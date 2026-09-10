@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChevronRight, PenSquare } from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
+import { Footer } from "@/components/navigation/footer";
 import { HeroBanner } from "@/components/media/hero-banner";
 import { ShelfRow } from "@/components/media/shelf-row";
 import { MediaCard } from "@/components/media/media-card";
@@ -50,23 +51,242 @@ export default async function HomePage() {
     console.error("Home feed fetch error:", err);
   }
 
-  // Choose featured title for Hero
-  const featuredTitle = trendingMovies[0] || {
-    id: "tmdb:movie:693134",
-    source: "tmdb",
-    sourceId: "693134",
-    mediaType: "movie",
-    title: "Dune: Part Two",
-    posterPath: "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
-    backdropPath: "https://image.tmdb.org/t/p/w1280/eZ239CUp1d6OryZEBPnO2n87gMG.jpg",
-    year: "2024",
-    rating: 8.8,
-    totalEpisodes: 1,
-    runtime: 166,
-    genres: ["Sci-Fi", "Adventure"],
-    synopsis:
-      "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
-  };
+  // Curated datasets matching stitch_home_mockup (Desktop, Tablet, Mobile)
+  const mockupMovies: NormalizedMedia[] = [
+    {
+      id: "mockup:movie:1",
+      source: "tmdb",
+      sourceId: "872585",
+      mediaType: "movie",
+      title: "Oppenheimer",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCQxdA-5PQ-FJ1jBS7ByKX-pp4xHGERuBNVlG42mtLu1tpbXlWYLX66nfIyrxPGDtaBsuPPHECFLn_G1XsctB3NsT9-ED-GCfbWlscRgnsHoWYzZznlCsxhs_L4MLTpqsoqN2qV998Znxjgfk4Sb-jRdfLorQCZvDAu5Gg1pvW0O5D7Dn5wN0a9Jk9teCs7IUQUtgC6trpztQnUsLqHRNWV58ab1tVZSHWHHaeKTeDijPrUCcSKqlpExw",
+      backdropPath: null,
+      year: "2023",
+      rating: 8.9,
+      totalEpisodes: 1,
+      genres: ["Drama", "History"],
+    },
+    {
+      id: "mockup:movie:2",
+      source: "tmdb",
+      sourceId: "666277",
+      mediaType: "movie",
+      title: "Past Lives",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCjbf208Df2LKhf61-iMpnY0AgOSe8WVAobf4WB3XFUFAknM5EcBPZtkpaf8zO4XXA_n7scOJpu2G9EsfD8AqLSqtnydifRPzVUsopU01Z4U35ayU3uP930xMWZB4B2GSVTyTacZ4vqozwyJpNF1waN1BM-dY1z_WsADWUsORKqhAy9i-SpmY9FqgdDpDFnadXuyG1aonrS_yyObSgPOJdM2w-7P6bkaM4e0-VU6HhlRci8dKrMvJbgmw",
+      backdropPath: null,
+      year: "2023",
+      rating: 8.2,
+      totalEpisodes: 1,
+      genres: ["Drama", "Romance"],
+    },
+    {
+      id: "mockup:movie:3",
+      source: "tmdb",
+      sourceId: "915935",
+      mediaType: "movie",
+      title: "Anatomy of a Fall",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuD-jJwF4iiLVv6ch2WJh4PRm1TuhbvMg94cMj3ay8PX7pXBM-1V4G37IwmZK5GGrrZKFZ6-WYSDnFujFHBRqsUBNdxw7B6lCvj91clgqB4gsoib-6EfdJxcEpjH456uBWWQncGamuTDRVtBNkxM0M2_LkU5xbqaS1qICYsVX16ww7ixDq9xVywxpMfnxlCK1_M5l7mEz3fBtArAy95mX4mEHOTD7YC0kL32HPw6g8v9-T4adbEFOeHJ5g",
+      backdropPath: null,
+      year: "2023",
+      rating: 8.1,
+      totalEpisodes: 1,
+      genres: ["Crime", "Drama"],
+    },
+    {
+      id: "mockup:movie:4",
+      source: "tmdb",
+      sourceId: "792307",
+      mediaType: "movie",
+      title: "Poor Things",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuDMt_vq2vsgrUot-Qz2r57fyCkYJnGg_WN_Y-ufbLhLR4IwpJO_94ptyRXJPmCn7SCYGaN4d-9IJ45fSmb_cIMDlMIVPK611pbX3fa9iIRmSuXwr2-bqIngp4sxhNd5WCgc21wQzHK8co00-mB9I0KL0f0DpSbfzZRNQxYBVep2wMG23n9ER4G6083brYsTXin5G9S1QkNUW1Pz3p8M95zzCDl2w-psItWAR95zbMD4w4MF2oxOLq1-Xw",
+      backdropPath: null,
+      year: "2023",
+      rating: 8.0,
+      totalEpisodes: 1,
+      genres: ["Comedy", "Sci-Fi"],
+    },
+    {
+      id: "mockup:movie:5",
+      source: "tmdb",
+      sourceId: "467244",
+      mediaType: "movie",
+      title: "The Zone of Interest",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuAy63tVD_yvK6WWPuGPQMSi-qsUo7iFR4k7q2PnFMzpFTTfJzKxZVwXmJqWroVPOsuqkIE7prwkOBhuTrH3uK7p2YQaf5UplDrahGoBry23wormutnjiCdb96rvMcYv9CGwHHR-ZXoZ5Pc5oKkErBsmBXFEYP_uretYAd0KcQr1UJZ8JlhEBgpJV31RVquc-yYMHYatoj5UbCQa78cSg6vJ-oKvRtXeWHNHGuvM-DhMgN5-CvpyjpSgmA",
+      backdropPath: null,
+      year: "2023",
+      rating: 7.9,
+      totalEpisodes: 1,
+      genres: ["History", "Drama"],
+    },
+    {
+      id: "mockup:movie:6",
+      source: "tmdb",
+      sourceId: "569094",
+      mediaType: "movie",
+      title: "Across the Spider-Verse",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuD-YmM3q9v7AfX3eO8sAAxYAmmSS2afBpRjWtFbzkHczvuyPC02tOmLCfYbxDYTayC5fLPNffIrsRTfMLBPX7Qz5F9pll1nVlefi3w_rsVrXRRwc0lhc07xhgMIhdReA7ZFatEbPV8xRMeT0O967SbHgh4PspHKk5Tv2eUSe2d1-WpjmkWdZ1nE628GW2DBWaD3zEwsumsLsHHDh8DA0Hh1EMvtoV5WLKGOgSF9B6TDmqebM557xaR5Gw",
+      backdropPath: null,
+      year: "2023",
+      rating: 8.8,
+      totalEpisodes: 1,
+      genres: ["Animation", "Action"],
+    },
+    {
+      id: "mockup:movie:7",
+      source: "tmdb",
+      sourceId: "937287",
+      mediaType: "movie",
+      title: "Challengers",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuAhQBAw1f_DaFntt5vuJ6wOzfm4fjYTauWwHZA5eCPHvnpX7MhmUaVKQImFSw8NkzEQWtPbxLGi4ymcrd5KkfadAT18zmr_wrMz0BKfOWlAnDQw0gg4ApFjs7dMtCenA6HIP3pmOYZkhvqjp8_BuMXb254II6eUxukGeZ4NA8jLs_EPd1uyD4Cdg9YNUpynw_JpF4Q03A6v5oEE3W_WQp9KixvQBzDPzrTt36HOkQse5uZH6JmWpGgNVQ",
+      backdropPath: null,
+      year: "2024",
+      rating: 7.7,
+      totalEpisodes: 1,
+      genres: ["Drama", "Romance"],
+    },
+  ];
+
+  const mockupAnime: NormalizedMedia[] = [
+    {
+      id: "mockup:anime:1",
+      source: "anilist",
+      sourceId: "127230",
+      mediaType: "anime",
+      title: "Chainsaw Man",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuARP3Eq1AqAADXC-yBvepA8PuCJ2Ngpla8WIWtBp8sSem9S5yTlqxfYdAXh2pYskYbn8C577eYafkexGd4YRqp-3ZvXTSC5R5ziaWzysREdp8DmABzWr--cGw4q1RQy38L8vGttA1wOA_Th2U0ATmRvkNxgQk6A-IAFpeeYvN3saqdD-V6I__Ldecm8w0uO-vf_urhXosqBfm7cwl-A96BA_8K-WOgW7MYYR2jAJBjGqgjtLii--PLEQQ",
+      backdropPath: null,
+      year: "TV · S1",
+      rating: 8.5,
+      totalEpisodes: 12,
+      genres: ["Action", "Supernatural"],
+    },
+    {
+      id: "mockup:anime:2",
+      source: "anilist",
+      sourceId: "145064",
+      mediaType: "anime",
+      title: "Jujutsu Kaisen",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCELT4Y88TU2WznWCG8cl7gwb1NjNoIhlRp9YAzhAt2AUH--A2tLhpAW2cj3-e2TH6yOkBJWZb1bmTetgoiIVkSBxhD5bPWWcE0GXhUSCfYquVye-ebrRosrhJA2aT6UjhpR5QvkzrqJyt6X13-LNrLzUuoxj3rIx7pJmTKR4G89qU0g1pOeIXp01bZPPpo92Ety8IlGNzfKuuyFWYF_wE3_eMgFlBNQgKNcszeh9CasgDwrpijPr-7UA",
+      backdropPath: null,
+      year: "TV · S2",
+      rating: 8.8,
+      totalEpisodes: 23,
+      genres: ["Action", "Supernatural"],
+    },
+    {
+      id: "mockup:anime:3",
+      source: "anilist",
+      sourceId: "110277",
+      mediaType: "anime",
+      title: "Attack on Titan",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuD1uGJGxnrrCPkjm7aBg5JT8zlfxLg0nqUJWp6J3EsDq1YHtCvl-NTDvdEoiIVbIHiOVnsq9bMSvdBkfoquU1pfxSlHemp-DHTHPwIRaj8qEkUr69zTyZI8isiL5lRa3nu9nIvFbAk8Mk-CEB3Jx5E21eNv6rCXNR0pkB8DO7G22XL_-94SF0gILYYQ0AHAJnPDdL7KnzLiygv40IzwoBlCOo7t3OEPBWwCHw2K8my4jWoBPmHazzdyTA",
+      backdropPath: null,
+      year: "Final Season",
+      rating: 9.1,
+      totalEpisodes: 28,
+      genres: ["Action", "Fantasy"],
+    },
+    {
+      id: "mockup:anime:4",
+      source: "anilist",
+      sourceId: "166240",
+      mediaType: "anime",
+      title: "Demon Slayer",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCR1Y8MqncJ0kInJJ-Ztjmidta7Pp8iHU4Uutd1zd24JqFJYpBYmD5-cu9L6KrZQSXm43m7cxuGW2cAJ9SqYblkkPfiCukIs5mvtAoyTyuSdCy_H9MjTBqZI3Mdf6LoA0RI9_ThFBY85z9OYfssfR_8YiIYuLVg3uavqxJvdlFDS-iOcl2BxNdMhgGkYhJmbwKvKlXeY9vuvGgA4jWVUfDt4uYh_ozdHzg826jopexgqxcbwHDY3Ar3nw",
+      backdropPath: null,
+      year: "TV · S4",
+      rating: 8.4,
+      totalEpisodes: 8,
+      genres: ["Action", "Fantasy"],
+    },
+    {
+      id: "mockup:anime:5",
+      source: "anilist",
+      sourceId: "136430",
+      mediaType: "anime",
+      title: "Vinland Saga",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuClt97IAonD8Y4vNI2in9CiBMQJ0U_I9iPs4YwjdXIgZDFtywtTsDCDMsuM7cKxOyG99MfmWy5_d-FkC9_9js4SPWxs7gZoUVRBkaSh3jiIOAjo5N1uDekXznbcVMGFHTtUUgIeAKMbE8HGR3S42Rp8R9DKptWoqdKR4L2jSnr_9Tg6U0pxKOERFtMUglFGU-fgwi4hoeqjMFTgM6Mh14nZsXg_lW9UuqvXBo2Z5ptmT3g0kFUtgKdN6Q",
+      backdropPath: null,
+      year: "TV · S2",
+      rating: 8.9,
+      totalEpisodes: 24,
+      genres: ["Action", "Adventure"],
+    },
+    {
+      id: "mockup:anime:6",
+      source: "anilist",
+      sourceId: "151807",
+      mediaType: "anime",
+      title: "Solo Leveling",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuBjLQCZCLNtUWmFzjKNY6bPbQKKasREmFA_OlyFa2FV3b2c_-SeRT4Odc76mYVjL-Kcv_prs2w8OyfyuFD0bbPmQFAgW5aO7iuA_DUVHoqbaZkZV58gvjjZQL1xV-pGRCS5BNEPVv8UcS8cdkmyeqSTTTgLoeunFA-ZaUjt15OYMQRNS4WPBtGKIFE8CyaTsiorbs7jJHJPt_bk-M4efAaiYELE0S_IGjbqufizQsAa6yjJxa2nAu7-TA",
+      backdropPath: null,
+      year: "TV · S1",
+      rating: 8.3,
+      totalEpisodes: 12,
+      genres: ["Action", "Fantasy"],
+    },
+  ];
+
+  // Fallback continue watching matching all 3 mockup viewports 100%
+  const defaultContinueWatching = [
+    {
+      mediaId: "tmdb:tv:95396",
+      sourceId: "95396",
+      mediaType: "series" as const,
+      title: "Severance",
+      episodeName: "S2 · Ep 4 of 10",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCKd8Srwo0pyzLHzQ1u07Okb900IZ78Ng28Nwp8xRMjVWFOUw5G-OWGygbBjEtQaqkvKsSa6X8LkMCSMRCQsZ6HEXsyNh5nRU9Pac9i9XBbIoRWgCMhsg1LKQ9Z_DizrcCfQyb6SuR34SlaSh-Jo2W9BlRFDN270Qxd15GHBIUO0GyNTeRD0sRd6xw9W5abBc3CJNA8RT_YXh7SXj_KJwfUqEproEkP2g0Q_UZxNY6871oJNgegK7P4Ig",
+      currentEpisode: 4,
+      totalEpisodes: 10,
+      seasonNumber: 2,
+      network: "Apple TV+",
+    },
+    {
+      mediaId: "anilist:154587",
+      sourceId: "154587",
+      mediaType: "anime" as const,
+      title: "Frieren",
+      episodeName: "S1 · Ep 18 of 28",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuDg1NTbyu2eOQ9nS6kl0Xq8c4ZHwyV7qJSWwoRAAj2cET2lLnULFXg-VZIp1pFNBJ7jcezh_4Y-3wdXjrgpJkAOCF8LW89hkbT7XWma7pWrM1q_ERoeV-PqCPyigcVvia0cBCWkH0ue732A0LTOy-DecZFyN2gbPLQr372SeAQdwT3dc3Hk_dGtWQdI8jYjZ6Ed6Re8oBI35DJElNYgP6cCeSml8o4wcL6A3r0ynqXhJ6II-rxzC1o2cw",
+      currentEpisode: 18,
+      totalEpisodes: 28,
+      seasonNumber: 1,
+      network: "Crunchyroll",
+    },
+    {
+      mediaId: "tmdb:tv:126308",
+      sourceId: "126308",
+      mediaType: "series" as const,
+      title: "Shōgun",
+      episodeName: "Miniseries · Ep 7 of 10",
+      posterPath:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuDkffOGGbWAsDZimHAI-ArRt8gLFDhlPD1o95E5XL2oulgeBB7-pgyk7AkvKlFNqJZycd4E3SwWAh7C-J-Vt92W5B3BRjSHjfnb5-6xxKHNkGhwJ_vLARc285IhsGZiBxXuk0-VYObJjpgORJGB4340eoEBiniNLArN4Z-Nk2Xm2nIP_X0HcC-ZovxaCq6utsRKo63-jW3jVEi63uCRHuv7S37GGzHUkPCT72b_GXiC7dGloAohn0PjOQ",
+      currentEpisode: 7,
+      totalEpisodes: 10,
+      seasonNumber: 1,
+      network: "FX / Hulu",
+    },
+  ];
+
+  // Display items: use mockups by default for exact visual parity
+  const displayMovies = mockupMovies;
+  const displayAnime = mockupAnime;
+  const featuredTitle = trendingMovies[0] || mockupMovies[0];
 
   // User's active continue watching items
   let continueWatchingList: any[] = [];
@@ -93,49 +313,6 @@ export default async function HomePage() {
     }
   }
 
-  // Fallback items for guest experience matching mockups
-  const defaultContinueWatching = [
-    {
-      mediaId: "tmdb:tv:95396",
-      sourceId: "95396",
-      mediaType: "series" as const,
-      title: "Severance",
-      episodeName: 'Episode 4 • "Woe\'s Hollow"',
-      backdropPath:
-        "https://image.tmdb.org/t/p/w780/ixgFmf1X59PUZam2qbAfskx2gQr.jpg",
-      posterPath:
-        "https://image.tmdb.org/t/p/w500/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
-      currentEpisode: 4,
-      totalEpisodes: 10,
-    },
-    {
-      mediaId: "anilist:154587",
-      sourceId: "154587",
-      mediaType: "anime" as const,
-      title: "Frieren: Beyond Journey's End",
-      episodeName: "Episode 18 • First Class Mage Exam",
-      backdropPath:
-        "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-gviZ2zfLIf0w.jpg",
-      posterPath:
-        "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-gviZ2zfLIf0w.jpg",
-      currentEpisode: 18,
-      totalEpisodes: 28,
-    },
-    {
-      mediaId: "tmdb:tv:94605",
-      sourceId: "94605",
-      mediaType: "series" as const,
-      title: "Arcane",
-      episodeName: "Season 2 • Episode 3",
-      backdropPath:
-        "https://image.tmdb.org/t/p/w780/fqldJn2tMkQggQi29HyjewmlvCw.jpg",
-      posterPath:
-        "https://image.tmdb.org/t/p/w500/abf8tHznhSvl9BAElD23cQaeCDW.jpg",
-      currentEpisode: 3,
-      totalEpisodes: 9,
-    },
-  ];
-
   return (
     <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] pb-24 md:pb-12">
       {/* Header */}
@@ -152,8 +329,8 @@ export default async function HomePage() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col w-full pt-16">
-        {/* Cinematic Hero */}
+      <main className="flex-1 flex flex-col w-full pt-[70px]">
+        {/* 1. Featured Hero (Responsive across Desktop, Tablet, Mobile) */}
         <HeroBanner
           user={
             user
@@ -167,63 +344,82 @@ export default async function HomePage() {
           secondaryMedia={trendingAnime[0]}
         />
 
-        <div className="max-w-7xl mx-auto w-full flex flex-col gap-2">
-          {/* Continue Watching Shelf */}
-          <ShelfRow
-            title="Continue Watching"
-            actionHref="/library?status=watching"
-            actionLabel="History"
-            accentColor="bg-[#3B9EFF]"
-          >
-            {continueWatchingList.length > 0
-              ? continueWatchingList.map(({ log, media }) => (
-                  <ContinueWatchingCard
-                    key={log.id}
-                    mediaId={media.id}
-                    sourceId={media.sourceId}
-                    mediaType={media.mediaType as any}
-                    title={media.title}
-                    currentEpisode={log.episodesWatched || 1}
-                    totalEpisodes={media.totalEpisodes || 1}
-                    backdropPath={media.backdropPath}
-                    posterPath={media.posterPath}
-                  />
-                ))
-              : defaultContinueWatching.map((item) => (
-                  <ContinueWatchingCard key={item.mediaId} {...item} />
-                ))}
-          </ShelfRow>
+        {/* 2. Continue Watching Shelf (Section 2 from stitch_home_mockup) */}
+        <section className="w-full bg-[#151C27] py-6 sm:py-8 border-b border-white/[0.04]">
+          <div className="w-full max-w-[834px] lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <h2 className="font-bold text-lg sm:text-xl text-[#F5F7FA] tracking-tight">
+                  Continue Watching
+                </h2>
+                <span className="px-2 py-0.5 rounded bg-[#1B2029] text-[10px] font-bold text-[#3B9EFF] tracking-wider uppercase border border-white/[0.06]">
+                  {continueWatchingList.length > 0
+                    ? `${continueWatchingList.length} In Progress`
+                    : "3 In Progress"}
+                </span>
+              </div>
+              <Link
+                href="/library?status=watching"
+                className="text-xs font-semibold text-[#6F7886] hover:text-[#F5F7FA] transition-colors flex items-center gap-0.5"
+              >
+                <span className="sm:hidden">View All</span>
+                <span className="hidden sm:inline">View All Logs</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
 
-          {/* Trending Feature Films Shelf */}
+            {/* Responsive Cards: horizontal rail on mobile, 3 columns on tablet & desktop */}
+            <div className="flex sm:grid sm:grid-cols-3 gap-3 sm:gap-4 overflow-x-auto sm:overflow-visible pb-2 sm:pb-0 no-scrollbar snap-x snap-mandatory">
+              {continueWatchingList.length > 0
+                ? continueWatchingList.map(({ log, media }: any) => (
+                    <ContinueWatchingCard
+                      key={log.id}
+                      mediaId={media.id}
+                      sourceId={media.sourceId}
+                      mediaType={media.mediaType as any}
+                      title={media.title}
+                      currentEpisode={log.episodesWatched || 1}
+                      totalEpisodes={media.totalEpisodes || 1}
+                      backdropPath={media.backdropPath}
+                      posterPath={media.posterPath}
+                    />
+                  ))
+                : defaultContinueWatching.map((item) => (
+                    <ContinueWatchingCard key={item.mediaId} {...item} />
+                  ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Central Container for Discover Shelves, Vaults & Reviews */}
+        <div className="w-full max-w-[834px] lg:max-w-[1440px] mx-auto px-0 sm:px-4 lg:px-8 flex flex-col gap-2">
+          {/* 3. Trending Feature Films Shelf */}
           <ShelfRow
             title="Trending Feature Films"
+            subtitle="Critically acclaimed cinema tracked across global databases this week"
             actionHref="/discover?type=movie"
             actionLabel="Explore all"
-            accentColor="bg-[#F5C84B]"
           >
-            {trendingMovies.map((movie) => (
-              <div key={movie.id} className="w-32 sm:w-40 shrink-0">
-                <MediaCard media={movie} />
-              </div>
+            {displayMovies.map((movie) => (
+              <MediaCard key={movie.id} media={movie} />
             ))}
           </ShelfRow>
 
-          {/* Anime Simulcasts Shelf */}
+          {/* 4. Popular Anime Simulcasts Shelf */}
           <ShelfRow
-            title="Anime Simulcasts"
-            badge="Winter 2025"
+            title="Popular Anime Simulcasts"
+            subtitle="Top ranked serialized series by community engagement & episode completion rate"
+            badge="Current Season"
+            badgeColor="text-[#FFB873] bg-[#FFB873]/10 border-[#FFB873]/20"
             actionHref="/discover?type=anime"
             actionLabel="Explore all"
-            accentColor="bg-[#3B9EFF]"
           >
-            {trendingAnime.map((anime) => (
-              <div key={anime.id} className="w-32 sm:w-40 shrink-0">
-                <MediaCard media={anime} />
-              </div>
+            {displayAnime.map((anime) => (
+              <MediaCard key={anime.id} media={anime} />
             ))}
           </ShelfRow>
 
-          {/* Explore by Genre */}
+          {/* 5. Explore by Genre (Vaults Bento Grid) */}
           <section className="px-4 my-6">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -234,9 +430,12 @@ export default async function HomePage() {
                   Curated vaults categorized by thematic tone and cinematic structure
                 </p>
               </div>
+              <span className="sm:hidden font-semibold text-xs text-[#6F7886]">
+                6 Categories
+              </span>
               <Link
                 href="/discover"
-                className="text-xs font-semibold text-[#6F7886] hover:text-[#F5F7FA] transition-colors flex items-center gap-0.5"
+                className="hidden sm:flex text-xs font-semibold text-[#6F7886] hover:text-[#F5F7FA] transition-colors items-center gap-0.5"
               >
                 Full Directory
                 <ChevronRight className="w-4 h-4" />
@@ -248,142 +447,140 @@ export default async function HomePage() {
                 genre="SCI-FI"
                 vaultLabel="Vault"
                 vaultColor="text-[#3B9EFF]"
-                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuBqKNsb__pjrt8rqBOhVO2kD-OC3_IsA73L04OjbXZ6R4wJnsmxP-FtT9U4BeL-6uLfR_dYsiDz2st1a1pPSJpkGKm0eFTWtGCrU2z_H7JVSbJ1-pRcg0OsYMRU-HE0BFlsECsqsPZqybLB0GCNpez4IgZfzFw0788ohAHvw561YbmpB3kxJpygQpgWMgR8b98XXCReAFiQysgmI3Hns40R1s2T5sq5fVOVg8TDwI6xfPITYkO7ciLo3A"
+                count="1,420 titles"
+                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuBDjt02_RkeaZjD14JC_89hLZBGRy6HpII811LcgWI4k8t7PZHuh7lMk9sJbTs9ctk9Fzy077nVE3IwWqHc4dj1vC3r4YwVxIfktmm8yTQQ8LvUNsBj5HCFKC9cEofVRSjPxeBnKrRrAPVir8xaiYI6zcuxq32QLI0cQg5CxdduJke4GN-qHgt04nL86q08n9dQO4sEm3PlvDM00i5E571oOF3YlYU7Ztq9q5jB7qu68L7Zg-3lNurnUw"
                 href="/discover?genre=Sci-Fi"
               />
               <GenreCard
                 genre="ACTION"
                 vaultLabel="Vault"
                 vaultColor="text-[#FF9B54]"
-                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuDe4Je_JAAtTJKtf6afTSB_FuPt9HTAZsPx8qpbFmoRSVzUX_S1GCKUWK5CVvjti3-AWXI5sV2a7cW5qpYMzJ47Bvn9biG9VgGVqZzPIwVjPzKGg-CCyNKGkmp2yjKfUOraknGvtRV7fJyu_YFm7f82ntqUHaoLO4TqYa0HWgSvvgfrH75xtI3TWaCeFyfMntu5D5KPO4rG-TJEsBAZRpZTILn2z_4hh0e9sf9E-0-KoBPjPsBITb8a3Q"
+                count="2,180 titles"
+                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuB6qzQRwwHnpB4dm2Oo028nprw6179VmzN1PHsyw7crQXIbp_1ovNjD711vr0UXfW0ldlb1YIVTzCtaQj2sX1perUyjOeh8vR8ltGIap45iMITwuYCW49EJ3Ok7LwouICJXtX5xHBoPwiLaY34aafYzrCRa4j4VRjWqU2HH9Cxs4tn47U9TF50aPfZs3dzzMyKscQwlMeY2rpn_4CLPsIqQVXGH-FxnBMFwU2yfaVHmfMioNqliYBiHXQ"
                 href="/discover?genre=Action"
               />
               <GenreCard
                 genre="THRILLER"
                 vaultLabel="Vault"
                 vaultColor="text-[#F43F5E]"
-                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuDMHiFdyjS91wid12yb4o2MowHaRtcSp7krD8fmU-rJQqV3whsvFbupbt5wdi9JgsAzIkdPztKiXDb5SnkGyKgal4tScjfTk2PXH_yIELsQxhuAhbxndSJIcc4FsT6QYtSiYwIGyjoTWrsdcBau9OjMCEDpzTleUcKcKPFrSWkAwT2Ay2Ds6-3WKTn92fm8NRE53BlrDkkKwaA__xu7WB-3c1Cf9D-bMbQnHeUKwGiOrVbVsYnmFFSflQ"
+                count="980 titles"
+                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuBfsMjT-FX9xxCoToW-MCs8KXPFORj6q0J0ZUS1QXeAu6ZaBpbtgdzqg7MhHBGjz264dF33vSSMg3-J4dpAKskauVdH7q681Te5Y4DBiWi0FdYL8l-Cf1DyPJtU9LI5QJabjUHo4Ow4nN8DOxmdqlsXlKZ4WGjw6_EGZJIoMmmgwaVs6zBA5Is1xEhplVHTrv1evfWieOblpyk-frPLSmL1eOo6VGYSBrDrKCv5c8SgULcbvaJfSmjzmw"
                 href="/discover?genre=Thriller"
               />
               <GenreCard
                 genre="DRAMA"
                 vaultLabel="Vault"
                 vaultColor="text-[#F5C84B]"
-                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuCqARaK9QT-ZEx7mRikEeMR7LQCUns5HmkcA9sY5YXGYLVhe6duKKvmd7ZICqoD_nBOT3K6zyFF87yfKtPEvI8jj4SBKKdnx2s4hU75q5yf5BBWvf9C8-iW-VpvGB4tpk-wan0vV9Nte4n6K_4QxOo3ZaQ5HcaJCnQKKvgfqJocHyNfUxertqyTSC2WIron2uxYuki-XALSr-TuLoSnX_YONDyxRjFyeiMuNnhR-XtQFiLV2oig7-IDYA"
+                count="3,040 titles"
+                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuDVQRFgGeDhyjFxRDGXNm2JzwryGXBBWVWATUIWVZvdH0Hvc76OEtRQar7ZuisaQ1dLp_TbwS7-aTKvOgaXtmDfQpiMxQVK3pJrqbQGoOlbEKH2hXh2fNagQADuvq6B-77NQzj-GdbFfR5TcqNWVtCAd_frelXRWY8eCFTe1VhfogL_N1-mxwwrrmpp02tZ3qqgcSV-f5iiVhXZpX7szwIWyW-aCF6Jn-HbiedBI_umZN0NtPnCPzM7Yw"
                 href="/discover?genre=Drama"
               />
               <GenreCard
                 genre="ANIME"
                 vaultLabel="Vault"
                 vaultColor="text-[#8BB4F8]"
-                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuCuUraliBjGlOlNFE2q-dbMyKuLTLHR4zmN3v05es4fnI9VdPZBqgZSgLxAE9_cx2GUvsqTIJGDHji5gCv9Xhc3iOQaktCAAtzcPSJFqsdOVVWc9WsptH6ntGCWvqhv-Pmjqx0z5cvnhRHuViCsMlXMFXLa0PD_TkcCiazVlPDgYNabq7SqaWIL6mHOnkykNEJoSeSOJDXhDkJp3R1wO5vBuvOeMMvX1r6VJvYdCbnivb8rv0X3ZHQEsw"
+                count="1,890 titles"
+                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuDSlh9H9M5tP4RhkDG_B-QDpaktvHa9CsSBpSf05vnoUONWODmTrYWUceu2Y45oHab5T1-JknN6btS1zuo8pBh7kOF1s3zu-YNJCooZqehoTfwRz70Gbv3lZLb2e2Iu-Afol-Tf2GMfjBTMCe4Xv18eqJVsndL5TPajlbG_xkXlakDD_0ASRSgrlIs6-Aalqd7B-7ye0Efkur5beOYIws_qszcbqCqfRp6aOGHYIJsmMbLYFj9oqmg5eg"
                 href="/discover?genre=Anime"
               />
               <GenreCard
                 genre="NOIR"
                 vaultLabel="Vault"
                 vaultColor="text-[#94A3B8]"
-                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuAjcbcTrcIGhVCZ1SmQux3-S_aYTfE1nyalQpYMUS2_d4Mjd2jxCVK6RO232joAdicjQFz-CMigFD8FkHF7a4FpL5Y_i3dsnHlDna83TyfvxNgtC4CEMrqYZB0WyrSzOXCzJ3h9wXwF0gAR4IV24gLPRqj23bX0dju7uhcgGG-unJGGOrJlroORt1cSJ2znSsAs1Q0z_p-Oim3jN5ecCFwsFQjsZ7qX87IBWV6Fy_tpvuq6FgF7204n3g"
+                count="450 titles"
+                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuDIr7Ujn4N0D4MEIIZpbtZSL1Ls7Sd9BE-KohYwa7i3U7XMjSrtBwZSRCfEls87Sa0XNJY1Rey-9pxEKkqhQdGMrXd5QFXJ7gY3v7jS09DvflH3vt76Md6mX820KeT9u4zESDwAJ7Yfk1Uw9acQjS0KTRXw7VskK8W85z_UFlSTmZQ8pG4q4zsYwOgr_x2eDpMx_pAw2jplCxSXWC0Qb39BEGNoqDyN7fVZR9sOWMSnhTKxrYqkG6D-5g"
                 href="/discover?genre=Noir"
               />
             </div>
           </section>
 
-          {/* Editorial & Community Reviews */}
+          {/* 6. Editorial & Community Reviews */}
           <section className="px-4 my-6 flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="font-bold text-lg sm:text-xl text-[#F5F7FA] tracking-tight">
-                    Editorial &amp; Community Reviews
+                    Editorial &amp; Reviews
                   </h2>
-                  <span className="px-2 py-0.5 rounded bg-[#1D2734] text-[10px] font-bold text-[#22C55E] tracking-wider uppercase border border-white/[0.06]">
-                    Verified Logs
-                  </span>
                 </div>
                 <p className="text-xs text-[#6F7886] mt-0.5">
-                  Critical impressions logged by CineTrack members and accredited critics
+                  Thoughtful cinema critiques from the community
                 </p>
               </div>
               <button
                 type="button"
-                className="h-9 px-3.5 rounded-lg bg-[#1A2330] hover:bg-[#243042] text-[#F5F7FA] text-xs font-semibold flex items-center gap-1.5 transition-colors border border-white/[0.08] cursor-pointer"
+                className="h-9 px-3.5 rounded-lg bg-[#1D2734] hover:bg-[#243042] text-[#3B9EFF] text-xs font-semibold flex items-center gap-1.5 transition-colors border border-white/[0.08] cursor-pointer shadow-sm active:scale-95"
               >
-                <PenSquare className="w-3.5 h-3.5 text-[#3B9EFF]" />
-                <span className="hidden sm:inline">Write a Review</span>
-                <span className="sm:hidden">Write</span>
+                <PenSquare className="w-3.5 h-3.5" />
+                <span>Write</span>
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
-              {/* Review 1: Bilingual Review (Bengali & English) */}
+              {/* Review 1: Bilingual Bengali Editorial */}
               <ReviewCard
                 author={{
                   name: "Anirban Sen",
-                  avatarUrl:
-                    "https://lh3.googleusercontent.com/aida-public/AB6AXuAvf9w2OpO98x1I5C3ZgAkFT-UGZ3nouwJuI0tHqHyq33WtWn5tKevFkpyiJgOtVoPug62ptttFbKJRkzQAYjHpGE8No9Ehj703kqjXB7livavGfMXimNXabTM73XweMtMhTML4cSqiaGrWqpM0GrRiZ0t3Yf1dJsrDIX7AwQ5GuDTCuIOLJpUZLjvKVtLlomrfpryzRaemZdVSJV_HjKU7cCeu9CuaJOlwjL2j57MlpPHndfNORJ06rg",
                   isVerified: true,
-                  role: "STAFF CRITIC",
+                  role: "Staff Critic",
                   roleColor: "text-[#3B9EFF]",
                 }}
                 mediaTitle="Pather Panchali (1955)"
                 mediaHref="/movie/500"
-                editionTag="4K Restoration"
                 rating={9.5}
-                bengaliQuote="সত্যজিৎ রায়ের এই মাস্টারপিস প্রতিটি দৃশ্যে প্রকৃতির ছন্দ আর মানুষের অনুভূতির এক বিরল মেলবন্ধন সৃষ্টি করে।"
+                bengaliQuote="সত্যজিৎ রায়ের এই মাস্টারপিস প্রতিটি দৃশ্যে প্রকৃতির ছন্দ আর মানুষের অনুভূতির এক বিরল মেলবন্ধন সৃষ্টি করে।"
                 reviewText="Subbu's camera floats through rural Bengal with an unflinching yet profoundly tender gaze. The new 4K transfer restores Subrata Mitra’s revolutionary natural lighting to its pristine brilliance."
-                likesCount={42}
-                commentsCount={8}
-                timeAgo="2 hours ago"
+                seriesTag="Cinema Classic Series"
+                likesCount={128}
+                commentsCount={24}
               />
 
               {/* Review 2: Spoiler-Protected Card */}
               <ReviewCard
                 author={{
                   name: "Marcus Vance",
-                  avatarUrl:
-                    "https://lh3.googleusercontent.com/aida-public/AB6AXuB0s277pGVr6O6vac0KMRAAgQcBdMRQPbtu3wJlES0SjUWCPDdv8ZXOWK0R_K5zk2PX0zMjkh8U0cXyd1SOx8VSDFvslS-oTuGz3lR3QPvMHhkWZY_yoRo05aFBTpVBvqFHWmFfVLztDlf6b3GHDtwcS26HwKZOmkN7ChDh5p4yig0NJydXqBez0IfDwo59XdS2AaU-xxmeAJ0Vxf7EnAw6KIAApD_Xi1oZSFOD-D7QQVA7rplPlOb62w",
-                  isVerified: false,
-                  role: "VERIFIED MEMBER",
-                  roleColor: "text-[#6F7886]",
+                  isVerified: true,
+                  role: "Verified",
+                  roleColor: "text-[#22C55E]",
                 }}
-                mediaTitle="Anatomy of a Fall"
+                mediaTitle="Anatomy of a Fall (2023)"
                 mediaHref="/movie/915935"
-                editionTag="Courtroom Drama"
                 rating={8.0}
                 containsSpoilers={true}
-                reviewText="The ambiguity surrounding Daniel's final courtroom testimony is what cements Triet's direction. We never actually know if Sandra orchestrated the recording or if Samuel intentionally induced his own demise. The true trial is memory itself."
-                likesCount={89}
-                commentsCount={19}
-                timeAgo="Yesterday"
+                reviewText="The pivotal recording played in the third act completely re-contextualizes the argument. Sandra Hüller's quiet realization that Daniel had memorized his mother's cadence gives the ending its heartbreaking ambiguity."
+                seriesTag="Palme d'Or Analysis"
+                likesCount={94}
+                commentsCount={18}
               />
 
               {/* Review 3: Standard Editorial Deep Dive */}
               <ReviewCard
                 author={{
                   name: "Elena Rostova",
-                  avatarUrl:
-                    "https://lh3.googleusercontent.com/aida-public/AB6AXuCLvzgXbVZaODd2nainiIysJdzwXPY5dE3oLHcyCgpXosvkcSsMV1qoKALKON8lE-kZ2TOfJJPy6Jl93uiUtKMeYBlbfKFj7XjM41k5DBh3OqDrrzMq7Asf-kLGPC1L5ncyIxNqGFb6mNqQY32ymDX1zPJfgXdpj8u2YdSS1-aHzsQy7ZYUspGipkuwmrPJ3lvq3mhTlfzr_0pkDJyIkxtyKZV16RQx7udhKj-bmY-60O6qkgvzaNQcAQ",
                   isVerified: true,
-                  role: "CURATOR",
-                  roleColor: "text-[#F5C84B]",
+                  role: "Curator",
+                  roleColor: "text-[#A8B0BD]",
                 }}
-                mediaTitle="Dune: Part Two"
+                mediaTitle="Dune: Part Two (2024)"
                 mediaHref="/movie/693134"
                 editionTag="IMAX 70mm"
                 rating={9.0}
-                reviewText="Greig Fraser’s infrared photography on Giedi Prime is the single most audacious cinematography decision in modern blockbuster history. Villeneuve treats Herbert’s cautionary tale with the solemn reverence of religious mythos."
-                likesCount={134}
-                commentsCount={31}
-                timeAgo="3 days ago"
+                reviewText="Seen in IMAX 70mm. The sound design during the worm-riding sequence vibrates your entire skeleton. Greig Fraser’s infrared photography on Giedi Prime delivers one of the most stark visual sequences in modern science fiction."
+                seriesTag="Sci-Fi Landmark Retrospective"
+                likesCount={312}
+                commentsCount={42}
               />
             </div>
           </section>
         </div>
       </main>
 
-      {/* Bottom Nav for Mobile */}
+      {/* 7. Rich 4-Column Footer */}
+      <Footer />
+
+      {/* 8. Bottom Navigation for Mobile */}
       <BottomNav />
     </div>
   );
 }
+

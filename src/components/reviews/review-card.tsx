@@ -23,6 +23,7 @@ export interface ReviewCardProps {
   commentsCount?: number;
   timeAgo?: string;
   isBengali?: boolean;
+  seriesTag?: string;
 }
 
 export function ReviewCard({
@@ -38,6 +39,7 @@ export function ReviewCard({
   commentsCount = 0,
   timeAgo = "2 hours ago",
   isBengali = false,
+  seriesTag,
 }: ReviewCardProps) {
   const [revealed, setRevealed] = useState(!containsSpoilers);
   const [likes, setLikes] = useState(likesCount);
@@ -49,14 +51,14 @@ export function ReviewCard({
   };
 
   const roleText =
-    author.role || (author.isVerified ? "STAFF CRITIC" : "VERIFIED MEMBER");
-  const roleColor =
-    author.roleColor ||
-    (author.role === "CURATOR"
-      ? "text-[#F5C84B]"
-      : author.isVerified || author.role === "STAFF CRITIC"
-      ? "text-[#3B9EFF]"
-      : "text-[#6F7886]");
+    author.role || (author.isVerified ? "Staff Critic" : "Verified");
+
+  const badgeBg =
+    author.role === "Staff Critic" || author.role === "STAFF CRITIC"
+      ? "bg-[#3B9EFF]/15 text-[#3B9EFF]"
+      : author.role === "Verified" || author.role === "VERIFIED MEMBER" || author.isVerified
+      ? "bg-[#22C55E]/15 text-[#22C55E]"
+      : "bg-[#252A34] text-[#A8B0BD]";
 
   return (
     <div className="flex flex-col justify-between p-4 sm:p-5 rounded-xl bg-[#1D2734] hover:bg-[#1A2330] border border-white/[0.06] transition-colors gap-3.5 shadow-sm">
@@ -76,14 +78,17 @@ export function ReviewCard({
               </div>
             )}
             <div className="min-w-0">
-              <h4 className="font-semibold text-sm text-[#F5F7FA] leading-tight truncate">
-                {author.name}
-              </h4>
-              <span
-                className={`text-[10px] font-bold uppercase tracking-wider block ${roleColor}`}
-              >
-                {roleText}
-              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h4 className="font-bold text-sm text-[#F5F7FA] leading-tight truncate">
+                  {author.name}
+                </h4>
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${badgeBg}`}>
+                  {roleText}
+                </span>
+              </div>
+              <p className="text-[11px] text-[#6F7886] mt-0.5 truncate">
+                Reviewed {mediaTitle} {editionTag ? `(${editionTag})` : ""}
+              </p>
             </div>
           </div>
 
@@ -95,26 +100,7 @@ export function ReviewCard({
           )}
         </div>
 
-        {/* Subject Media Tag */}
-        <div className="mb-2.5 flex items-center gap-1.5 flex-wrap text-xs">
-          {mediaHref ? (
-            <Link
-              href={mediaHref}
-              className="font-semibold text-sm text-[#3B9EFF] hover:underline truncate"
-            >
-              {mediaTitle}
-            </Link>
-          ) : (
-            <span className="font-semibold text-sm text-[#3B9EFF] hover:underline cursor-pointer truncate">
-              {mediaTitle}
-            </span>
-          )}
-          {editionTag && (
-            <span className="text-xs text-[#6F7886] truncate">
-              · {editionTag}
-            </span>
-          )}
-        </div>
+
 
         {/* Optional Bengali Typography Quote */}
         {bengaliQuote && (
@@ -129,17 +115,17 @@ export function ReviewCard({
             <p className="blur-md select-none pointer-events-none text-xs sm:text-sm text-[#A8B0BD] leading-relaxed">
               {reviewText}
             </p>
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0F141D]/70 backdrop-blur-xs p-3 text-center z-10 rounded-lg">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0F141D]/80 backdrop-blur-sm p-3 text-center z-10 rounded-lg">
               <AlertTriangle className="w-4 h-4 text-[#F59E0B] mb-1 shrink-0" />
               <span className="text-xs font-bold text-[#F5F7FA]">
-                Contains Major Narrative Spoilers
+                Contains Narrative Spoilers
               </span>
               <button
                 type="button"
                 onClick={() => setRevealed(true)}
-                className="mt-2 px-3 py-1 rounded bg-[#1A2330] hover:bg-[#253244] text-[#F5F7FA] text-[10px] font-bold uppercase tracking-wider transition-colors border border-white/[0.08] cursor-pointer"
+                className="mt-2 px-3 py-1 rounded bg-[#1A2330] hover:bg-[#253244] text-[#F5F7FA] text-[11px] font-bold transition-colors border border-white/[0.08] cursor-pointer"
               >
-                Click to Reveal
+                Tap to Reveal
               </button>
             </div>
           </div>
@@ -156,7 +142,13 @@ export function ReviewCard({
 
       {/* Footer Controls */}
       <div className="pt-3 mt-auto border-t border-white/[0.06] flex items-center justify-between text-xs text-[#6F7886]">
-        <span>{timeAgo}</span>
+        <div className="flex items-center gap-2">
+          {seriesTag ? (
+            <span className="text-[11px] font-medium text-[#A8B0BD]">{seriesTag}</span>
+          ) : (
+            <span>{timeAgo}</span>
+          )}
+        </div>
         <div className="flex items-center gap-3.5">
           <button
             type="button"

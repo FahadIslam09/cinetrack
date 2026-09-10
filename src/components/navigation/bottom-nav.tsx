@@ -14,7 +14,7 @@ function BottomNavContent() {
     {
       label: "Home",
       href: "/",
-      icon: Home,
+      icon: Film,
       isActive: pathname === "/",
     },
     {
@@ -24,22 +24,30 @@ function BottomNavContent() {
       isActive: pathname === "/discover" && !currentType,
     },
     {
-      label: "Movies",
-      href: "/discover?type=movie",
-      icon: Film,
-      isActive: pathname === "/discover" && currentType === "movie",
-    },
-    {
-      label: "TV",
-      href: "/discover?type=series",
-      icon: Tv,
-      isActive: pathname === "/discover" && currentType === "series",
-    },
-    {
       label: "Library",
       href: "/library",
       icon: BookmarkCheck,
       isActive: pathname === "/library",
+    },
+    {
+      label: "Profile",
+      href: "/profile",
+      icon: () => (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+          />
+        </svg>
+      ),
+      isActive: pathname.startsWith("/profile") || pathname.startsWith("/@"),
     },
   ];
 

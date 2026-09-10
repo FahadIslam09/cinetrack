@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Search, Bell, Film } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Search, Bell, Film, Plus } from "lucide-react";
+import { QuickAddModal } from "../quick-add/quick-add-modal";
 
 interface AppHeaderProps {
   user?: {
@@ -14,117 +16,237 @@ interface AppHeaderProps {
 
 export function AppHeader({ user }: AppHeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/discover?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
-    <header className="fixed top-0 w-full z-40 pt-safe bg-[#151C27]/90 backdrop-blur-xl border-b border-white/[0.06] shadow-sm">
-      <div className="h-16 max-w-7xl mx-auto px-4 flex items-center justify-between">
-        {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-[#3B9EFF]/15 border border-[#3B9EFF]/30 flex items-center justify-center text-[#3B9EFF] transition-transform group-hover:scale-105">
-            <Film className="w-5 h-5" />
+    <>
+      <header className="fixed top-0 left-0 w-full z-50 bg-[#0F141D]/90 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_1px_8px_rgba(0,0,0,0.04)] h-16 sm:h-[70px] flex items-center">
+        <div className="w-full max-w-[834px] lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-3 sm:gap-6">
+          {/* Left: Brand & Navigation Links */}
+          <div className="flex items-center gap-6 lg:gap-8 min-w-0">
+            {/* Brand Logo & Badge */}
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 shrink-0 group focus:outline-none"
+            >
+              <div className="w-7 h-7 rounded bg-gradient-to-br from-[#3B9EFF] to-blue-700 flex items-center justify-center text-white text-sm shadow-md transition-transform group-hover:scale-105">
+                <Film className="w-4 h-4" />
+              </div>
+              <span className="font-bold text-lg tracking-tight text-[#F5F7FA]">
+                Cine<span className="text-[#3B9EFF]">Track</span>
+              </span>
+              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-[#3B9EFF]/10 text-[#3B9EFF] border border-[#3B9EFF]/20">
+                PRO
+              </span>
+            </Link>
+
+            {/* Main Navigation Menu Links */}
+            <nav
+              className="hidden md:flex items-center gap-4 lg:gap-6 shrink-0"
+              aria-label="Main Navigation"
+            >
+              <Link
+                href="/"
+                className={`relative py-2 text-[14px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
+                  pathname === "/"
+                    ? "text-[#F5F7FA]"
+                    : "text-[#A8B0BD] hover:text-[#F5F7FA]"
+                }`}
+              >
+                <span>Home</span>
+                {pathname === "/" && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
+                )}
+              </Link>
+              <Link
+                href="/discover"
+                className={`relative py-2 text-[14px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
+                  pathname === "/discover"
+                    ? "text-[#F5F7FA]"
+                    : "text-[#A8B0BD] hover:text-[#F5F7FA]"
+                }`}
+              >
+                <span>Discover</span>
+                {pathname === "/discover" && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
+                )}
+              </Link>
+              <Link
+                href="/discover?type=movie"
+                className={`relative py-2 text-[14px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
+                  pathname.includes("type=movie")
+                    ? "text-[#F5F7FA]"
+                    : "text-[#A8B0BD] hover:text-[#F5F7FA]"
+                }`}
+              >
+                <span>Movies</span>
+                {pathname.includes("type=movie") && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
+                )}
+              </Link>
+              <Link
+                href="/discover?type=series"
+                className={`relative py-2 text-[14px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
+                  pathname.includes("type=series")
+                    ? "text-[#F5F7FA]"
+                    : "text-[#A8B0BD] hover:text-[#F5F7FA]"
+                }`}
+              >
+                <span>TV Shows</span>
+                {pathname.includes("type=series") && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
+                )}
+              </Link>
+              <Link
+                href="/discover?type=anime"
+                className={`relative py-2 text-[14px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
+                  pathname.includes("type=anime")
+                    ? "text-[#F5F7FA]"
+                    : "text-[#A8B0BD] hover:text-[#F5F7FA]"
+                }`}
+              >
+                <span>Anime</span>
+                {pathname.includes("type=anime") && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
+                )}
+              </Link>
+              <Link
+                href="/library"
+                className={`relative py-2 text-[14px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
+                  pathname === "/library"
+                    ? "text-[#F5F7FA]"
+                    : "text-[#A8B0BD] hover:text-[#F5F7FA]"
+                }`}
+              >
+                <span>My Library</span>
+                {pathname === "/library" && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
+                )}
+              </Link>
+            </nav>
           </div>
-          <span className="font-bold text-lg tracking-tight text-[#F5F7FA]">
-            Cine<span className="text-[#3B9EFF]">Track</span>
-          </span>
-        </Link>
 
-        {/* Desktop Nav Links */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <Link
-            href="/"
-            className={`transition-colors ${
-              pathname === "/" ? "text-[#3B9EFF]" : "text-[#A8B0BD] hover:text-[#F5F7FA]"
-            }`}
-          >
-            Home
-          </Link>
-          <Link
-            href="/discover"
-            className={`transition-colors ${
-              pathname === "/discover" ? "text-[#3B9EFF]" : "text-[#A8B0BD] hover:text-[#F5F7FA]"
-            }`}
-          >
-            Discover
-          </Link>
-          <Link
-            href="/discover?type=movie"
-            className={`transition-colors ${
-              pathname.includes("type=movie") ? "text-[#3B9EFF]" : "text-[#A8B0BD] hover:text-[#F5F7FA]"
-            }`}
-          >
-            Movies
-          </Link>
-          <Link
-            href="/discover?type=series"
-            className={`transition-colors ${
-              pathname.includes("type=series") ? "text-[#3B9EFF]" : "text-[#A8B0BD] hover:text-[#F5F7FA]"
-            }`}
-          >
-            TV Shows
-          </Link>
-          <Link
-            href="/discover?type=anime"
-            className={`transition-colors ${
-              pathname.includes("type=anime") ? "text-[#3B9EFF]" : "text-[#A8B0BD] hover:text-[#F5F7FA]"
-            }`}
-          >
-            Anime
-          </Link>
-          <Link
-            href="/library"
-            className={`transition-colors ${
-              pathname === "/library" ? "text-[#3B9EFF]" : "text-[#A8B0BD] hover:text-[#F5F7FA]"
-            }`}
-          >
-            My Library
-          </Link>
-        </nav>
-
-        {/* Action Controls */}
-        <div className="flex items-center gap-1">
-          <Link
-            href="/search"
-            className="w-10 h-10 flex items-center justify-center rounded-lg text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-white/[0.04] transition-colors"
-            title="Search"
-          >
-            <Search className="w-5 h-5" />
-          </Link>
-
-          <button
-            className="w-10 h-10 flex items-center justify-center rounded-lg text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-white/[0.04] transition-colors relative"
-            title="Notifications"
-          >
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#3B9EFF] ring-2 ring-[#151C27]" />
-          </button>
-
-          {user ? (
-            <Link
-              href={user.username ? `/@${user.username}` : "/library"}
-              className="w-10 h-10 flex items-center justify-center ml-1"
+          {/* Right: Search Bar & Actions */}
+          <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
+            {/* Tablet Search Box (768px - 1023px) */}
+            <form
+              onSubmit={handleSearchSubmit}
+              className="relative hidden md:flex lg:hidden items-center w-36 sm:w-44"
             >
-              {user.avatarUrl ? (
-                <img
-                  src={user.avatarUrl}
-                  alt="Profile"
-                  className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-[#3B9EFF]/20 border border-[#3B9EFF]/40 flex items-center justify-center text-xs font-semibold text-[#3B9EFF]">
-                  {user.email?.slice(0, 2).toUpperCase() || "U"}
-                </div>
-              )}
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="ml-2 px-3 py-1.5 rounded-lg bg-[#3B9EFF] text-xs font-semibold text-white hover:bg-[#5AAFFF] transition-colors"
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search..."
+                className="w-full bg-[#151C27] text-xs text-slate-200 placeholder-[#6F7886] pl-8 pr-7 py-1.5 rounded-full border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] transition-all"
+              />
+              <Search className="w-3.5 h-3.5 text-[#6F7886] absolute left-2.5 pointer-events-none" />
+              <span className="hidden sm:inline-block absolute right-2 text-[9px] bg-[#1B2029] text-slate-400 px-1 py-0.5 rounded border border-white/[0.06] select-none pointer-events-none">
+                ⌘K
+              </span>
+            </form>
+
+            {/* Desktop Search Bar (≥ 1024px) */}
+            <form
+              onSubmit={handleSearchSubmit}
+              className="relative hidden lg:block w-[280px] xl:w-[310px]"
             >
-              Sign In
-            </Link>
-          )}
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#6F7886] pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search movies, TV shows, anime..."
+                className="w-full h-9 pl-9 pr-12 bg-[#1A2330]/70 border border-white/[0.06] hover:border-white/[0.12] focus:border-[#3B9EFF] rounded-lg text-[#F5F7FA] text-[13px] placeholder:text-[#6F7886] focus:outline-none transition-colors"
+              />
+              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-semibold text-[#6F7886] bg-[#1B2029] rounded border border-white/[0.06] pointer-events-none select-none">
+                ⌘K
+              </kbd>
+            </form>
+
+            {/* Quick Log Button - Hidden on mobile */}
+            <button
+              type="button"
+              onClick={() => setIsQuickAddOpen(true)}
+              className="hidden sm:inline-flex h-9 px-3 sm:px-3.5 rounded-lg bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs sm:text-[13px] items-center gap-1.5 transition-colors shadow-sm shrink-0 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="whitespace-nowrap">Log</span>
+            </button>
+
+            {/* Notification Bell */}
+            <button
+              type="button"
+              aria-label="Notifications"
+              className="relative p-2 text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] rounded-lg transition-colors shrink-0 cursor-pointer"
+            >
+              <Bell className="w-5 h-5 block" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#3B9EFF] ring-2 ring-[#0F141D]" />
+            </button>
+
+            {/* User Profile Avatar / Sign In */}
+            {user ? (
+              <Link
+                href={user.username ? `/@${user.username}` : "/library"}
+                className="flex items-center shrink-0 pl-1"
+                title="User Profile"
+              >
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full object-cover border border-white/[0.06] hover:border-white/[0.16] ring-1 ring-white/[0.08] hover:ring-[#3B9EFF]/50 transition-all"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-[#3B9EFF]/20 border border-[#3B9EFF]/40 flex items-center justify-center text-xs font-semibold text-[#3B9EFF]">
+                    {user.email?.slice(0, 2).toUpperCase() || "U"}
+                  </div>
+                )}
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="px-3.5 py-1.5 rounded-lg bg-[#1A2330] hover:bg-[#253244] text-xs font-semibold text-[#F5F7FA] border border-white/[0.08] transition-colors"
+              >
+                Sign In
+              </Link>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Quick Add Modal */}
+      <QuickAddModal
+        isOpen={isQuickAddOpen}
+        onClose={() => setIsQuickAddOpen(false)}
+        media={{
+          id: "tmdb:movie:693134",
+          source: "tmdb",
+          sourceId: "693134",
+          mediaType: "movie",
+          title: "Dune: Part Two",
+          year: "2024",
+          rating: 8.8,
+          totalEpisodes: 1,
+          posterPath:
+            "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
+          backdropPath:
+            "https://image.tmdb.org/t/p/w1280/eZ239CUp1d6OryZEBPnO2n87gMG.jpg",
+          genres: ["Sci-Fi", "Adventure"],
+          synopsis:
+            "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
+        }}
+      />
+    </>
   );
 }
+
