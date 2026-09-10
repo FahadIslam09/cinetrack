@@ -12,6 +12,7 @@ interface MediaCardProps {
   userRating?: number;
   userEpisodes?: number;
   badgeLabel?: string;
+  className?: string;
   onUpdate?: () => void;
 }
 
@@ -20,6 +21,7 @@ export function MediaCard({
   status,
   userRating,
   badgeLabel,
+  className,
   onUpdate,
 }: MediaCardProps) {
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
@@ -54,7 +56,7 @@ export function MediaCard({
 
   return (
     <>
-      <div className="w-[140px] sm:w-[160px] lg:w-[168px] shrink-0 group flex flex-col cursor-pointer snap-start">
+      <div className={`${className || "w-[140px] sm:w-[160px] lg:w-[168px] shrink-0"} group flex flex-col cursor-pointer snap-start`}>
         {/* Poster Container (2:3 Aspect Ratio) */}
         <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-[#1D2734] border border-white/[0.04] mb-2 shadow-sm transition-all group-hover:border-white/[0.12]">
           <Link href={detailUrl} className="block w-full h-full">
@@ -119,9 +121,28 @@ export function MediaCard({
             </span>
           </div>
 
-          {/* Mobile Always-Visible Score Pill */}
-          <div className="sm:hidden absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-[#0F141D]/85 backdrop-blur font-bold text-[10px] text-[#F5C84B] flex items-center gap-0.5 pointer-events-none">
-            ★ {media.rating ? media.rating.toFixed(1) : "—"}
+          {/* Top Status & Score Pills */}
+          {status && (
+            <div
+              className={`absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-[#0F141D]/90 backdrop-blur text-[9px] font-bold uppercase tracking-wider ${statusColor} border border-white/[0.06] z-10 pointer-events-none`}
+            >
+              {statusLabel}
+            </div>
+          )}
+
+          <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-[#0F141D]/90 backdrop-blur font-bold text-[10px] flex items-center gap-0.5 pointer-events-none shadow-sm border border-white/[0.06] z-10">
+            <Star
+              className={`w-3 h-3 ${
+                userRating ? "fill-[#F5C84B] text-[#F5C84B]" : "fill-[#F5C84B]/70 text-[#F5C84B]/70"
+              }`}
+            />
+            <span className={userRating ? "text-[#F5C84B]" : "text-[#F5F7FA]"}>
+              {userRating
+                ? userRating.toFixed(1)
+                : media.rating
+                ? media.rating.toFixed(1)
+                : "—"}
+            </span>
           </div>
         </div>
 
@@ -137,9 +158,11 @@ export function MediaCard({
           <span className="truncate">
             {media.year || "2024"} · {formatText}
           </span>
-          <span className="text-[#F5C84B] font-bold shrink-0 hidden sm:flex items-center gap-0.5">
-            ★ {media.rating ? media.rating.toFixed(1) : "—"}
-          </span>
+          {userRating && (
+            <span className="text-[10px] text-[#A8B0BD] font-medium shrink-0">
+              You: <strong className="text-[#F5C84B]">★ {userRating.toFixed(1)}</strong>
+            </span>
+          )}
         </div>
       </div>
 

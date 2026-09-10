@@ -1,13 +1,10 @@
-import Link from "next/link";
-import { Plus, Clock, Star, CheckCircle, Search, Film } from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
-import { MediaCard } from "@/components/media/media-card";
+import { LibraryView, LibraryItem } from "@/components/library/library-view";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
-import { userMediaLogs, mediaItems } from "@/lib/db/schema";
-import { eq, desc, and } from "drizzle-orm";
-import { NormalizedMedia } from "@/lib/media/normalize";
+import { userMediaLogs, mediaItems, profiles } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
 
 interface LibraryPageProps {
   searchParams: Promise<{
@@ -24,9 +21,13 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let logs: any[] = [];
+  let userProfile: any = null;
+  let items: LibraryItem[] = [];
   let stats = {
     total: 0,
+    movies: 0,
+    series: 0,
+    anime: 0,
     watching: 0,
     completed: 0,
     avgRating: 0,
@@ -35,6 +36,18 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
 
   if (user) {
     try {
+      // 1. Fetch user profile
+      const profileRows = await db
+        .select()
+        .from(profiles)
+        .where(eq(profiles.id, user.id))
+        .limit(1);
+
+      if (profileRows.length > 0) {
+        userProfile = profileRows[0];
+      }
+
+      // 2. Fetch user media logs
       const allUserLogs = await db
         .select({
           log: userMediaLogs,
@@ -46,10 +59,15 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         .orderBy(desc(userMediaLogs.updatedAt));
 
       stats.total = allUserLogs.length;
+      stats.movies = allUserLogs.filter((l) => l.media.mediaType === "movie").length;
+      stats.series = allUserLogs.filter((l) => l.media.mediaType === "series").length;
+      stats.anime = allUserLogs.filter((l) => l.media.mediaType === "anime").length;
       stats.watching = allUserLogs.filter((l) => l.log.status === "watching").length;
       stats.completed = allUserLogs.filter((l) => l.log.status === "completed").length;
 
-      const rated = allUserLogs.filter((l) => l.log.rating !== null);
+      const rated = allUserLogs.filter(
+        (l) => l.log.rating !== null && l.log.rating !== undefined
+      );
       if (rated.length > 0) {
         stats.avgRating =
           rated.reduce((acc, curr) => acc + Number(curr.log.rating), 0) / rated.length;
@@ -61,259 +79,310 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         return acc + runtime * eps;
       }, 0);
 
-      // Filter by status & type
-      logs = allUserLogs.filter((item) => {
-        if (status !== "all" && item.log.status !== status) return false;
-        if (type !== "all" && item.media.mediaType !== type) return false;
-        return true;
-      });
+      items = allUserLogs.map((l) => ({
+        id: l.log.id,
+        media: {
+          id: l.media.id,
+          source: l.media.source as "tmdb" | "anilist",
+          sourceId: l.media.sourceId,
+          mediaType: l.media.mediaType as "movie" | "series" | "anime",
+          title: l.media.title,
+          originalTitle: l.media.originalTitle || undefined,
+          posterPath: l.media.posterPath || null,
+          backdropPath: l.media.backdropPath || null,
+          year: l.media.releaseDate ? l.media.releaseDate.substring(0, 4) : undefined,
+          rating: l.log.rating ? Number(l.log.rating) : 0,
+          totalEpisodes: l.media.totalEpisodes || 1,
+          genres: l.media.genres || [],
+          synopsis: l.media.synopsis || undefined,
+        },
+        status: l.log.status as any,
+        userRating: l.log.rating ? Number(l.log.rating) : undefined,
+        userEpisodes: l.log.episodesWatched,
+        reviewText: l.log.reviewText,
+        updatedAt: l.log.updatedAt ? l.log.updatedAt.toISOString() : undefined,
+      }));
     } catch (err) {
       console.error("Library query error:", err);
     }
   }
 
-  // Demo items for guests or empty states to match mockup experience
-  const demoLibraryItems = [
+  // Curated demo items with verified 200 OK TMDb posters and rich genre tagging
+  const demoLibraryItems: LibraryItem[] = [
     {
-      media: {
-        id: "tmdb:tv:95396",
-        source: "tmdb" as const,
-        sourceId: "95396",
-        mediaType: "series" as const,
-        title: "Severance",
-        posterPath: "https://image.tmdb.org/t/p/w500/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
-        year: "2022",
-        rating: 8.7,
-        totalEpisodes: 10,
-        genres: ["Sci-Fi", "Mystery"],
-      },
-      status: "watching" as const,
-      userRating: 8.7,
-      userEpisodes: 4,
-    },
-    {
-      media: {
-        id: "tmdb:movie:693134",
-        source: "tmdb" as const,
-        sourceId: "693134",
-        mediaType: "movie" as const,
-        title: "Dune: Part Two",
-        posterPath: "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
-        year: "2024",
-        rating: 9.2,
-        totalEpisodes: 1,
-        genres: ["Sci-Fi"],
-      },
-      status: "completed" as const,
-      userRating: 9.2,
-    },
-    {
-      media: {
-        id: "anilist:127230",
-        source: "anilist" as const,
-        sourceId: "127230",
-        mediaType: "anime" as const,
-        title: "Cyberpunk: Edgerunners",
-        posterPath: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx127230-eU0Hq3sJ8o5l.jpg",
-        year: "2022",
-        rating: 8.9,
-        totalEpisodes: 10,
-        genres: ["Action", "Sci-Fi"],
-      },
-      status: "completed" as const,
-      userRating: 8.9,
-      userEpisodes: 10,
-    },
-    {
-      media: {
-        id: "tmdb:tv:76331",
-        source: "tmdb" as const,
-        sourceId: "76331",
-        mediaType: "series" as const,
-        title: "Succession",
-        posterPath: "https://image.tmdb.org/t/p/w500/7udWfh98n7G2EebF8FvU3oMh1bW.jpg",
-        year: "2023",
-        rating: 9.4,
-        totalEpisodes: 39,
-        genres: ["Drama"],
-      },
-      status: "completed" as const,
-      userRating: 9.4,
-      userEpisodes: 39,
-    },
-    {
-      media: {
-        id: "tmdb:tv:126308",
-        source: "tmdb" as const,
-        sourceId: "126308",
-        mediaType: "series" as const,
-        title: "Shōgun",
-        posterPath: "https://image.tmdb.org/t/p/w500/7O4iVfOMQmdCSxhOg1WNzG1AgYT.jpg",
-        year: "2024",
-        rating: 9.1,
-        totalEpisodes: 10,
-        genres: ["Drama", "History"],
-      },
-      status: "watching" as const,
-      userRating: 9.1,
-      userEpisodes: 7,
-    },
-    {
+      id: "demo-1",
       media: {
         id: "tmdb:movie:872585",
-        source: "tmdb" as const,
+        source: "tmdb",
         sourceId: "872585",
-        mediaType: "movie" as const,
+        mediaType: "movie",
         title: "Oppenheimer",
         posterPath: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+        backdropPath: null,
         year: "2023",
-        rating: 9.0,
+        rating: 8.9,
         totalEpisodes: 1,
         genres: ["Drama", "History"],
       },
-      status: "completed" as const,
+      status: "completed",
+      userRating: 9.5,
+      updatedAt: "2024-03-10T12:00:00.000Z",
+    },
+    {
+      id: "demo-2",
+      media: {
+        id: "tmdb:movie:569094",
+        source: "tmdb",
+        sourceId: "569094",
+        mediaType: "movie",
+        title: "Spider-Man: Across the Spider-Verse",
+        posterPath: "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+        backdropPath: null,
+        year: "2023",
+        rating: 8.4,
+        totalEpisodes: 1,
+        genres: ["Animation", "Action", "Comedy"],
+      },
+      status: "completed",
+      userRating: 9.3,
+      updatedAt: "2024-02-14T15:30:00.000Z",
+    },
+    {
+      id: "demo-3",
+      media: {
+        id: "tmdb:tv:95396",
+        source: "tmdb",
+        sourceId: "95396",
+        mediaType: "series",
+        title: "Severance",
+        posterPath: "https://image.tmdb.org/t/p/w500/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
+        backdropPath: null,
+        year: "2022",
+        rating: 8.4,
+        totalEpisodes: 10,
+        genres: ["Sci-Fi", "Mystery", "Drama"],
+      },
+      status: "watching",
+      userRating: 9.2,
+      userEpisodes: 8,
+      updatedAt: "2024-04-01T08:00:00.000Z",
+    },
+    {
+      id: "demo-4",
+      media: {
+        id: "tmdb:movie:792307",
+        source: "tmdb",
+        sourceId: "792307",
+        mediaType: "movie",
+        title: "Poor Things",
+        posterPath: "https://image.tmdb.org/t/p/w500/kCGlIMHnOm8JPXq3rXM6c5wMxcT.jpg",
+        backdropPath: null,
+        year: "2023",
+        rating: 7.8,
+        totalEpisodes: 1,
+        genres: ["Comedy", "Sci-Fi", "Romance"],
+      },
+      status: "completed",
+      userRating: 8.8,
+      updatedAt: "2024-01-20T21:00:00.000Z",
+    },
+    {
+      id: "demo-5",
+      media: {
+        id: "tmdb:tv:126308",
+        source: "tmdb",
+        sourceId: "126308",
+        mediaType: "series",
+        title: "Shōgun",
+        posterPath: "https://image.tmdb.org/t/p/w500/7O4iVfOMQmdCSxhOg1WnzG1AgYT.jpg",
+        backdropPath: null,
+        year: "2024",
+        rating: 8.5,
+        totalEpisodes: 10,
+        genres: ["Drama", "History", "Action"],
+      },
+      status: "watching",
+      userRating: 9.1,
+      userEpisodes: 7,
+      updatedAt: "2024-04-12T18:40:00.000Z",
+    },
+    {
+      id: "demo-6",
+      media: {
+        id: "tmdb:tv:1429",
+        source: "tmdb",
+        sourceId: "1429",
+        mediaType: "anime",
+        title: "Attack on Titan",
+        posterPath: "https://image.tmdb.org/t/p/w500/hTP1DtLGFamjfu8WqjnuQdP1n4i.jpg",
+        backdropPath: null,
+        year: "2013",
+        rating: 8.7,
+        totalEpisodes: 87,
+        genres: ["Action", "Fantasy", "Animation"],
+      },
+      status: "completed",
+      userRating: 9.6,
+      userEpisodes: 87,
+      updatedAt: "2023-12-05T10:00:00.000Z",
+    },
+    {
+      id: "demo-7",
+      media: {
+        id: "tmdb:tv:209867",
+        source: "tmdb",
+        sourceId: "209867",
+        mediaType: "anime",
+        title: "Frieren: Beyond Journey's End",
+        posterPath: "https://image.tmdb.org/t/p/w500/dqZENchTd7lp5zht7BdlqM7RBhD.jpg",
+        backdropPath: null,
+        year: "2023",
+        rating: 8.9,
+        totalEpisodes: 28,
+        genres: ["Fantasy", "Adventure", "Animation"],
+      },
+      status: "completed",
+      userRating: 9.4,
+      userEpisodes: 28,
+      updatedAt: "2024-03-22T19:00:00.000Z",
+    },
+    {
+      id: "demo-8",
+      media: {
+        id: "tmdb:tv:95479",
+        source: "tmdb",
+        sourceId: "95479",
+        mediaType: "anime",
+        title: "Jujutsu Kaisen",
+        posterPath: "https://image.tmdb.org/t/p/w500/6qQzMJG27XOJsyAEEIisoJB45j2.jpg",
+        backdropPath: null,
+        year: "2020",
+        rating: 8.6,
+        totalEpisodes: 47,
+        genres: ["Action", "Supernatural", "Animation"],
+      },
+      status: "completed",
       userRating: 9.0,
+      userEpisodes: 47,
+      updatedAt: "2024-01-15T14:00:00.000Z",
+    },
+    {
+      id: "demo-9",
+      media: {
+        id: "tmdb:movie:666277",
+        source: "tmdb",
+        sourceId: "666277",
+        mediaType: "movie",
+        title: "Past Lives",
+        posterPath: "https://image.tmdb.org/t/p/w500/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg",
+        backdropPath: null,
+        year: "2023",
+        rating: 7.9,
+        totalEpisodes: 1,
+        genres: ["Drama", "Romance"],
+      },
+      status: "completed",
+      userRating: 8.7,
+      updatedAt: "2023-11-20T22:15:00.000Z",
+    },
+    {
+      id: "demo-10",
+      media: {
+        id: "tmdb:movie:937287",
+        source: "tmdb",
+        sourceId: "937287",
+        mediaType: "movie",
+        title: "Challengers",
+        posterPath: "https://image.tmdb.org/t/p/w500/H6vke7zGiuLsz4v4RPeReb9rsv.jpg",
+        backdropPath: null,
+        year: "2024",
+        rating: 7.2,
+        totalEpisodes: 1,
+        genres: ["Drama", "Romance"],
+      },
+      status: "completed",
+      userRating: 8.4,
+      updatedAt: "2024-05-02T16:00:00.000Z",
+    },
+    {
+      id: "demo-11",
+      media: {
+        id: "tmdb:tv:85937",
+        source: "tmdb",
+        sourceId: "85937",
+        mediaType: "anime",
+        title: "Demon Slayer: Kimetsu no Yaiba",
+        posterPath: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg",
+        backdropPath: null,
+        year: "2019",
+        rating: 8.7,
+        totalEpisodes: 55,
+        genres: ["Action", "Fantasy", "Animation"],
+      },
+      status: "completed",
+      userRating: 8.9,
+      userEpisodes: 55,
+      updatedAt: "2024-02-28T11:00:00.000Z",
+    },
+    {
+      id: "demo-12",
+      media: {
+        id: "tmdb:tv:114410",
+        source: "tmdb",
+        sourceId: "114410",
+        mediaType: "anime",
+        title: "Chainsaw Man",
+        posterPath: "https://image.tmdb.org/t/p/w500/iFM1dyFi0rByvEomEkmm7NpQeeb.jpg",
+        backdropPath: null,
+        year: "2022",
+        rating: 8.5,
+        totalEpisodes: 12,
+        genres: ["Action", "Supernatural", "Animation"],
+      },
+      status: "completed",
+      userRating: 8.8,
+      userEpisodes: 12,
+      updatedAt: "2023-10-18T17:45:00.000Z",
     },
   ];
 
-  const days = Math.floor(stats.totalMinutes / (60 * 24));
-  const hours = Math.floor((stats.totalMinutes % (60 * 24)) / 60);
+  const finalItems = items.length > 0 ? items : demoLibraryItems;
 
-  const activeItems = logs.length > 0 ? logs : demoLibraryItems;
+  const finalStats =
+    items.length > 0
+      ? stats
+      : {
+          total: 142,
+          movies: 64,
+          series: 42,
+          anime: 36,
+          watching: 8,
+          completed: 118,
+          avgRating: 9.0,
+          totalMinutes: 26400,
+        };
 
-  const statusTabs = [
-    { id: "all", label: `All (${user ? stats.total : 142})` },
-    { id: "watching", label: `Watching (${user ? stats.watching : 8})` },
-    { id: "completed", label: `Completed (${user ? stats.completed : 94})` },
-    { id: "plan_to_watch", label: "Plan to Watch" },
-    { id: "on_hold", label: "On Hold" },
-    { id: "dropped", label: "Dropped" },
-  ];
+  const userProp = user
+    ? {
+        id: user.id,
+        username: userProfile?.username || user.email?.split("@")[0] || "user",
+        email: user.email,
+        avatarUrl: userProfile?.avatarUrl || user.user_metadata?.avatar_url,
+      }
+    : null;
 
   return (
-    <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] pb-24 md:pb-12">
+    <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D]">
       <AppHeader />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 pt-20 flex flex-col gap-5">
-        {/* Title Bar */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <h1 className="font-extrabold text-2xl sm:text-3xl text-[#F5F7FA] tracking-tight">
-              My Library
-            </h1>
-            <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#151C27] border border-white/[0.06] text-[#A8B0BD]">
-              {user ? `${stats.total} Titles Tracked` : "142 Titles Tracked"}
-            </span>
-          </div>
-
-          <Link
-            href="/search"
-            className="px-3.5 py-2 rounded-lg bg-[#3B9EFF] text-xs font-semibold text-white hover:bg-[#5AAFFF] flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Log Entry</span>
-          </Link>
-        </div>
-
-        {/* Statistics Pills */}
-        <div className="grid grid-cols-3 gap-2.5">
-          <div className="p-3 rounded-xl bg-[#151C27] border border-white/[0.06] flex flex-col items-center text-center">
-            <div className="flex items-center gap-1 text-[#3B9EFF] text-xs font-bold">
-              <Clock className="w-3.5 h-3.5" />
-              <span>{user ? `${days}d ${hours}h` : "18d 4h"}</span>
-            </div>
-            <span className="text-[10px] text-[#A8B0BD] uppercase tracking-wider font-semibold mt-0.5">
-              Watch Time
-            </span>
-          </div>
-
-          <div className="p-3 rounded-xl bg-[#151C27] border border-white/[0.06] flex flex-col items-center text-center">
-            <div className="flex items-center gap-1 text-[#F5C84B] text-xs font-bold">
-              <Star className="w-3.5 h-3.5 fill-[#F5C84B]" />
-              <span>{user && stats.avgRating > 0 ? stats.avgRating.toFixed(1) : "8.2"}</span>
-            </div>
-            <span className="text-[10px] text-[#A8B0BD] uppercase tracking-wider font-semibold mt-0.5">
-              Avg Rating
-            </span>
-          </div>
-
-          <div className="p-3 rounded-xl bg-[#151C27] border border-white/[0.06] flex flex-col items-center text-center">
-            <div className="flex items-center gap-1 text-[#22C55E] text-xs font-bold">
-              <CheckCircle className="w-3.5 h-3.5" />
-              <span>
-                {user && stats.total > 0
-                  ? `${Math.round((stats.completed / stats.total) * 100)}%`
-                  : "78%"}
-              </span>
-            </div>
-            <span className="text-[10px] text-[#A8B0BD] uppercase tracking-wider font-semibold mt-0.5">
-              Completed
-            </span>
-          </div>
-        </div>
-
-        {/* Status Horizontal Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-          {statusTabs.map((tab) => (
-            <Link
-              key={tab.id}
-              href={`/library?status=${tab.id}&type=${type}`}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-                status === tab.id
-                  ? "bg-[#3B9EFF] text-white shadow-sm"
-                  : "bg-[#151C27] text-[#A8B0BD] hover:text-white border border-white/[0.04]"
-              }`}
-            >
-              {tab.label}
-            </Link>
-          ))}
-        </div>
-
-        {/* Filter Toolbar */}
-        <div className="flex items-center gap-2 text-xs">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-[#6F7886] absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search within library..."
-              className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#151C27] border border-white/[0.06] text-xs text-[#F5F7FA] placeholder-[#6F7886] focus:outline-none focus:border-[#3B9EFF]"
-            />
-          </div>
-
-          {["all", "movie", "series", "anime"].map((t) => (
-            <Link
-              key={t}
-              href={`/library?status=${status}&type=${t}`}
-              className={`px-3 py-2 rounded-lg border capitalize whitespace-nowrap transition-colors ${
-                type === t
-                  ? "bg-[#3B9EFF]/20 border-[#3B9EFF] text-[#3B9EFF]"
-                  : "bg-[#151C27] border-white/[0.06] text-[#A8B0BD] hover:text-white"
-              }`}
-            >
-              {t === "all" ? "All Types" : t}
-            </Link>
-          ))}
-        </div>
-
-        {/* 2-Column Mobile Poster Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4 mt-2">
-          {activeItems.map((item: any) => {
-            const media = item.media as NormalizedMedia;
-            const logStatus = item.log ? item.log.status : item.status;
-            const userRate = item.log?.rating ? Number(item.log.rating) : item.userRating;
-            const eps = item.log ? item.log.episodesWatched : item.userEpisodes;
-
-            return (
-              <MediaCard
-                key={media.id}
-                media={media}
-                status={logStatus}
-                userRating={userRate}
-                userEpisodes={eps}
-              />
-            );
-          })}
-        </div>
+      <main className="flex-1 w-full max-w-[834px] lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 pt-24 sm:pt-28 pb-24 md:pb-12">
+        <LibraryView
+          initialItems={finalItems}
+          user={userProp}
+          stats={finalStats}
+          initialStatus={status}
+          initialType={type}
+        />
       </main>
 
       <BottomNav />
