@@ -1,256 +1,283 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  CheckCircle2,
-  Star,
-  Compass,
-  Share2,
-  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
   Play,
+  Star,
+  Check,
   BookmarkCheck,
-  Sparkles,
+  Info,
 } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
+import { QuickAddModal } from "../quick-add/quick-add-modal";
+
+interface HeroSlide {
+  badge: string;
+  media: NormalizedMedia;
+  metaLine: string;
+}
 
 interface HeroBannerProps {
   user?: {
     username?: string;
     email?: string;
   } | null;
-  featuredMovie?: NormalizedMedia | null;
-  featuredTV?: {
-    title: string;
-    posterPath: string;
-    backdropPath?: string;
-    currentEpisode?: number;
-    totalEpisodes?: number;
-  };
-  featuredAnime?: {
-    title: string;
-    posterPath: string;
-    rating?: number;
-  };
+  featuredMedia?: NormalizedMedia | null;
+  secondaryMedia?: NormalizedMedia | null;
 }
 
-export function HeroBanner({
-  user,
-  featuredMovie,
-  featuredTV,
-  featuredAnime,
-}: HeroBannerProps) {
+export function HeroBanner({ user, featuredMedia, secondaryMedia }: HeroBannerProps) {
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+
   const isLoggedIn = !!user;
   const username = user?.username || user?.email?.split("@")[0] || "Cinephile";
 
-  // Fallbacks for media artwork ecosystem
-  const movie = featuredMovie || {
-    id: "tmdb:movie:693134",
-    title: "Dune: Part Two",
-    year: "2024",
-    rating: 8.8,
-    posterPath: "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
-    backdropPath: "https://image.tmdb.org/t/p/w1280/eZ239CUp1d6OryZEBPnO2n87gMG.jpg",
-    mediaType: "movie",
-    sourceId: "693134",
+  // Built-in curated slides representing Movie + TV + Anime
+  const slides: HeroSlide[] = [
+    {
+      badge: "FEATURED FILM",
+      metaLine: "2024 • Sci-Fi, Adventure • Movie Tracker",
+      media: featuredMedia || {
+        id: "tmdb:movie:693134",
+        source: "tmdb",
+        sourceId: "693134",
+        mediaType: "movie",
+        title: "Dune: Part Two",
+        year: "2024",
+        rating: 8.8,
+        posterPath: "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
+        backdropPath: "https://image.tmdb.org/t/p/w1280/eZ239CUp1d6OryZEBPnO2n87gMG.jpg",
+        genres: ["Sci-Fi", "Adventure"],
+        synopsis: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
+      },
+    },
+    {
+      badge: "TRENDING SERIES",
+      metaLine: "2024 • Animation, Sci-Fi • TV Tracker",
+      media: secondaryMedia || {
+        id: "tmdb:tv:94605",
+        source: "tmdb",
+        sourceId: "94605",
+        mediaType: "series",
+        title: "Arcane",
+        year: "2024",
+        rating: 9.1,
+        posterPath: "https://image.tmdb.org/t/p/w500/abf8tHznhSvl9BAElD23cQaeCDW.jpg",
+        backdropPath: "https://image.tmdb.org/t/p/w1280/fqldJn2tMkQggQi29HyjewmlvCw.jpg",
+        genres: ["Animation", "Sci-Fi"],
+        synopsis: "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war between magic technologies.",
+      },
+    },
+    {
+      badge: "TOP ANIME SIMULCAST",
+      metaLine: "2023 • Fantasy, Adventure • Anime Tracker",
+      media: {
+        id: "anilist:154587",
+        source: "anilist",
+        sourceId: "154587",
+        mediaType: "anime",
+        title: "Frieren: Beyond Journey's End",
+        year: "2023",
+        rating: 9.4,
+        posterPath: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-gviZ2zfLIf0w.jpg",
+        backdropPath: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/154587-dr7e5m5h.jpg",
+        genres: ["Fantasy", "Adventure"],
+        synopsis: "An elf mage embarks on a nostalgic journey through places she once explored with the legendary hero party.",
+      },
+    },
+  ];
+
+  const currentSlide = slides[currentIdx] || slides[0];
+  const media = currentSlide.media;
+  const detailUrl = `/${media.mediaType}/${media.sourceId}`;
+  const backdropUrl = media.backdropPath || media.posterPath || "/placeholder-backdrop.png";
+
+  const prevSlide = () => {
+    setCurrentIdx((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
   };
 
-  const tv = featuredTV || {
-    title: "Severance",
-    posterPath: "https://image.tmdb.org/t/p/w500/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
-    backdropPath: "https://image.tmdb.org/t/p/w780/ixgFmf1X59PUZam2qbAfskx2gQr.jpg",
-    currentEpisode: 4,
-    totalEpisodes: 10,
+  const nextSlide = () => {
+    setCurrentIdx((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
   };
 
-  const anime = featuredAnime || {
-    title: "Frieren: Beyond Journey's End",
-    posterPath: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-gviZ2zfLIf0w.jpg",
-    rating: 9.4,
-  };
+  // Previous and next indices for side preview cards
+  const prevIdx = currentIdx === 0 ? slides.length - 1 : currentIdx - 1;
+  const nextIdx = currentIdx === slides.length - 1 ? 0 : currentIdx + 1;
 
   return (
-    <section className="relative w-full bg-[#0F141D] overflow-hidden border-b border-white/[0.06] pt-6 pb-10 sm:py-12 md:py-16">
-      {/* Background Soft Atmospheric Ambient Glow */}
-      <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-[#3B9EFF]/10 rounded-full blur-[140px] pointer-events-none -mr-32 -mt-32" />
-      <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-[#F5C84B]/5 rounded-full blur-[120px] pointer-events-none" />
+    <>
+      <section className="relative w-full py-4 sm:py-6 overflow-hidden bg-[#0F141D]">
+        {/* CAROUSEL CONTAINER WITH PEEK CARDS */}
+        <div className="relative max-w-[1360px] mx-auto px-2 sm:px-4 md:px-8 flex items-center justify-center">
+          
+          {/* Left Peeking Card (Subtle edge bleed) */}
+          <div
+            onClick={prevSlide}
+            className="hidden xl:block absolute -left-28 w-44 h-[440px] rounded-3xl overflow-hidden opacity-25 hover:opacity-40 transition-opacity cursor-pointer border border-white/[0.06] shadow-2xl pointer-events-auto"
+          >
+            <div
+              className="w-full h-full bg-cover bg-center"
+              style={{
+                backgroundImage: `url('${slides[prevIdx].media.backdropPath || slides[prevIdx].media.posterPath}')`,
+              }}
+            />
+            <div className="absolute inset-0 bg-[#0F141D]/70" />
+          </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          {/* Left Column: Product Value Proposition & Actions */}
-          <div className="lg:col-span-7 flex flex-col items-start text-left">
-            {/* Level 1: Eyebrow */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#3B9EFF] animate-pulse" />
-              <span className="text-[10px] sm:text-[11px] font-bold tracking-widest uppercase text-[#A8B0BD]">
-                {isLoggedIn ? "YOUR PERSONAL DASHBOARD" : "YOUR PERSONAL MEDIA LIBRARY"}
+          {/* MAIN BILLBOARD STAGE CARD */}
+          <div className="relative w-full h-[460px] sm:h-[490px] md:h-[510px] rounded-2xl sm:rounded-3xl overflow-hidden border border-white/[0.1] shadow-[0_25px_60px_rgba(0,0,0,0.8)] bg-[#151C27] flex flex-col justify-between">
+            
+            {/* Full-bleed High-Res Artwork */}
+            <div
+              key={media.id}
+              className="absolute inset-0 bg-cover bg-center transition-all duration-700 ease-out scale-[1.01]"
+              style={{ backgroundImage: `url('${backdropUrl}')` }}
+            />
+
+            {/* Gradient Scrims (Flawless readability on left, cinematic transparency on right) */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0F141D] via-[#0F141D]/90 md:via-[#0F141D]/70 to-transparent w-full md:w-4/5" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0F141D] via-[#0F141D]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0F141D]/40 via-transparent to-transparent" />
+
+            {/* Top Bar inside Billboard (Eyebrow + Category Tag) */}
+            <div className="relative z-10 p-6 sm:p-8 md:p-10 flex items-center justify-between">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/[0.1] shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3B9EFF] animate-pulse shadow-[0_0_8px_#3B9EFF]" />
+                <span className="text-[10px] sm:text-[11px] font-bold tracking-widest uppercase text-[#F5F7FA]">
+                  {isLoggedIn ? `PERSONAL HUB • ${username.toUpperCase()}` : "YOUR PERSONAL MEDIA LIBRARY"}
+                </span>
+              </div>
+
+              {/* Slide Counter / Category Badge */}
+              <span className="px-3 py-1 rounded-full bg-white/[0.08] backdrop-blur-md text-[10px] sm:text-[11px] font-bold tracking-wider text-[#A8B0BD] uppercase border border-white/[0.08]">
+                {currentSlide.badge}
               </span>
             </div>
 
-            {/* Level 2: Main Heading (The Visual Anchor) */}
-            <h1 className="font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[52px] tracking-tight text-[#F5F7FA] leading-[1.12] mb-4">
-              {isLoggedIn ? (
-                <>
-                  Welcome back, <br className="hidden sm:inline" />
-                  <span className="text-[#3B9EFF]">{username}.</span>
-                </>
-              ) : (
-                <>
-                  Everything You Watch, <br className="hidden sm:inline" />
-                  In One Place.
-                </>
-              )}
-            </h1>
+            {/* Content Area inside Billboard (Left-Anchored Value Prop & Title) */}
+            <div className="relative z-10 px-5 sm:px-10 md:pl-16 md:pr-8 pb-7 sm:pb-9 max-w-2xl flex flex-col items-start text-left">
+              
+              {/* Value Proposition Headline */}
+              <h1 className="font-extrabold text-2xl sm:text-4xl md:text-[44px] tracking-tight text-[#F5F7FA] leading-[1.12] mb-2.5">
+                {isLoggedIn ? (
+                  <>Welcome back, <span className="text-[#3B9EFF]">{username}.</span></>
+                ) : (
+                  <>Everything You Watch, <span className="text-[#3B9EFF]">In One Place.</span></>
+                )}
+              </h1>
 
-            {/* Level 3: Supporting Description */}
-            <p className="text-sm sm:text-base text-[#A8B0BD] leading-relaxed max-w-xl mb-6 sm:mb-8">
-              {isLoggedIn
-                ? "Pick up right where you left off across your active watchlists, log new ratings, or discover your next cinematic obsession."
-                : "Track movies, TV shows, and anime. Rate what you watch, write reviews, discover what to watch next, and build your own cinematic profile."}
-            </p>
+              {/* Dynamic Featured Media Title & Rating */}
+              <div className="flex items-center gap-2 flex-wrap mb-2 text-xs font-semibold text-[#A8B0BD]">
+                <div className="flex items-center gap-1 text-[#F5C84B]">
+                  <Star className="w-3.5 h-3.5 fill-[#F5C84B]" />
+                  <span className="font-bold text-sm text-[#F5F7FA]">
+                    {media.rating ? Number(media.rating).toFixed(1) : "8.5"}
+                  </span>
+                </div>
+                <span>•</span>
+                <span className="text-white font-medium">{media.title}</span>
+                <span>•</span>
+                <span className="text-[#A8B0BD]">{currentSlide.metaLine}</span>
+              </div>
 
-            {/* Level 4: CTAs (Primary & Secondary) */}
-            <div className="flex items-center flex-wrap gap-3 sm:gap-4 w-full sm:w-auto mb-8">
-              {isLoggedIn ? (
-                <Link
-                  href="/library"
-                  className="h-12 px-6 rounded-xl bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#3B9EFF]/20 active:scale-95 transition-all"
+              {/* Supporting Value Description (Clear in 3-5 seconds) */}
+              <p className="text-xs sm:text-sm text-[#A8B0BD] line-clamp-2 md:line-clamp-3 leading-relaxed max-w-xl mb-5 sm:mb-6 font-normal">
+                {isLoggedIn
+                  ? "Resume your active watchlists, log your latest impressions, or discover recommendations tailored to your cinematic taste."
+                  : "Track movies, TV shows, and anime. Rate what you watch, write reviews, discover what to watch next, and build your own cinematic profile."}
+              </p>
+
+              {/* Dual Action Buttons matching inspired-design.jpg */}
+              <div className="flex items-center flex-wrap gap-2.5 sm:gap-3 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setIsQuickAddOpen(true)}
+                  className="h-10 sm:h-12 px-5 sm:px-7 rounded-xl bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#3B9EFF]/30 active:scale-95 transition-all cursor-pointer"
                 >
-                  <BookmarkCheck className="w-4 h-4" />
-                  <span>Open Your Library</span>
-                </Link>
-              ) : (
-                <Link
-                  href="/login"
-                  className="h-12 px-7 rounded-xl bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#3B9EFF]/25 active:scale-95 transition-all"
-                >
-                  <span>Start Tracking</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              )}
+                  <Play className="w-4 h-4 fill-white" />
+                  <span>Track This Title</span>
+                </button>
 
-              <Link
-                href="/discover"
-                className="h-12 px-6 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-[#F5F7FA] border border-white/[0.1] hover:border-white/[0.2] font-semibold text-sm flex items-center justify-center gap-2 active:scale-95 transition-all"
-              >
-                <span>Explore Discover</span>
-                <Compass className="w-4 h-4 text-[#3B9EFF]" />
-              </Link>
+                <Link
+                  href={detailUrl}
+                  className="h-10 sm:h-12 px-4 sm:px-6 rounded-xl bg-black/40 hover:bg-black/60 text-[#F5F7FA] border border-white/[0.18] hover:border-white/[0.3] font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 backdrop-blur-md active:scale-95 transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>View Details</span>
+                </Link>
+
+                <Link
+                  href="/discover"
+                  className="hidden sm:flex h-10 sm:h-12 px-3.5 rounded-xl text-[#A8B0BD] hover:text-[#F5F7FA] font-medium text-xs sm:text-sm items-center justify-center transition-colors"
+                >
+                  <span>Explore Discover →</span>
+                </Link>
+              </div>
             </div>
 
-            {/* Level 5: Compact Feature Benefits Row */}
-            <div className="pt-4 border-t border-white/[0.08] w-full max-w-xl grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-2">
-              <div className="flex items-center gap-2 text-xs font-medium text-[#A8B0BD]">
-                <CheckCircle2 className="w-4 h-4 text-[#3B9EFF] shrink-0" />
-                <span className="truncate">Track library</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs font-medium text-[#A8B0BD]">
-                <Star className="w-4 h-4 text-[#F5C84B] shrink-0 fill-[#F5C84B]/20" />
-                <span className="truncate">Rate & review</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs font-medium text-[#A8B0BD]">
-                <Compass className="w-4 h-4 text-[#3B9EFF] shrink-0" />
-                <span className="truncate">Discover next</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs font-medium text-[#A8B0BD]">
-                <Share2 className="w-4 h-4 text-[#A8B0BD] shrink-0" />
-                <span className="truncate">Share profile</span>
-              </div>
-            </div>
+            {/* Navigation Arrows on Left & Right Edges (Desktop only to prevent mobile text collision) */}
+            <button
+              type="button"
+              onClick={prevSlide}
+              className="hidden sm:flex absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-black/50 hover:bg-[#3B9EFF] text-white border border-white/[0.15] backdrop-blur-md items-center justify-center shadow-xl transition-all active:scale-90 z-20 cursor-pointer"
+              title="Previous title"
+            >
+              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
+
+            <button
+              type="button"
+              onClick={nextSlide}
+              className="hidden sm:flex absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-black/50 hover:bg-[#3B9EFF] text-white border border-white/[0.15] backdrop-blur-md items-center justify-center shadow-xl transition-all active:scale-90 z-20 cursor-pointer"
+              title="Next title"
+            >
+              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
           </div>
 
-          {/* Right Column: Layered Cinematic Artwork Ecosystem (Movie + TV + Anime) */}
-          <div className="lg:col-span-5 relative flex items-center justify-center pt-4 lg:pt-0">
-            <div className="relative w-full max-w-[380px] sm:max-w-[420px] aspect-[4/5] flex items-center justify-center">
-              {/* Back Card 1: TV Series Card (Staggered Left) */}
-              <div className="absolute -left-2 sm:-left-4 top-6 w-36 sm:w-44 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border border-white/[0.08] bg-[#151C27] rotate-[-5deg] opacity-75 hover:opacity-100 hover:rotate-[-2deg] transition-all duration-300 z-10">
-                <img
-                  src={tv.posterPath}
-                  alt={tv.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0F141D] via-transparent to-transparent" />
-                <div className="absolute bottom-2 left-2 right-2 flex flex-col gap-0.5">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-[#3B9EFF]">
-                    TV SERIES
-                  </span>
-                  <span className="text-[11px] font-semibold text-white truncate">
-                    {tv.title}
-                  </span>
-                  {tv.currentEpisode && (
-                    <span className="text-[9px] text-[#A8B0BD]">
-                      Ep {tv.currentEpisode}/{tv.totalEpisodes || 10} • Watching
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Back Card 2: Anime Card (Staggered Right) */}
-              <div className="absolute -right-2 sm:-right-4 top-8 w-36 sm:w-44 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border border-white/[0.08] bg-[#151C27] rotate-[6deg] opacity-75 hover:opacity-100 hover:rotate-[3deg] transition-all duration-300 z-10">
-                <img
-                  src={anime.posterPath}
-                  alt={anime.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0F141D] via-transparent to-transparent" />
-                <div className="absolute bottom-2 left-2 right-2 flex flex-col gap-0.5">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-[#F5C84B]">
-                    ANIME
-                  </span>
-                  <span className="text-[11px] font-semibold text-white truncate">
-                    {anime.title}
-                  </span>
-                  <div className="flex items-center gap-1 text-[9px] font-bold text-[#F5C84B]">
-                    <Star className="w-2.5 h-2.5 fill-[#F5C84B]" />
-                    <span>{anime.rating || 9.4}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Center Main Featured Card: Primary Movie */}
-              <Link
-                href={`/${movie.mediaType || "movie"}/${movie.sourceId || "693134"}`}
-                className="relative w-48 sm:w-56 aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-white/[0.14] bg-[#1D2734] z-20 transition-transform duration-300 hover:scale-[1.03] group block"
-              >
-                <img
-                  src={movie.posterPath || "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg"}
-                  alt={movie.title}
-                  className="w-full h-full object-cover"
-                />
-                {/* Soft natural edge gradient scrim */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0F141D] via-[#0F141D]/20 to-transparent" />
-
-                {/* Rating Badge Top Right */}
-                <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-[#0F141D]/80 backdrop-blur-md border border-white/[0.1] flex items-center gap-1 shadow-md">
-                  <Star className="w-3 h-3 fill-[#F5C84B] text-[#F5C84B]" />
-                  <span className="text-xs font-bold text-[#F5C84B]">
-                    {movie.rating ? Number(movie.rating).toFixed(1) : "8.8"}
-                  </span>
-                </div>
-
-                {/* Featured Movie Label & Quick Info Bottom */}
-                <div className="absolute bottom-3 left-3 right-3 flex flex-col gap-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="px-1.5 py-0.5 rounded bg-[#3B9EFF]/90 text-[9px] font-bold tracking-wider uppercase text-white shadow-sm">
-                      FEATURED
-                    </span>
-                    <span className="text-[10px] text-[#A8B0BD]">{movie.year || "2024"}</span>
-                  </div>
-                  <h3 className="font-bold text-sm text-[#F5F7FA] truncate group-hover:text-[#3B9EFF] transition-colors">
-                    {movie.title}
-                  </h3>
-                </div>
-              </Link>
-
-              {/* Floating Letterboxd-style tracking pill bottom-left */}
-              <div className="absolute -bottom-2 left-4 sm:left-6 z-30 px-3 py-1.5 rounded-lg bg-[#151C27]/95 backdrop-blur-md border border-white/[0.1] shadow-xl flex items-center gap-2 text-xs">
-                <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
-                <span className="font-semibold text-white">Movie · Series · Anime</span>
-                <span className="text-[#6F7886]">• 1 Platform</span>
-              </div>
-            </div>
+          {/* Right Peeking Card (Subtle edge bleed) */}
+          <div
+            onClick={nextSlide}
+            className="hidden xl:block absolute -right-28 w-44 h-[440px] rounded-3xl overflow-hidden opacity-25 hover:opacity-40 transition-opacity cursor-pointer border border-white/[0.06] shadow-2xl pointer-events-auto"
+          >
+            <div
+              className="w-full h-full bg-cover bg-center"
+              style={{
+                backgroundImage: `url('${slides[nextIdx].media.backdropPath || slides[nextIdx].media.posterPath}')`,
+              }}
+            />
+            <div className="absolute inset-0 bg-[#0F141D]/70" />
           </div>
         </div>
-      </div>
-    </section>
+
+        {/* Carousel Pagination Dots matching inspired-design.jpg */}
+        <div className="flex items-center justify-center gap-2 mt-4">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIdx(index)}
+              className={`transition-all duration-300 rounded-full cursor-pointer ${
+                index === currentIdx
+                  ? "w-8 h-1.5 bg-[#3B9EFF] shadow-[0_0_8px_#3B9EFF]"
+                  : "w-1.5 h-1.5 bg-white/25 hover:bg-white/50"
+              }`}
+              title={`Slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Quick Add Modal directly triggered by "Track This Title" */}
+      <QuickAddModal
+        media={media}
+        isOpen={isQuickAddOpen}
+        onClose={() => setIsQuickAddOpen(false)}
+      />
+    </>
   );
 }

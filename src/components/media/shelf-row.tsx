@@ -23,8 +23,7 @@ export function ShelfRow({
       {/* Header */}
       <div className="px-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className={`w-1.5 h-4 ${accentColor} rounded-full shrink-0`} />
-          <h2 className="font-bold text-base sm:text-lg tracking-tight text-[#F5F7FA]">
+          <h2 className="font-bold text-lg sm:text-xl tracking-tight text-[#F5F7FA]">
             {title}
           </h2>
           {badge && (

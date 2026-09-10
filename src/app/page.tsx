@@ -151,7 +151,7 @@ export default async function HomePage() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col w-full pt-16">
-        {/* Product Value-Focused Hero */}
+        {/* Cinematic Hero */}
         <HeroBanner
           user={
             user
@@ -161,21 +161,8 @@ export default async function HomePage() {
                 }
               : null
           }
-          featuredMovie={featuredTitle}
-          featuredTV={{
-            title: defaultContinueWatching[0].title,
-            posterPath: defaultContinueWatching[0].posterPath,
-            backdropPath: defaultContinueWatching[0].backdropPath,
-            currentEpisode: defaultContinueWatching[0].currentEpisode,
-            totalEpisodes: defaultContinueWatching[0].totalEpisodes,
-          }}
-          featuredAnime={{
-            title: trendingAnime[0]?.title || "Frieren: Beyond Journey's End",
-            posterPath:
-              trendingAnime[0]?.posterPath ||
-              "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-gviZ2zfLIf0w.jpg",
-            rating: trendingAnime[0]?.rating || 9.4,
-          }}
+          featuredMedia={featuredTitle}
+          secondaryMedia={trendingAnime[0]}
         />
 
         <div className="max-w-7xl mx-auto w-full flex flex-col gap-2">
