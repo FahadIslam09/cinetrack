@@ -69,8 +69,8 @@ export function HeroBanner({ user, featuredMedia }: HeroBannerProps) {
           <div
             className="absolute inset-0 bg-cover bg-center pointer-events-none scale-105"
             style={{
-              backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuC-0DQP9K7DLZt0ORIK3AMc5uqfd_tpbsA4BnB-z7BM53Mr4owdKrICP3N0J3--L70J4hmW4IZK7oiPI52JSAIV5i8gAEGpK_QCCX6ga1bSRJ_DffxyC4St_DmD1h4uxGFEV0q7AmKb22DaZxF3Fala8PsvhlP5pIy-ChxkTwD_hqU4J3Kuiqbso3u7CXV59T8QcPpAVzCBElDDjpLakF5fmZHbx4t0ExUnc6OOEwYj3o9hjo6XaYW3LLrYLHN9In3Jh7g')`,
-              filter: "brightness(0.65) saturate(1.1)",
+              backgroundImage: `url('/hero-background.jpeg')`,
+              filter: "brightness(0.55) contrast(1.1) saturate(1.15)",
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#090E17] via-[#090E17]/85 to-[#090E17]/60 pointer-events-none" />
@@ -136,10 +136,21 @@ export function HeroBanner({ user, featuredMedia }: HeroBannerProps) {
       {/* ---------------- TABLET HERO (768px to 1023px) ---------------- */}
       <div className="hidden md:block lg:hidden w-full max-w-[834px] mx-auto px-4 sm:px-6 py-6">
         <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#101926] via-[#0D141F] to-[#090E17] border border-white/[0.08] p-6 shadow-2xl">
-          {/* Background Ambient Glow */}
-          <div className="absolute -top-16 -right-16 w-80 h-80 bg-[#3B9EFF]/10 rounded-full blur-3xl pointer-events-none" />
+          {/* Background Hero Image Mosaic */}
+          <div
+            className="absolute inset-0 bg-cover bg-center pointer-events-none scale-105 opacity-25"
+            style={{
+              backgroundImage: `url('/hero-background.jpeg')`,
+              filter: "brightness(0.6) contrast(1.1) saturate(1.1)",
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0D141F] via-[#0D141F]/85 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#090E17] via-transparent to-transparent pointer-events-none" />
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          {/* Background Ambient Glow */}
+          <div className="absolute -top-16 -right-16 w-80 h-80 bg-[#3B9EFF]/15 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative z-10">
             {/* Left Hero Text Content (7 cols) */}
             <div className="md:col-span-7 space-y-4 z-10">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#3B9EFF]/10 border border-[#3B9EFF]/20 text-[#3B9EFF] text-[11px] font-medium tracking-wide">
@@ -260,70 +271,23 @@ export function HeroBanner({ user, featuredMedia }: HeroBannerProps) {
 
       {/* ---------------- DESKTOP HERO (≥ 1024px) ---------------- */}
       <section className="hidden lg:flex relative w-full min-h-[500px] lg:h-[520px] overflow-hidden bg-[#0F141D] border-b border-white/[0.06] items-center">
-        {/* Ambient Marquee Drifting Background Animation */}
+        {/* Premium Isometric Hero Background Mosaic */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <style>{`
-            @keyframes driftLeft {
-              0% { transform: translate3d(0, 0, 0); }
-              100% { transform: translate3d(-50%, 0, 0); }
-            }
-            @keyframes driftRight {
-              0% { transform: translate3d(-50%, 0, 0); }
-              100% { transform: translate3d(0, 0, 0); }
-            }
-            .hero-row-left {
-              display: flex;
-              width: max-content;
-              animation: driftLeft 65s linear infinite;
-              will-change: transform;
-            }
-            .hero-row-right {
-              display: flex;
-              width: max-content;
-              animation: driftRight 75s linear infinite;
-              will-change: transform;
-            }
-          `}</style>
-          <div className="absolute -top-32 right-1/4 w-[500px] h-[500px] rounded-full bg-[#3B9EFF]/10 blur-3xl pointer-events-none" />
+          <div
+            className="absolute inset-0 bg-cover bg-center lg:bg-[right_center] scale-105 opacity-40 transition-transform duration-1000 ease-out"
+            style={{
+              backgroundImage: `url('/hero-background.jpeg')`,
+              filter: "brightness(0.55) contrast(1.15) saturate(1.1)",
+            }}
+          />
+          {/* Subtle Ambient Radial Glows */}
+          <div className="absolute -top-32 right-1/4 w-[550px] h-[550px] rounded-full bg-[#3B9EFF]/15 blur-[120px] pointer-events-none" />
+          <div className="absolute -bottom-24 -left-12 w-[450px] h-[450px] rounded-full bg-[#3B9EFF]/10 blur-[100px] pointer-events-none" />
 
-          {/* Double Drifting Poster Rows with Scrim */}
-          <div className="absolute inset-0 opacity-[0.12] overflow-hidden flex flex-col justify-center gap-4 select-none pointer-events-none">
-            <div className="hero-row-left gap-4">
-              {[
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuDSqBRnV8-9LRegaKyhdZ1N3PiYLHhWfCHX4Q5pwQwBEfXq64CnpwTkSuxi6OxSGsG3Hj6x37fs010_AZ1Pp4RwQB_OaWLw27RbWAdDqmVj0xoOUzhyCsjTQF63blpPGK2ZaFT3L0Urapfk-jSOImaGagwkBNZTuYW69Z0JBy2Pforrrab7pjFN9RsDwMTVjMrAW9F7Sm-smoZ6i39ebGkFU4iMMjlRm2F0grsaEqWVmZ6mYjBsZ1TGdw",
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuCd3ylkKZ6v2G1WOqf3bMhdQvvLu8qfLn-DBpvCm6SBL-8xDGjm7Kio7BBIKLctYbUgQlM8SY3yPBv_lcFfGIZdx7v-ZWnu0B-EKthVISOJEEGD-XiINwNp9xQogyKIBjnXqp2wPoC8NNsOPshowraGbuYvkj6aZBed4EtdK5JihufzjIPScDTGVUmjBr1wNiTW_D-EwGbLO7zge5H7ijI2W6KvfJY5hI3vV1WeumcX3S2CGvhBOE1OvA",
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuByWzN4ZVcF14AX9OAOeWLSR_0U6h7va2g7dQgp2SugeAHrrZ9OKX3k9lnsGu0nbYXRnrSamQFHCV2_lTKuXWgBqs_xAG99j9ESRVB_5x2RgGaRvvGoIFWiElVeZ7AbKZvKDqmDg7l3orpetXHqFxJ5S1sdfoaLkwzTY-bvzneY7oo7TD7mo-SZE3sP4KUfTh40usmuPDdoQ9ZphTZKuoUjnAZBPKiAfNf5XFxjz6RPh4U2JvEEoNsdcw",
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuDONO2gGHTvWuimqprUqoDadhSR0SABqh9soGQ5d9ZtxhVxEcfxwNhi_GGDPkRMro_kd9amm_dEGYbVPlXkDEhV_1HI8p0rBChFB18KGO_sJkCK-iwPoxhAvo6YFqrwN8cAnMrab-z-XLzmFL0zDTP4T4YobWnde_WSx9aQUtRl1pU78yXSLrBR8NmwaE0121iafK5x0E_tdYM2-iKcXJ9AC-eyLWTY-_Albh1HjGXWUKxKrVxSUmO88Q",
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuAhQBAw1f_DaFntt5vuJ6wOzfm4fjYTauWwHZA5eCPHvnpX7MhmUaVKQImFSw8NkzEQWtPbxLGi4ymcrd5KkfadAT18zmr_wrMz0BKfOWlAnDQw0gg4ApFjs7dMtCenA6HIP3pmOYZkhvqjp8_BuMXb254II6eUxukGeZ4NA8jLs_EPd1uyD4Cdg9YNUpynw_JpF4Q03A6v5oEE3W_WQp9KixvQBzDPzrTt36HOkQse5uZH6JmWpGgNVQ",
-              ].map((src, idx) => (
-                <img
-                  key={`left-${idx}`}
-                  src={src}
-                  alt="Poster"
-                  className="w-36 h-52 object-cover rounded-lg shrink-0"
-                />
-              ))}
-            </div>
-            <div className="hero-row-right gap-4">
-              {[
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuDWgUXIjTeZX_aRC94tlJk2XXajZtRvSXTTx9i1938P1cO9yEhp5pm9cGdBFF6BYdars2YhlAlKzGHYS55MTi7oABGyyJpyQUJF9_EfnnpOgBv9x5rzZuxAE_UxfmDroCd90llxWZalZ0UjqrQovcutUSxmJKi8d5vWc-u6pVE1o6dzo3SIACZuLtnlUflAtFplfAjOYGwNEnaP-qhpZZCrorBtPSm_oc1rh5KjRzKpc_hKigV7QxSIdg",
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuDicxBq7GfGq41dbGEnOW-hGYhuNE312k1Ouz976F9ggZ_rFz3ogL0kwN1r2Seukwjan1bKpvJwHlcnJvZU6a39qWNG6STi-Eg2obclQfv6wQzSvYQZg2KLUgQiavXfEroMtvIJYWbqmKQXOgHhfFIuCCs-IfvbBblML1k1WG79cd4rDCDw66linnnO5KV3QmvB-Y7PZW2xUBadQrSrUCgKzz8cgDMnl2WLuW48SUyo_ukoi7J2pcWCIw",
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuDd_CGwuaNuJJZu_t2mD6ShdRsubg74KoaxCmMgnjiM-CITBBXzYyjjrixqdVTl4fJeioz9eyKj39L5LMheCbeI1qexLT9UAtpAG6AwK11XAm-SZjp0ivV0B2p8JpryUVLXTA00XiN5tai-CTlG-yqek6GoprQsJPF_HxL6acQNm4oX6F5jQj92qC4hAJFXjyY7_BV3d7HobInB6hpgLppNAKgK8ZAZiA-XkTHd5b0Vk4PeACG-vuoixg",
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuBWSx1iQY3LdBM28IQz8NYuK5swpSumAcLj3ppG-e207-B8txw0Iu-mBqpbkStZBCLW-QzX58vyQGse3ZQrHBuOYF8biYX_VlZ9kGIbqOS54M-ntU9s7LBOIAgMAaevu7cniIvxCbs_c8cnVdR7KoO9ne51Bb8gxNb7bAAdSRUrY45Etv4yctEvtNjjyENNCIpQHtCNiCUdgoH-y4a8RnUHSLAFMk_WSdbFArNkkl7ZTO7MhgAHioV6w",
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuClt97IAonD8Y4vNI2in9CiBMQJ0U_I9iPs4YwjdXIgZDFtywtTsDCDMsuM7cKxOyG99MfmWy5_d-FkC9_9js4SPWxs7gZoUVRBkaSh3jiIOAjo5N1uDekXznbcVMGFHTtUUgIeAKMbE8HGR3S42Rp8R9DKptWoqdKR4L2jSnr_9Tg6U0pxKOERFtMUglFGU-fgwi4hoeqjMFTgM6Mh14nZsXg_lW9UuqvXBo2Z5ptmT3g0kFUtgKdN6Q",
-              ].map((src, idx) => (
-                <img
-                  key={`right-${idx}`}
-                  src={src}
-                  alt="Poster"
-                  className="w-36 h-52 object-cover rounded-lg shrink-0"
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0F141D] via-[#0F141D]/90 to-transparent z-10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0F141D] via-transparent to-transparent z-10" />
+          {/* High-End Scrim & Vignette Overlays for Crisp Legibility */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0F141D] via-[#0F141D]/90 sm:via-[#0F141D]/80 to-[#0F141D]/30 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0F141D] via-transparent to-[#0F141D]/70 z-10" />
+          <div className="absolute inset-0 bg-radial-at-c from-transparent via-[#0F141D]/20 to-[#0F141D]/80 z-10" />
         </div>
 
         {/* Hero Main Content */}

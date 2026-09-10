@@ -51,12 +51,12 @@ export function AppHeader({ user }: AppHeaderProps) {
 
             {/* Main Navigation Menu Links */}
             <nav
-              className="hidden md:flex items-center gap-4 lg:gap-6 shrink-0"
+              className="hidden md:flex items-center gap-2.5 lg:gap-6 shrink-0 text-[13px] lg:text-[14px]"
               aria-label="Main Navigation"
             >
               <Link
                 href="/"
-                className={`relative py-2 text-[14px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
+                className={`relative py-2 font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
                   pathname === "/"
                     ? "text-[#F5F7FA]"
                     : "text-[#A8B0BD] hover:text-[#F5F7FA]"
@@ -69,7 +69,7 @@ export function AppHeader({ user }: AppHeaderProps) {
               </Link>
               <Link
                 href="/discover"
-                className={`relative py-2 text-[14px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
+                className={`relative py-2 font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
                   pathname === "/discover"
                     ? "text-[#F5F7FA]"
                     : "text-[#A8B0BD] hover:text-[#F5F7FA]"
@@ -82,7 +82,7 @@ export function AppHeader({ user }: AppHeaderProps) {
               </Link>
               <Link
                 href="/discover?type=movie"
-                className={`relative py-2 text-[14px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
+                className={`relative py-2 font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
                   pathname.includes("type=movie")
                     ? "text-[#F5F7FA]"
                     : "text-[#A8B0BD] hover:text-[#F5F7FA]"
@@ -95,20 +95,23 @@ export function AppHeader({ user }: AppHeaderProps) {
               </Link>
               <Link
                 href="/discover?type=series"
-                className={`relative py-2 text-[14px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
+                className={`relative py-2 font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
                   pathname.includes("type=series")
                     ? "text-[#F5F7FA]"
                     : "text-[#A8B0BD] hover:text-[#F5F7FA]"
                 }`}
               >
-                <span>TV Shows</span>
+                <span>
+                  <span className="hidden lg:inline">TV Shows</span>
+                  <span className="lg:hidden inline">TV</span>
+                </span>
                 {pathname.includes("type=series") && (
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
                 )}
               </Link>
               <Link
                 href="/discover?type=anime"
-                className={`relative py-2 text-[14px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
+                className={`relative py-2 font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
                   pathname.includes("type=anime")
                     ? "text-[#F5F7FA]"
                     : "text-[#A8B0BD] hover:text-[#F5F7FA]"
@@ -121,13 +124,16 @@ export function AppHeader({ user }: AppHeaderProps) {
               </Link>
               <Link
                 href="/library"
-                className={`relative py-2 text-[14px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
+                className={`relative py-2 font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
                   pathname === "/library"
                     ? "text-[#F5F7FA]"
                     : "text-[#A8B0BD] hover:text-[#F5F7FA]"
                 }`}
               >
-                <span>My Library</span>
+                <span>
+                  <span className="hidden lg:inline">My </span>
+                  <span>Library</span>
+                </span>
                 {pathname === "/library" && (
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
                 )}
@@ -136,23 +142,20 @@ export function AppHeader({ user }: AppHeaderProps) {
           </div>
 
           {/* Right: Search Bar & Actions */}
-          <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
+          <div className="flex items-center gap-2 lg:gap-4 shrink-0">
             {/* Tablet Search Box (768px - 1023px) */}
             <form
               onSubmit={handleSearchSubmit}
-              className="relative hidden md:flex lg:hidden items-center w-36 sm:w-44"
+              className="relative hidden md:flex lg:hidden items-center w-28 md:w-32"
             >
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
-                className="w-full bg-[#151C27] text-xs text-slate-200 placeholder-[#6F7886] pl-8 pr-7 py-1.5 rounded-full border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] transition-all"
+                className="w-full bg-[#151C27] text-xs text-slate-200 placeholder-[#6F7886] pl-7 pr-2 py-1.5 rounded-full border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] transition-all"
               />
-              <Search className="w-3.5 h-3.5 text-[#6F7886] absolute left-2.5 pointer-events-none" />
-              <span className="hidden sm:inline-block absolute right-2 text-[9px] bg-[#1B2029] text-slate-400 px-1 py-0.5 rounded border border-white/[0.06] select-none pointer-events-none">
-                ⌘K
-              </span>
+              <Search className="w-3.5 h-3.5 text-[#6F7886] absolute left-2 pointer-events-none" />
             </form>
 
             {/* Desktop Search Bar (≥ 1024px) */}
