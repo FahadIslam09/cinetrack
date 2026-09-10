@@ -16,6 +16,7 @@ import {
   normalizeAniListAnime,
   NormalizedMedia,
 } from "@/lib/media/normalize";
+import { LandingView } from "@/components/landing/landing-view";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { userMediaLogs, mediaItems } from "@/lib/db/schema";
@@ -23,11 +24,21 @@ import { eq, and } from "drizzle-orm";
 
 export const revalidate = 1800; // 30 mins ISR
 
-export default async function HomePage() {
+interface HomePageProps {
+  searchParams?: Promise<{ feed?: string }>;
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const sp = searchParams ? await searchParams : {};
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // If user is not logged in and didn't explicitly request the raw feed, show the high-converting Landing Page
+  if (!user && sp.feed !== "true") {
+    return <LandingView />;
+  }
 
   // Fetch trending movies and anime in parallel
   let trendingMovies: NormalizedMedia[] = [];
