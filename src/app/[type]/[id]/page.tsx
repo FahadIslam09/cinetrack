@@ -1,0 +1,317 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, Star, Plus, Film, Tv, Sparkles, Check, Bookmark } from "lucide-react";
+import { AppHeader } from "@/components/navigation/app-header";
+import { BottomNav } from "@/components/navigation/bottom-nav";
+import { ReviewCard } from "@/components/reviews/review-card";
+import { MediaCard } from "@/components/media/media-card";
+import { tmdb } from "@/lib/tmdb/client";
+import { anilist } from "@/lib/anilist/client";
+import {
+  normalizeTmdbMovie,
+  normalizeTmdbTV,
+  normalizeAniListAnime,
+  NormalizedMedia,
+} from "@/lib/media/normalize";
+import { createClient } from "@/lib/supabase/server";
+import { getUserMediaLog } from "@/actions/tracking";
+import { MediaDetailsActions } from "./actions-client";
+
+interface PageProps {
+  params: Promise<{
+    type: string;
+    id: string;
+  }>;
+}
+
+export default async function MediaDetailsPage({ params }: PageProps) {
+  const { type, id } = await params;
+
+  let media: NormalizedMedia | null = null;
+  let rawDetails: any = null;
+
+  try {
+    if (type === "movie") {
+      rawDetails = await tmdb.getMovieDetails(id);
+      media = normalizeTmdbMovie(rawDetails);
+    } else if (type === "series" || type === "tv") {
+      rawDetails = await tmdb.getTVDetails(id);
+      media = normalizeTmdbTV(rawDetails);
+    } else if (type === "anime") {
+      rawDetails = await anilist.getAnimeDetails(id);
+      media = normalizeAniListAnime(rawDetails);
+    }
+  } catch (err) {
+    console.error("Error fetching media details:", err);
+    notFound();
+  }
+
+  if (!media) notFound();
+
+  // Fetch user tracking log for this title if authenticated
+  const userLog = await getUserMediaLog(media.id);
+
+  // Streaming Providers (Default to US or first available country)
+  const providers =
+    media.streamingProviders?.["US"] ||
+    media.streamingProviders?.["BD"] ||
+    media.streamingProviders?.["IN"] ||
+    [];
+
+  // Cast members
+  const castList =
+    type === "anime"
+      ? (rawDetails?.characters?.edges || []).slice(0, 6).map((c: any) => ({
+          name: c.node.name.full,
+          role: c.role,
+          image: c.node.image.medium,
+        }))
+      : (rawDetails?.credits?.cast || []).slice(0, 6).map((c: any) => ({
+          name: c.name,
+          role: c.character,
+          image: c.profile_path
+            ? `https://image.tmdb.org/t/p/w185${c.profile_path}`
+            : null,
+        }));
+
+  // Similar / recommendations
+  const similarItems: NormalizedMedia[] =
+    type === "anime"
+      ? (rawDetails?.recommendations?.nodes || [])
+          .slice(0, 4)
+          .map((r: any) => normalizeAniListAnime(r.mediaRecommendation))
+          .filter(Boolean)
+      : (rawDetails?.similar?.results || [])
+          .slice(0, 4)
+          .map((item: any) =>
+            type === "movie" ? normalizeTmdbMovie(item) : normalizeTmdbTV(item)
+          );
+
+  return (
+    <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] pb-24 md:pb-12">
+      <AppHeader />
+
+      <main className="flex-1 flex flex-col w-full pt-16">
+        {/* Backdrop & Header Hero */}
+        <div className="relative w-full overflow-hidden bg-[#151C27] border-b border-white/[0.06]">
+          {/* Backdrop Image */}
+          <div
+            className="w-full h-80 sm:h-96 bg-cover bg-center relative"
+            style={{
+              backgroundImage: `url('${
+                media.backdropPath || media.posterPath || "/placeholder-backdrop.png"
+              }')`,
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0F141D] via-[#0F141D]/70 to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0F141D]/90 via-transparent to-[#0F141D]/40" />
+          </div>
+
+          {/* Overlapping Poster & Information */}
+          <div className="max-w-5xl mx-auto px-4 -mt-32 sm:-mt-40 relative z-10 pb-6 flex flex-col gap-4">
+            <div className="flex items-end gap-3.5 sm:gap-5">
+              {/* Poster 2:3 */}
+              <div className="w-28 sm:w-40 aspect-[2/3] shrink-0 rounded-xl overflow-hidden shadow-2xl bg-[#1D2734] border border-white/[0.1] relative">
+                {media.posterPath ? (
+                  <img
+                    src={media.posterPath}
+                    alt={media.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : null}
+                <span className="absolute top-1.5 left-1.5 bg-[#0F141D]/85 backdrop-blur-sm text-[#F5C84B] px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide flex items-center gap-0.5">
+                  <Star className="w-3 h-3 fill-[#F5C84B]" />
+                  {media.rating ? media.rating.toFixed(1) : "—"}
+                </span>
+              </div>
+
+              {/* Title & Metadata */}
+              <div className="flex flex-col justify-end min-w-0 pb-1">
+                <div className="flex items-center gap-1.5 flex-wrap mb-1 text-xs">
+                  <span className="bg-[#3B9EFF]/20 text-[#3B9EFF] px-2 py-0.5 rounded font-bold uppercase tracking-wider text-[10px]">
+                    {media.mediaType}
+                  </span>
+                  <span className="text-[#6F7886] font-medium">{media.year || "2024"}</span>
+                  <span className="text-[#4B5563]">•</span>
+                  {media.runtime && (
+                    <>
+                      <span className="text-[#6F7886] font-medium">
+                        {Math.floor(media.runtime / 60)}h {media.runtime % 60}m
+                      </span>
+                      <span className="text-[#4B5563]">•</span>
+                    </>
+                  )}
+                  {media.totalEpisodes > 1 && (
+                    <>
+                      <span className="text-[#6F7886] font-medium">
+                        {media.totalEpisodes} Episodes
+                      </span>
+                      <span className="text-[#4B5563]">•</span>
+                    </>
+                  )}
+                  <span className="text-[#A8B0BD] font-medium">
+                    {media.genres.slice(0, 2).join(", ")}
+                  </span>
+                </div>
+
+                <h1 className="font-extrabold text-xl sm:text-3xl text-[#F5F7FA] tracking-tight">
+                  {media.title}
+                </h1>
+                {media.originalTitle && media.originalTitle !== media.title && (
+                  <p className="text-xs text-[#A8B0BD] italic mt-0.5">
+                    {media.originalTitle}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Client Interactive Action Buttons (Add to Library / Rate) */}
+            <MediaDetailsActions media={media} initialLog={userLog} />
+          </div>
+        </div>
+
+        {/* Content Body */}
+        <div className="max-w-5xl mx-auto px-4 w-full py-6 flex flex-col gap-6">
+          {/* Where to Watch (OTT Providers) */}
+          <section className="p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-3.5 bg-[#3B9EFF] rounded-full" />
+                <h3 className="font-bold text-sm text-[#F5F7FA]">Where to Watch</h3>
+              </div>
+              <span className="text-[11px] text-[#A8B0BD]">STREAMING AVAILABILITY</span>
+            </div>
+
+            {providers.length > 0 ? (
+              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
+                {providers.map((p: any) => (
+                  <div
+                    key={p.provider_id}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#1D2734] border border-white/[0.06] shrink-0"
+                  >
+                    {p.logo_path && (
+                      <img
+                        src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
+                        alt={p.provider_name}
+                        className="w-6 h-6 rounded object-cover"
+                      />
+                    )}
+                    <span className="text-xs font-medium text-[#F5F7FA]">
+                      {p.provider_name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-[#6F7886]">
+                Streaming information currently unavailable for this region. Check back soon.
+              </p>
+            )}
+          </section>
+
+          {/* Synopsis */}
+          <section className="flex flex-col gap-2">
+            <h3 className="font-bold text-sm text-[#A8B0BD] uppercase tracking-wider">
+              Overview
+            </h3>
+            <p className="text-sm text-[#dee2ef] leading-relaxed font-sans">
+              {media.synopsis || "No description provided."}
+            </p>
+          </section>
+
+          {/* Cast */}
+          {castList.length > 0 && (
+            <section className="flex flex-col gap-3">
+              <h3 className="font-bold text-sm text-[#A8B0BD] uppercase tracking-wider">
+                Principal Cast
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                {castList.map((actor: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="flex flex-col items-center text-center p-3 rounded-xl bg-[#151C27] border border-white/[0.04]"
+                  >
+                    {actor.image ? (
+                      <img
+                        src={actor.image}
+                        alt={actor.name}
+                        className="w-14 h-14 rounded-full object-cover shadow-sm ring-1 ring-white/10 mb-2"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-full bg-[#1D2734] flex items-center justify-center text-xs font-bold text-[#6F7886] mb-2">
+                        {actor.name.slice(0, 2)}
+                      </div>
+                    )}
+                    <span className="font-semibold text-xs text-[#F5F7FA] truncate w-full">
+                      {actor.name}
+                    </span>
+                    <span className="text-[10px] text-[#A8B0BD] truncate w-full mt-0.5">
+                      {actor.role}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Member Dispatches */}
+          <section className="flex flex-col gap-3 mt-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-4 bg-[#3B9EFF] rounded-full" />
+                <h3 className="font-bold text-base text-[#F5F7FA]">Member Dispatches</h3>
+              </div>
+              <span className="text-xs text-[#3B9EFF] font-semibold">WRITE LOG</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <ReviewCard
+                author={{
+                  name: "শৌভিক ভট্টাচার্য (Souvik)",
+                  isVerified: true,
+                }}
+                mediaTitle={media.title}
+                rating={9.5}
+                reviewText="হিলদুর গুদনাদোত্তিরের শব্দের অনুরণন এবং সিনেমাটোগ্রাফি চলচ্চিত্রটিকে এক অন্য মাত্রায় নিয়ে গেছে। নিস্তব্ধতার যে ওজন থাকতে পারে, তা পরিচালক অত্যন্ত সংবেদনশীলতার সাথে ফুটিয়ে তুলেছেন।"
+                isBengali={true}
+                likesCount={142}
+                commentsCount={29}
+                timeAgo="Recent log"
+              />
+
+              <ReviewCard
+                author={{
+                  name: "Julian Vane",
+                  isVerified: false,
+                }}
+                mediaTitle={media.title}
+                rating={8.0}
+                containsSpoilers={true}
+                reviewText="The second act pacing accelerates relentlessly toward a sequence that fundamentally questions the characters' allegiances. One of the strongest cinematic conclusions this year."
+                likesCount={88}
+                commentsCount={14}
+                timeAgo="2 days ago"
+              />
+            </div>
+          </section>
+
+          {/* Related Titles */}
+          {similarItems.length > 0 && (
+            <section className="flex flex-col gap-3 mt-2">
+              <h3 className="font-bold text-sm text-[#A8B0BD] uppercase tracking-wider">
+                Related Resonance
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {similarItems.map((item) => (
+                  <MediaCard key={item.id} media={item} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      </main>
+
+      <BottomNav />
+    </div>
+  );
+}
