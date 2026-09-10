@@ -134,7 +134,7 @@ export function QuickAddModal({
             <label className="block text-xs font-semibold uppercase tracking-wider text-[#A8B0BD] mb-2">
               Watch Status
             </label>
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+            <div className="flex flex-wrap sm:grid sm:grid-cols-5 gap-2">
               {statusOptions.map((opt) => {
                 const isActive = status === opt.value;
                 return (
@@ -142,7 +142,7 @@ export function QuickAddModal({
                     key={opt.value}
                     type="button"
                     onClick={() => setStatus(opt.value as any)}
-                    className={`h-9 px-2 rounded-lg text-xs font-medium border transition-all flex items-center justify-center gap-1.5 ${
+                    className={`h-9 px-2 rounded-lg text-xs font-medium border transition-all flex items-center justify-center gap-1.5 flex-1 min-w-[28%] sm:min-w-0 cursor-pointer ${
                       isActive
                         ? opt.color
                         : "bg-[#1D2734] border-white/[0.06] text-[#A8B0BD] hover:text-white hover:bg-[#1A2330]"
@@ -166,7 +166,7 @@ export function QuickAddModal({
                 {rating !== null ? `★ ${rating.toFixed(1)} / 10` : "Not Rated"}
               </span>
             </div>
-            <div className="flex items-center justify-between gap-1 bg-[#1D2734] p-2.5 rounded-lg border border-white/[0.06]">
+            <div className="flex items-center justify-between gap-0.5 sm:gap-1 bg-[#1D2734] p-2 rounded-lg border border-white/[0.06]">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((starValue) => {
                 const isSelected = rating !== null && rating >= starValue;
                 return (
@@ -174,13 +174,20 @@ export function QuickAddModal({
                     key={starValue}
                     type="button"
                     onClick={() => setRating(rating === starValue ? null : starValue)}
-                    className="p-1 text-[#4B5563] hover:text-[#F5C84B] transition-colors"
+                    className="flex-1 py-1.5 flex flex-col items-center gap-0.5 text-[#4B5563] hover:text-[#F5C84B] transition-all rounded hover:bg-white/[0.04] active:scale-95 touch-manipulation cursor-pointer"
                   >
                     <Star
-                      className={`w-5 h-5 ${
-                        isSelected ? "fill-[#F5C84B] text-[#F5C84B]" : ""
+                      className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${
+                        isSelected ? "fill-[#F5C84B] text-[#F5C84B] scale-110" : ""
                       }`}
                     />
+                    <span
+                      className={`text-[9px] font-semibold transition-colors ${
+                        isSelected ? "text-[#F5C84B]" : "text-[#4B5563]"
+                      }`}
+                    >
+                      {starValue}
+                    </span>
                   </button>
                 );
               })}

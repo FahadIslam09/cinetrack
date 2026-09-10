@@ -59,9 +59,8 @@ export default async function HomePage() {
       sourceId: "872585",
       mediaType: "movie",
       title: "Oppenheimer",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCQxdA-5PQ-FJ1jBS7ByKX-pp4xHGERuBNVlG42mtLu1tpbXlWYLX66nfIyrxPGDtaBsuPPHECFLn_G1XsctB3NsT9-ED-GCfbWlscRgnsHoWYzZznlCsxhs_L4MLTpqsoqN2qV998Znxjgfk4Sb-jRdfLorQCZvDAu5Gg1pvW0O5D7Dn5wN0a9Jk9teCs7IUQUtgC6trpztQnUsLqHRNWV58ab1tVZSHWHHaeKTeDijPrUCcSKqlpExw",
-      backdropPath: null,
+      posterPath: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+      backdropPath: "https://image.tmdb.org/t/p/w1280/fm6KqXpk3M2HVveHwCrBSSBaO0V.jpg",
       year: "2023",
       rating: 8.9,
       totalEpisodes: 1,
@@ -73,8 +72,7 @@ export default async function HomePage() {
       sourceId: "666277",
       mediaType: "movie",
       title: "Past Lives",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCjbf208Df2LKhf61-iMpnY0AgOSe8WVAobf4WB3XFUFAknM5EcBPZtkpaf8zO4XXA_n7scOJpu2G9EsfD8AqLSqtnydifRPzVUsopU01Z4U35ayU3uP930xMWZB4B2GSVTyTacZ4vqozwyJpNF1waN1BM-dY1z_WsADWUsORKqhAy9i-SpmY9FqgdDpDFnadXuyG1aonrS_yyObSgPOJdM2w-7P6bkaM4e0-VU6HhlRci8dKrMvJbgmw",
+      posterPath: "https://image.tmdb.org/t/p/w500/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg",
       backdropPath: null,
       year: "2023",
       rating: 8.2,
@@ -87,8 +85,7 @@ export default async function HomePage() {
       sourceId: "915935",
       mediaType: "movie",
       title: "Anatomy of a Fall",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuD-jJwF4iiLVv6ch2WJh4PRm1TuhbvMg94cMj3ay8PX7pXBM-1V4G37IwmZK5GGrrZKFZ6-WYSDnFujFHBRqsUBNdxw7B6lCvj91clgqB4gsoib-6EfdJxcEpjH456uBWWQncGamuTDRVtBNkxM0M2_LkU5xbqaS1qICYsVX16ww7ixDq9xVywxpMfnxlCK1_M5l7mEz3fBtArAy95mX4mEHOTD7YC0kL32HPw6g8v9-T4adbEFOeHJ5g",
+      posterPath: "https://image.tmdb.org/t/p/w500/1ho0d4LNZw3Y0voeKmSvPSgJOJ2.jpg",
       backdropPath: null,
       year: "2023",
       rating: 8.1,
@@ -101,8 +98,7 @@ export default async function HomePage() {
       sourceId: "792307",
       mediaType: "movie",
       title: "Poor Things",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDMt_vq2vsgrUot-Qz2r57fyCkYJnGg_WN_Y-ufbLhLR4IwpJO_94ptyRXJPmCn7SCYGaN4d-9IJ45fSmb_cIMDlMIVPK611pbX3fa9iIRmSuXwr2-bqIngp4sxhNd5WCgc21wQzHK8co00-mB9I0KL0f0DpSbfzZRNQxYBVep2wMG23n9ER4G6083brYsTXin5G9S1QkNUW1Pz3p8M95zzCDl2w-psItWAR95zbMD4w4MF2oxOLq1-Xw",
+      posterPath: "https://image.tmdb.org/t/p/w500/kCGlIMHnOm8JPXq3rXM6c5wMxcT.jpg",
       backdropPath: null,
       year: "2023",
       rating: 8.0,
@@ -115,8 +111,7 @@ export default async function HomePage() {
       sourceId: "467244",
       mediaType: "movie",
       title: "The Zone of Interest",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAy63tVD_yvK6WWPuGPQMSi-qsUo7iFR4k7q2PnFMzpFTTfJzKxZVwXmJqWroVPOsuqkIE7prwkOBhuTrH3uK7p2YQaf5UplDrahGoBry23wormutnjiCdb96rvMcYv9CGwHHR-ZXoZ5Pc5oKkErBsmBXFEYP_uretYAd0KcQr1UJZ8JlhEBgpJV31RVquc-yYMHYatoj5UbCQa78cSg6vJ-oKvRtXeWHNHGuvM-DhMgN5-CvpyjpSgmA",
+      posterPath: "https://image.tmdb.org/t/p/w500/hUu9zyZmDd8VZegKi1iK1Vk0RYS.jpg",
       backdropPath: null,
       year: "2023",
       rating: 7.9,
@@ -129,8 +124,7 @@ export default async function HomePage() {
       sourceId: "569094",
       mediaType: "movie",
       title: "Across the Spider-Verse",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuD-YmM3q9v7AfX3eO8sAAxYAmmSS2afBpRjWtFbzkHczvuyPC02tOmLCfYbxDYTayC5fLPNffIrsRTfMLBPX7Qz5F9pll1nVlefi3w_rsVrXRRwc0lhc07xhgMIhdReA7ZFatEbPV8xRMeT0O967SbHgh4PspHKk5Tv2eUSe2d1-WpjmkWdZ1nE628GW2DBWaD3zEwsumsLsHHDh8DA0Hh1EMvtoV5WLKGOgSF9B6TDmqebM557xaR5Gw",
+      posterPath: "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
       backdropPath: null,
       year: "2023",
       rating: 8.8,
@@ -143,8 +137,7 @@ export default async function HomePage() {
       sourceId: "937287",
       mediaType: "movie",
       title: "Challengers",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAhQBAw1f_DaFntt5vuJ6wOzfm4fjYTauWwHZA5eCPHvnpX7MhmUaVKQImFSw8NkzEQWtPbxLGi4ymcrd5KkfadAT18zmr_wrMz0BKfOWlAnDQw0gg4ApFjs7dMtCenA6HIP3pmOYZkhvqjp8_BuMXb254II6eUxukGeZ4NA8jLs_EPd1uyD4Cdg9YNUpynw_JpF4Q03A6v5oEE3W_WQp9KixvQBzDPzrTt36HOkQse5uZH6JmWpGgNVQ",
+      posterPath: "https://image.tmdb.org/t/p/w500/H6vke7zGiuLsz4v4RPeReb9rsv.jpg",
       backdropPath: null,
       year: "2024",
       rating: 7.7,
@@ -160,8 +153,7 @@ export default async function HomePage() {
       sourceId: "127230",
       mediaType: "anime",
       title: "Chainsaw Man",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuARP3Eq1AqAADXC-yBvepA8PuCJ2Ngpla8WIWtBp8sSem9S5yTlqxfYdAXh2pYskYbn8C577eYafkexGd4YRqp-3ZvXTSC5R5ziaWzysREdp8DmABzWr--cGw4q1RQy38L8vGttA1wOA_Th2U0ATmRvkNxgQk6A-IAFpeeYvN3saqdD-V6I__Ldecm8w0uO-vf_urhXosqBfm7cwl-A96BA_8K-WOgW7MYYR2jAJBjGqgjtLii--PLEQQ",
+      posterPath: "https://image.tmdb.org/t/p/w500/iFM1dyFi0rByvEomEkmm7NpQeeb.jpg",
       backdropPath: null,
       year: "TV · S1",
       rating: 8.5,
@@ -174,8 +166,7 @@ export default async function HomePage() {
       sourceId: "145064",
       mediaType: "anime",
       title: "Jujutsu Kaisen",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCELT4Y88TU2WznWCG8cl7gwb1NjNoIhlRp9YAzhAt2AUH--A2tLhpAW2cj3-e2TH6yOkBJWZb1bmTetgoiIVkSBxhD5bPWWcE0GXhUSCfYquVye-ebrRosrhJA2aT6UjhpR5QvkzrqJyt6X13-LNrLzUuoxj3rIx7pJmTKR4G89qU0g1pOeIXp01bZPPpo92Ety8IlGNzfKuuyFWYF_wE3_eMgFlBNQgKNcszeh9CasgDwrpijPr-7UA",
+      posterPath: "https://image.tmdb.org/t/p/w500/6qQzMJG27XOJsyAEEIisoJB45j2.jpg",
       backdropPath: null,
       year: "TV · S2",
       rating: 8.8,
@@ -188,8 +179,7 @@ export default async function HomePage() {
       sourceId: "110277",
       mediaType: "anime",
       title: "Attack on Titan",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuD1uGJGxnrrCPkjm7aBg5JT8zlfxLg0nqUJWp6J3EsDq1YHtCvl-NTDvdEoiIVbIHiOVnsq9bMSvdBkfoquU1pfxSlHemp-DHTHPwIRaj8qEkUr69zTyZI8isiL5lRa3nu9nIvFbAk8Mk-CEB3Jx5E21eNv6rCXNR0pkB8DO7G22XL_-94SF0gILYYQ0AHAJnPDdL7KnzLiygv40IzwoBlCOo7t3OEPBWwCHw2K8my4jWoBPmHazzdyTA",
+      posterPath: "https://image.tmdb.org/t/p/w500/hTP1DtLGFamjfu8WqjnuQdP1n4i.jpg",
       backdropPath: null,
       year: "Final Season",
       rating: 9.1,
@@ -202,8 +192,7 @@ export default async function HomePage() {
       sourceId: "166240",
       mediaType: "anime",
       title: "Demon Slayer",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCR1Y8MqncJ0kInJJ-Ztjmidta7Pp8iHU4Uutd1zd24JqFJYpBYmD5-cu9L6KrZQSXm43m7cxuGW2cAJ9SqYblkkPfiCukIs5mvtAoyTyuSdCy_H9MjTBqZI3Mdf6LoA0RI9_ThFBY85z9OYfssfR_8YiIYuLVg3uavqxJvdlFDS-iOcl2BxNdMhgGkYhJmbwKvKlXeY9vuvGgA4jWVUfDt4uYh_ozdHzg826jopexgqxcbwHDY3Ar3nw",
+      posterPath: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg",
       backdropPath: null,
       year: "TV · S4",
       rating: 8.4,
@@ -216,8 +205,7 @@ export default async function HomePage() {
       sourceId: "136430",
       mediaType: "anime",
       title: "Vinland Saga",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuClt97IAonD8Y4vNI2in9CiBMQJ0U_I9iPs4YwjdXIgZDFtywtTsDCDMsuM7cKxOyG99MfmWy5_d-FkC9_9js4SPWxs7gZoUVRBkaSh3jiIOAjo5N1uDekXznbcVMGFHTtUUgIeAKMbE8HGR3S42Rp8R9DKptWoqdKR4L2jSnr_9Tg6U0pxKOERFtMUglFGU-fgwi4hoeqjMFTgM6Mh14nZsXg_lW9UuqvXBo2Z5ptmT3g0kFUtgKdN6Q",
+      posterPath: "https://image.tmdb.org/t/p/w500/vUHlpA5c1NXkds59reY3HMb4Abs.jpg",
       backdropPath: null,
       year: "TV · S2",
       rating: 8.9,
@@ -230,8 +218,7 @@ export default async function HomePage() {
       sourceId: "151807",
       mediaType: "anime",
       title: "Solo Leveling",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBjLQCZCLNtUWmFzjKNY6bPbQKKasREmFA_OlyFa2FV3b2c_-SeRT4Odc76mYVjL-Kcv_prs2w8OyfyuFD0bbPmQFAgW5aO7iuA_DUVHoqbaZkZV58gvjjZQL1xV-pGRCS5BNEPVv8UcS8cdkmyeqSTTTgLoeunFA-ZaUjt15OYMQRNS4WPBtGKIFE8CyaTsiorbs7jJHJPt_bk-M4efAaiYELE0S_IGjbqufizQsAa6yjJxa2nAu7-TA",
+      posterPath: "https://image.tmdb.org/t/p/w500/geCRueV3ElhRTr0xtJuEWJt6dJ1.jpg",
       backdropPath: null,
       year: "TV · S1",
       rating: 8.3,
@@ -248,8 +235,7 @@ export default async function HomePage() {
       mediaType: "series" as const,
       title: "Severance",
       episodeName: "S2 · Ep 4 of 10",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCKd8Srwo0pyzLHzQ1u07Okb900IZ78Ng28Nwp8xRMjVWFOUw5G-OWGygbBjEtQaqkvKsSa6X8LkMCSMRCQsZ6HEXsyNh5nRU9Pac9i9XBbIoRWgCMhsg1LKQ9Z_DizrcCfQyb6SuR34SlaSh-Jo2W9BlRFDN270Qxd15GHBIUO0GyNTeRD0sRd6xw9W5abBc3CJNA8RT_YXh7SXj_KJwfUqEproEkP2g0Q_UZxNY6871oJNgegK7P4Ig",
+      posterPath: "https://image.tmdb.org/t/p/w500/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
       currentEpisode: 4,
       totalEpisodes: 10,
       seasonNumber: 2,
@@ -261,8 +247,7 @@ export default async function HomePage() {
       mediaType: "anime" as const,
       title: "Frieren",
       episodeName: "S1 · Ep 18 of 28",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDg1NTbyu2eOQ9nS6kl0Xq8c4ZHwyV7qJSWwoRAAj2cET2lLnULFXg-VZIp1pFNBJ7jcezh_4Y-3wdXjrgpJkAOCF8LW89hkbT7XWma7pWrM1q_ERoeV-PqCPyigcVvia0cBCWkH0ue732A0LTOy-DecZFyN2gbPLQr372SeAQdwT3dc3Hk_dGtWQdI8jYjZ6Ed6Re8oBI35DJElNYgP6cCeSml8o4wcL6A3r0ynqXhJ6II-rxzC1o2cw",
+      posterPath: "https://image.tmdb.org/t/p/w500/dqZENchTd7lp5zht7BdlqM7RBhD.jpg",
       currentEpisode: 18,
       totalEpisodes: 28,
       seasonNumber: 1,
@@ -274,8 +259,7 @@ export default async function HomePage() {
       mediaType: "series" as const,
       title: "Shōgun",
       episodeName: "Miniseries · Ep 7 of 10",
-      posterPath:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDkffOGGbWAsDZimHAI-ArRt8gLFDhlPD1o95E5XL2oulgeBB7-pgyk7AkvKlFNqJZycd4E3SwWAh7C-J-Vt92W5B3BRjSHjfnb5-6xxKHNkGhwJ_vLARc285IhsGZiBxXuk0-VYObJjpgORJGB4340eoEBiniNLArN4Z-Nk2Xm2nIP_X0HcC-ZovxaCq6utsRKo63-jW3jVEi63uCRHuv7S37GGzHUkPCT72b_GXiC7dGloAohn0PjOQ",
+      posterPath: "https://image.tmdb.org/t/p/w500/7O4iVfOMQmdCSxhOg1WnzG1AgYT.jpg",
       currentEpisode: 7,
       totalEpisodes: 10,
       seasonNumber: 1,
@@ -369,7 +353,7 @@ export default async function HomePage() {
             </div>
 
             {/* Responsive Cards: horizontal rail on mobile, 3 columns on tablet & desktop */}
-            <div className="flex sm:grid sm:grid-cols-3 gap-3 sm:gap-4 overflow-x-auto sm:overflow-visible pb-2 sm:pb-0 no-scrollbar snap-x snap-mandatory">
+            <div className="flex md:grid md:grid-cols-3 gap-3 md:gap-4 overflow-x-auto md:overflow-visible pb-2 md:pb-0 no-scrollbar snap-x snap-mandatory">
               {continueWatchingList.length > 0
                 ? continueWatchingList.map(({ log, media }: any) => (
                     <ContinueWatchingCard
@@ -448,7 +432,7 @@ export default async function HomePage() {
                 vaultLabel="Vault"
                 vaultColor="text-[#3B9EFF]"
                 count="1,420 titles"
-                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuBDjt02_RkeaZjD14JC_89hLZBGRy6HpII811LcgWI4k8t7PZHuh7lMk9sJbTs9ctk9Fzy077nVE3IwWqHc4dj1vC3r4YwVxIfktmm8yTQQ8LvUNsBj5HCFKC9cEofVRSjPxeBnKrRrAPVir8xaiYI6zcuxq32QLI0cQg5CxdduJke4GN-qHgt04nL86q08n9dQO4sEm3PlvDM00i5E571oOF3YlYU7Ztq9q5jB7qu68L7Zg-3lNurnUw"
+                bgImage="https://image.tmdb.org/t/p/w780/eZ239CUp1d6OryZEBPnO2n87gMG.jpg"
                 href="/discover?genre=Sci-Fi"
               />
               <GenreCard
@@ -456,7 +440,7 @@ export default async function HomePage() {
                 vaultLabel="Vault"
                 vaultColor="text-[#FF9B54]"
                 count="2,180 titles"
-                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuB6qzQRwwHnpB4dm2Oo028nprw6179VmzN1PHsyw7crQXIbp_1ovNjD711vr0UXfW0ldlb1YIVTzCtaQj2sX1perUyjOeh8vR8ltGIap45iMITwuYCW49EJ3Ok7LwouICJXtX5xHBoPwiLaY34aafYzrCRa4j4VRjWqU2HH9Cxs4tn47U9TF50aPfZs3dzzMyKscQwlMeY2rpn_4CLPsIqQVXGH-FxnBMFwU2yfaVHmfMioNqliYBiHXQ"
+                bgImage="https://image.tmdb.org/t/p/w780/7I6VUdPj6tQECNHdviJkUHD2f89.jpg"
                 href="/discover?genre=Action"
               />
               <GenreCard
@@ -464,7 +448,7 @@ export default async function HomePage() {
                 vaultLabel="Vault"
                 vaultColor="text-[#F43F5E]"
                 count="980 titles"
-                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuBfsMjT-FX9xxCoToW-MCs8KXPFORj6q0J0ZUS1QXeAu6ZaBpbtgdzqg7MhHBGjz264dF33vSSMg3-J4dpAKskauVdH7q681Te5Y4DBiWi0FdYL8l-Cf1DyPJtU9LI5QJabjUHo4Ow4nN8DOxmdqlsXlKZ4WGjw6_EGZJIoMmmgwaVs6zBA5Is1xEhplVHTrv1evfWieOblpyk-frPLSmL1eOo6VGYSBrDrKCv5c8SgULcbvaJfSmjzmw"
+                bgImage="https://image.tmdb.org/t/p/w780/fm6KqXpk3M2HVveHwCrBSSBaO0V.jpg"
                 href="/discover?genre=Thriller"
               />
               <GenreCard
@@ -472,7 +456,7 @@ export default async function HomePage() {
                 vaultLabel="Vault"
                 vaultColor="text-[#F5C84B]"
                 count="3,040 titles"
-                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuDVQRFgGeDhyjFxRDGXNm2JzwryGXBBWVWATUIWVZvdH0Hvc76OEtRQar7ZuisaQ1dLp_TbwS7-aTKvOgaXtmDfQpiMxQVK3pJrqbQGoOlbEKH2hXh2fNagQADuvq6B-77NQzj-GdbFfR5TcqNWVtCAd_frelXRWY8eCFTe1VhfogL_N1-mxwwrrmpp02tZ3qqgcSV-f5iiVhXZpX7szwIWyW-aCF6Jn-HbiedBI_umZN0NtPnCPzM7Yw"
+                bgImage="https://image.tmdb.org/t/p/w780/r9PkFnRUIthgBp2JqD24W1v2U2e.jpg"
                 href="/discover?genre=Drama"
               />
               <GenreCard
@@ -480,7 +464,7 @@ export default async function HomePage() {
                 vaultLabel="Vault"
                 vaultColor="text-[#8BB4F8]"
                 count="1,890 titles"
-                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuDSlh9H9M5tP4RhkDG_B-QDpaktvHa9CsSBpSf05vnoUONWODmTrYWUceu2Y45oHab5T1-JknN6btS1zuo8pBh7kOF1s3zu-YNJCooZqehoTfwRz70Gbv3lZLb2e2Iu-Afol-Tf2GMfjBTMCe4Xv18eqJVsndL5TPajlbG_xkXlakDD_0ASRSgrlIs6-Aalqd7B-7ye0Efkur5beOYIws_qszcbqCqfRp6aOGHYIJsmMbLYFj9oqmg5eg"
+                bgImage="https://image.tmdb.org/t/p/w780/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg"
                 href="/discover?genre=Anime"
               />
               <GenreCard
@@ -488,7 +472,7 @@ export default async function HomePage() {
                 vaultLabel="Vault"
                 vaultColor="text-[#94A3B8]"
                 count="450 titles"
-                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuDIr7Ujn4N0D4MEIIZpbtZSL1Ls7Sd9BE-KohYwa7i3U7XMjSrtBwZSRCfEls87Sa0XNJY1Rey-9pxEKkqhQdGMrXd5QFXJ7gY3v7jS09DvflH3vt76Md6mX820KeT9u4zESDwAJ7Yfk1Uw9acQjS0KTRXw7VskK8W85z_UFlSTmZQ8pG4q4zsYwOgr_x2eDpMx_pAw2jplCxSXWC0Qb39BEGNoqDyN7fVZR9sOWMSnhTKxrYqkG6D-5g"
+                bgImage="https://image.tmdb.org/t/p/w780/b0PlSFdDwbyK0cf5RxwDpaOJQvQ.jpg"
                 href="/discover?genre=Noir"
               />
             </div>

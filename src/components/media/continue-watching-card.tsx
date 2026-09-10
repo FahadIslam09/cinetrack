@@ -159,15 +159,15 @@ export function ContinueWatchingCard({
           </div>
 
           {/* Tablet/Desktop Network & Button Row */}
-          <div className="hidden sm:flex items-center justify-between pt-1 border-t border-white/[0.04]">
-            <span className="text-xs text-[#A8B0BD] truncate max-w-[110px]">
+          <div className="hidden sm:flex items-center justify-between gap-2 pt-1 border-t border-white/[0.04]">
+            <span className="text-xs text-[#A8B0BD] truncate min-w-0">
               {platformText}
             </span>
             <button
               type="button"
               onClick={handleIncrement}
               disabled={loading}
-              className={`h-7 px-2.5 rounded text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer active:scale-95 ${
+              className={`h-7 px-2.5 rounded text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer active:scale-95 whitespace-nowrap shrink-0 ${
                 loggedAnim
                   ? "bg-[#22C55E]/20 text-[#22C55E]"
                   : "bg-[#151C27] hover:bg-[#3B9EFF] text-[#3B9EFF] hover:text-white"

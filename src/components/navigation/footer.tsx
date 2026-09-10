@@ -3,7 +3,7 @@ import { Film } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="w-full bg-[#0F141D] border-t border-white/[0.06] py-10 sm:py-12 mt-8">
+    <footer className="w-full bg-[#0F141D] border-t border-white/[0.06] pt-10 pb-24 sm:py-12 mt-8">
       <div className="w-full max-w-[834px] lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12 mb-10">
           {/* Col 1: Brand */}
