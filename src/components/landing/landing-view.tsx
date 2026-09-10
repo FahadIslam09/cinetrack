@@ -25,6 +25,8 @@ import {
   TrendingUp,
   Award,
   ShieldCheck,
+  ChevronRight,
+  Compass,
 } from "lucide-react";
 
 // Curated Vibe Data from mockup
@@ -430,66 +432,58 @@ export function LandingView() {
       </header>
 
       <main className="w-full pt-16 flex-1 flex flex-col">
-        {/* 1. MINIMAL HERO SECTION */}
-        <section className="relative w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-16 lg:py-24 flex flex-col items-center text-center">
-          {/* Subtle Ambient Glow */}
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[600px] h-[340px] sm:h-[600px] bg-[#3B9EFF]/10 rounded-full blur-[120px] pointer-events-none" />
-
-          {/* Top Pill Tag */}
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1 rounded-full bg-[#1B2029] text-[#A1C9FF] text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase mb-5 sm:mb-6 shadow-sm border border-white/[0.06] max-w-full text-center leading-snug">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#3B9EFF] animate-pulse shrink-0" />
-            <span>The Personal Cinematic Vault &amp; Friend Recommender</span>
+        {/* 1. NETFLIX-STYLE MINIMAL HERO SECTION */}
+        <section className="relative w-full min-h-[580px] sm:min-h-[660px] lg:min-h-[720px] overflow-hidden bg-[#0F141D] flex flex-col justify-center items-center text-center">
+          {/* Full-Display Cinematic Poster Wall Background */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <img
+              src="/hero-background.jpeg"
+              alt="CineTrack Poster Wall"
+              className="w-full h-full object-cover object-center scale-105"
+            />
+            {/* Netflix-style balanced dark tint: covers entire screen uniformly so posters are crisp yet text has 100% readability */}
+            <div className="absolute inset-0 bg-black/60 sm:bg-black/55 backdrop-brightness-[0.9]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0F141D] via-transparent to-[#0F141D]/80" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_20%,_#0F141D_90%)] opacity-80" />
           </div>
 
-          {/* Main H1 Headline */}
-          <h1 className="text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#F5F7FA] max-w-4xl mb-4 leading-tight">
-            Track what you watch. <br className="hidden sm:inline" />
-            <span className="text-[#3B9EFF]">Recommend what they&apos;ll love.</span>
-          </h1>
+          <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 flex flex-col items-center">
+            {/* Main CineTrack Headline (Option 1) */}
+            <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-[54px] xl:text-6xl font-black tracking-tight text-white leading-[1.12] mb-3 sm:mb-4 drop-shadow-md text-center">
+              <span className="sm:whitespace-nowrap">Track what you watch.</span>{" "}
+              <br className="hidden sm:inline" />
+              <span className="text-[#3B9EFF] sm:whitespace-nowrap">
+                Recommend what they&apos;ll love.
+              </span>
+            </h1>
 
-          {/* Subtitle */}
-          <p className="text-xs sm:text-base text-[#A8B0BD] max-w-2xl mx-auto mb-7 sm:mb-8 leading-relaxed font-normal">
-            CineTrack organizes every movie, series, and anime you&apos;ve ever experienced. When
-            friends ask for a recommendation, send tailored picks by vibe or share your profile
-            link instantly.
-          </p>
+            {/* Subtitle (Option 1) */}
+            <p className="text-sm sm:text-lg text-[#CBD5E1] max-w-2xl mx-auto mb-6 sm:mb-8 font-normal leading-relaxed drop-shadow">
+              CineTrack organizes every movie, series, and anime you&apos;ve ever experienced. When friends ask for a recommendation, send tailored picks by vibe or share your profile link instantly.
+            </p>
 
-          {/* Action CTAs */}
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto mb-8 sm:mb-10 z-10">
-            <Link
-              href="/login"
-              className="w-full sm:w-auto h-11 px-5 sm:px-6 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs sm:text-sm rounded-lg flex items-center justify-center gap-2 shadow-md shadow-[#3B9EFF]/20 transition-all active:scale-95"
-            >
-              <BookmarkPlus className="w-4 h-4" />
-              <span>Track your Watch - It&apos;s Free</span>
-            </Link>
+            {/* Dual Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
+              <Link
+                href="/login"
+                className="w-full sm:w-auto h-12 sm:h-13 px-7 sm:px-8 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#3B9EFF]/25 transition-all active:scale-95 cursor-pointer"
+              >
+                <span>Get Started</span>
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Link>
 
-            <a
-              href="#demo-section"
-              className="w-full sm:w-auto h-11 px-5 sm:px-6 bg-[#1A2330] hover:bg-[#1D2734] border border-white/[0.08] text-[#F5F7FA] font-semibold text-xs sm:text-sm rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
-            >
-              <PlayCircle className="w-4 h-4 text-[#3B9EFF]" />
-              <span>Discover best movies</span>
-            </a>
-          </div>
-
-          {/* Quick Trust Bar / Value Props */}
-          <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-3.5 sm:gap-x-6 text-[#A8B0BD] text-[11px] sm:text-xs font-medium">
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
-              <span>No ad clutter</span>
-            </div>
-            <span className="hidden sm:inline text-[#4B5563]">•</span>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
-              <span>Instant WhatsApp / iMessage export</span>
-            </div>
-            <span className="hidden sm:inline text-[#4B5563]">•</span>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
-              <span>1-click import from Letterboxd &amp; IMDb</span>
+              <Link
+                href="/discover"
+                className="w-full sm:w-auto h-12 sm:h-13 px-6 sm:px-7 bg-[#1A2330]/80 hover:bg-[#253244] border border-white/[0.12] hover:border-white/[0.24] text-[#F5F7FA] font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 transition-all backdrop-blur-sm active:scale-95 shadow-sm"
+              >
+                <Compass className="w-4 h-4 sm:w-5 sm:h-5 text-[#3B9EFF]" />
+                <span>Explore Discover</span>
+              </Link>
             </div>
           </div>
+
+          {/* Netflix Signature Curved Bottom Arch Separator */}
+          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-[140%] h-24 rounded-[100%] border-t-2 border-[#3B9EFF]/30 bg-gradient-to-b from-[#3B9EFF]/5 to-transparent pointer-events-none" />
         </section>
 
         {/* 2. "HOW IT WORKS IN 3 SIMPLE STEPS" */}
