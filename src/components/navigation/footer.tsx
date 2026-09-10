@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Film } from "lucide-react";
+import { LogoIcon } from "@/components/ui/logo-icon";
 
 export function Footer() {
   return (
@@ -9,9 +10,7 @@ export function Footer() {
           {/* Col 1: Brand */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 rounded bg-gradient-to-br from-[#3B9EFF] to-blue-700 flex items-center justify-center text-white text-xs shadow-md">
-                <Film className="w-3.5 h-3.5" />
-              </div>
+              <LogoIcon className="w-6 h-6" size={24} />
               <span className="font-bold text-base text-[#F5F7FA]">
                 Cine<span className="text-[#3B9EFF]">Track</span>
               </span>

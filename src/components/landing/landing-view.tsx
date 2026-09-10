@@ -28,6 +28,7 @@ import {
   ChevronRight,
   Compass,
 } from "lucide-react";
+import { LogoIcon } from "@/components/ui/logo-icon";
 
 // 4 Highlight Cinema Cards from Section 3 of mockup
 const HIGHLIGHT_MOVIES = [
@@ -123,10 +124,8 @@ export function LandingView() {
       <header className="fixed top-0 left-0 right-0 w-full z-50 bg-[#151C27]/95 backdrop-blur-md border-b border-white/[0.06]">
         <div className="h-16 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 rounded-lg bg-[#3B9EFF] flex items-center justify-center font-bold text-white shadow-md shadow-[#3B9EFF]/25 group-hover:scale-105 transition-transform">
-                C
-              </div>
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <LogoIcon className="w-8 h-8" size={32} priority />
               <span className="font-bold text-lg text-white tracking-tight group-hover:text-[#3B9EFF] transition-colors">
                 CineTrack
               </span>
@@ -743,9 +742,7 @@ export function LandingView() {
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#A8B0BD]">
           <div className="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-[#3B9EFF] flex items-center justify-center font-bold text-xs text-white">
-                C
-              </div>
+              <LogoIcon className="w-6 h-6" size={24} />
               <span className="font-bold text-sm text-[#F5F7FA] tracking-tight">CineTrack</span>
             </div>
             <span className="hidden sm:inline text-[#4B5563]">•</span>

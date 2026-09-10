@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, Bell, Film, Plus } from "lucide-react";
 import { QuickAddModal } from "../quick-add/quick-add-modal";
+import { LogoIcon } from "@/components/ui/logo-icon";
 
 interface AppHeaderProps {
   user?: {
@@ -38,9 +39,7 @@ export function AppHeader({ user }: AppHeaderProps) {
               href="/"
               className="flex items-center gap-2.5 shrink-0 group focus:outline-none"
             >
-              <div className="w-7 h-7 rounded bg-gradient-to-br from-[#3B9EFF] to-blue-700 flex items-center justify-center text-white text-sm shadow-md transition-transform group-hover:scale-105">
-                <Film className="w-4 h-4" />
-              </div>
+              <LogoIcon className="w-7 h-7" size={28} priority />
               <span className="font-bold text-lg tracking-tight text-[#F5F7FA]">
                 Cine<span className="text-[#3B9EFF]">Track</span>
               </span>

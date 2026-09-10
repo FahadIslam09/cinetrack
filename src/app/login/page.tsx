@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Film, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { LogoIcon } from "@/components/ui/logo-icon";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -38,10 +39,8 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-gradient-to-t from-[#0F141D] via-[#0F141D]/90 to-[#151C27]" />
 
       <div className="relative z-10 w-full max-w-md p-6 sm:p-8 rounded-2xl bg-[#151C27] border border-white/[0.08] shadow-2xl flex flex-col items-center text-center">
-        {/* Logo */}
-        <div className="w-12 h-12 rounded-xl bg-[#3B9EFF]/15 border border-[#3B9EFF]/30 flex items-center justify-center text-[#3B9EFF] mb-4 shadow-sm">
-          <Film className="w-6 h-6" />
-        </div>
+        {/* Brand Logo */}
+        <LogoIcon className="w-14 h-14 mb-4" size={56} priority />
 
         <h1 className="font-extrabold text-2xl text-[#F5F7FA] tracking-tight">
           Welcome to Cine<span className="text-[#3B9EFF]">Track</span>
