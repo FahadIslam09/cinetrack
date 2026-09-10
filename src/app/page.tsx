@@ -32,12 +32,18 @@ export default async function HomePage() {
 
   try {
     const [tmdbRes, anilistRes] = await Promise.all([
-      tmdb.getTrendingMovies("week"),
-      anilist.getTrendingAnime(10),
+      tmdb.getTrendingMovies("week").catch((e) => {
+        console.error("TMDb trending fetch error:", e);
+        return { results: [] };
+      }),
+      anilist.getTrendingAnime(10).catch((e) => {
+        console.error("AniList trending fetch error:", e);
+        return [];
+      }),
     ]);
 
-    trendingMovies = tmdbRes.results.slice(0, 10).map(normalizeTmdbMovie);
-    trendingAnime = anilistRes.map(normalizeAniListAnime);
+    trendingMovies = (tmdbRes.results || []).slice(0, 10).map(normalizeTmdbMovie);
+    trendingAnime = (anilistRes || []).map(normalizeAniListAnime);
   } catch (err) {
     console.error("Home feed fetch error:", err);
   }
