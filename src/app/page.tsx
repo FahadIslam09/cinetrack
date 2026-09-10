@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ChevronRight, PenSquare } from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { HeroBanner } from "@/components/media/hero-banner";
@@ -221,105 +223,159 @@ export default async function HomePage() {
             ))}
           </ShelfRow>
 
-          {/* Explore Categories (2-column mobile grid) */}
-          <section className="px-4 my-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-4 bg-[#F5C84B] rounded-full" />
-                <h2 className="font-bold text-base sm:text-lg text-[#F5F7FA]">
-                  Explore Categories
+          {/* Explore by Genre */}
+          <section className="px-4 my-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="font-bold text-lg sm:text-xl text-[#F5F7FA] tracking-tight">
+                  Explore by Genre
                 </h2>
+                <p className="text-xs text-[#6F7886] mt-0.5">
+                  Curated vaults categorized by thematic tone and cinematic structure
+                </p>
               </div>
-              <span className="text-xs text-[#A8B0BD]">6 Curated</span>
+              <Link
+                href="/discover"
+                className="text-xs font-semibold text-[#6F7886] hover:text-[#F5F7FA] transition-colors flex items-center gap-0.5"
+              >
+                Full Directory
+                <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               <GenreCard
-                genre="Sci-Fi"
-                count="1,420 Films"
-                iconName="rocket"
-                bgImage="https://image.tmdb.org/t/p/w500/xOMo8BRK7PfcJv9JCnx7s520b4q.jpg"
+                genre="SCI-FI"
+                vaultLabel="Vault"
+                vaultColor="text-[#3B9EFF]"
+                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuBqKNsb__pjrt8rqBOhVO2kD-OC3_IsA73L04OjbXZ6R4wJnsmxP-FtT9U4BeL-6uLfR_dYsiDz2st1a1pPSJpkGKm0eFTWtGCrU2z_H7JVSbJ1-pRcg0OsYMRU-HE0BFlsECsqsPZqybLB0GCNpez4IgZfzFw0788ohAHvw561YbmpB3kxJpygQpgWMgR8b98XXCReAFiQysgmI3Hns40R1s2T5sq5fVOVg8TDwI6xfPITYkO7ciLo3A"
+                href="/discover?genre=Sci-Fi"
               />
               <GenreCard
-                genre="Action"
-                count="2,890 Films"
-                iconName="flame"
-                bgImage="https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg"
+                genre="ACTION"
+                vaultLabel="Vault"
+                vaultColor="text-[#FF9B54]"
+                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuDe4Je_JAAtTJKtf6afTSB_FuPt9HTAZsPx8qpbFmoRSVzUX_S1GCKUWK5CVvjti3-AWXI5sV2a7cW5qpYMzJ47Bvn9biG9VgGVqZzPIwVjPzKGg-CCyNKGkmp2yjKfUOraknGvtRV7fJyu_YFm7f82ntqUHaoLO4TqYa0HWgSvvgfrH75xtI3TWaCeFyfMntu5D5KPO4rG-TJEsBAZRpZTILn2z_4hh0e9sf9E-0-KoBPjPsBITb8a3Q"
+                href="/discover?genre=Action"
               />
               <GenreCard
-                genre="Thriller"
-                count="980 Films"
-                iconName="eye"
-                bgImage="https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg"
+                genre="THRILLER"
+                vaultLabel="Vault"
+                vaultColor="text-[#F43F5E]"
+                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuDMHiFdyjS91wid12yb4o2MowHaRtcSp7krD8fmU-rJQqV3whsvFbupbt5wdi9JgsAzIkdPztKiXDb5SnkGyKgal4tScjfTk2PXH_yIELsQxhuAhbxndSJIcc4FsT6QYtSiYwIGyjoTWrsdcBau9OjMCEDpzTleUcKcKPFrSWkAwT2Ay2Ds6-3WKTn92fm8NRE53BlrDkkKwaA__xu7WB-3c1Cf9D-bMbQnHeUKwGiOrVbVsYnmFFSflQ"
+                href="/discover?genre=Thriller"
               />
               <GenreCard
-                genre="Drama"
-                count="3,120 Films"
-                iconName="theater"
-                bgImage="https://image.tmdb.org/t/p/w500/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg"
+                genre="DRAMA"
+                vaultLabel="Vault"
+                vaultColor="text-[#F5C84B]"
+                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuCqARaK9QT-ZEx7mRikEeMR7LQCUns5HmkcA9sY5YXGYLVhe6duKKvmd7ZICqoD_nBOT3K6zyFF87yfKtPEvI8jj4SBKKdnx2s4hU75q5yf5BBWvf9C8-iW-VpvGB4tpk-wan0vV9Nte4n6K_4QxOo3ZaQ5HcaJCnQKKvgfqJocHyNfUxertqyTSC2WIron2uxYuki-XALSr-TuLoSnX_YONDyxRjFyeiMuNnhR-XtQFiLV2oig7-IDYA"
+                href="/discover?genre=Drama"
               />
               <GenreCard
-                genre="Anime"
-                count="1,670 Titles"
-                iconName="sparkles"
-                bgImage="https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-gviZ2zfLIf0w.jpg"
+                genre="ANIME"
+                vaultLabel="Vault"
+                vaultColor="text-[#8BB4F8]"
+                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuCuUraliBjGlOlNFE2q-dbMyKuLTLHR4zmN3v05es4fnI9VdPZBqgZSgLxAE9_cx2GUvsqTIJGDHji5gCv9Xhc3iOQaktCAAtzcPSJFqsdOVVWc9WsptH6ntGCWvqhv-Pmjqx0z5cvnhRHuViCsMlXMFXLa0PD_TkcCiazVlPDgYNabq7SqaWIL6mHOnkykNEJoSeSOJDXhDkJp3R1wO5vBuvOeMMvX1r6VJvYdCbnivb8rv0X3ZHQEsw"
+                href="/discover?genre=Anime"
               />
               <GenreCard
-                genre="Noir"
-                count="450 Films"
-                iconName="clapperboard"
-                bgImage="https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg"
+                genre="NOIR"
+                vaultLabel="Vault"
+                vaultColor="text-[#94A3B8]"
+                bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuAjcbcTrcIGhVCZ1SmQux3-S_aYTfE1nyalQpYMUS2_d4Mjd2jxCVK6RO232joAdicjQFz-CMigFD8FkHF7a4FpL5Y_i3dsnHlDna83TyfvxNgtC4CEMrqYZB0WyrSzOXCzJ3h9wXwF0gAR4IV24gLPRqj23bX0dju7uhcgGG-unJGGOrJlroORt1cSJ2znSsAs1Q0z_p-Oim3jN5ecCFwsFQjsZ7qX87IBWV6Fy_tpvuq6FgF7204n3g"
+                href="/discover?genre=Noir"
               />
             </div>
           </section>
 
-          {/* Community Dispatches (Reviews with Bengali & Spoilers) */}
-          <section className="px-4 my-4 flex flex-col gap-3">
+          {/* Editorial & Community Reviews */}
+          <section className="px-4 my-6 flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-4 bg-[#3B9EFF] rounded-full" />
-                <h2 className="font-bold text-base sm:text-lg text-[#F5F7FA]">
-                  Community Dispatches
-                </h2>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-bold text-lg sm:text-xl text-[#F5F7FA] tracking-tight">
+                    Editorial &amp; Community Reviews
+                  </h2>
+                  <span className="px-2 py-0.5 rounded bg-[#1D2734] text-[10px] font-bold text-[#22C55E] tracking-wider uppercase border border-white/[0.06]">
+                    Verified Logs
+                  </span>
+                </div>
+                <p className="text-xs text-[#6F7886] mt-0.5">
+                  Critical impressions logged by CineTrack members and accredited critics
+                </p>
               </div>
-              <span className="text-[11px] font-bold text-[#3B9EFF] tracking-wider uppercase">
-                EDITORIAL
-              </span>
+              <button
+                type="button"
+                className="h-9 px-3.5 rounded-lg bg-[#1A2330] hover:bg-[#243042] text-[#F5F7FA] text-xs font-semibold flex items-center gap-1.5 transition-colors border border-white/[0.08] cursor-pointer"
+              >
+                <PenSquare className="w-3.5 h-3.5 text-[#3B9EFF]" />
+                <span className="hidden sm:inline">Write a Review</span>
+                <span className="sm:hidden">Write</span>
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* Bengali Review Card (From Stitch Mockup) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
+              {/* Review 1: Bilingual Review (Bengali & English) */}
               <ReviewCard
                 author={{
-                  name: "Arghya Sen",
+                  name: "Anirban Sen",
                   avatarUrl:
-                    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop",
+                    "https://lh3.googleusercontent.com/aida-public/AB6AXuAvf9w2OpO98x1I5C3ZgAkFT-UGZ3nouwJuI0tHqHyq33WtWn5tKevFkpyiJgOtVoPug62ptttFbKJRkzQAYjHpGE8No9Ehj703kqjXB7livavGfMXimNXabTM73XweMtMhTML4cSqiaGrWqpM0GrRiZ0t3Yf1dJsrDIX7AwQ5GuDTCuIOLJpUZLjvKVtLlomrfpryzRaemZdVSJV_HjKU7cCeu9CuaJOlwjL2j57MlpPHndfNORJ06rg",
                   isVerified: true,
+                  role: "STAFF CRITIC",
+                  roleColor: "text-[#3B9EFF]",
                 }}
-                mediaTitle="Pather Panchali (4K Remaster)"
+                mediaTitle="Pather Panchali (1955)"
+                mediaHref="/movie/500"
+                editionTag="4K Restoration"
                 rating={9.5}
-                reviewText="“সত্যজিৎ রায়ের ফ্রেম কেবল দৃশ্য নয়, অনুভূতির কাব্য। কাশফুলের মধ্য দিয়ে ট্রেনের সেই অবিস্মরণীয় শব্দ আজও সিনেমাপ্রেমীদের বুকে গভীর আলোড়ন তোলে। অপুর চোখের বিস্ময় মানব ইতিহাসের সবচেয়ে খাঁটি চলচিত্র দলিল।”"
-                isBengali={true}
-                likesCount={142}
-                commentsCount={28}
+                bengaliQuote="সত্যজিৎ রায়ের এই মাস্টারপিস প্রতিটি দৃশ্যে প্রকৃতির ছন্দ আর মানুষের অনুভূতির এক বিরল মেলবন্ধন সৃষ্টি করে।"
+                reviewText="Subbu's camera floats through rural Bengal with an unflinching yet profoundly tender gaze. The new 4K transfer restores Subrata Mitra’s revolutionary natural lighting to its pristine brilliance."
+                likesCount={42}
+                commentsCount={8}
                 timeAgo="2 hours ago"
               />
 
-              {/* Spoiler Review Card (From Stitch Mockup) */}
+              {/* Review 2: Spoiler-Protected Card */}
+              <ReviewCard
+                author={{
+                  name: "Marcus Vance",
+                  avatarUrl:
+                    "https://lh3.googleusercontent.com/aida-public/AB6AXuB0s277pGVr6O6vac0KMRAAgQcBdMRQPbtu3wJlES0SjUWCPDdv8ZXOWK0R_K5zk2PX0zMjkh8U0cXyd1SOx8VSDFvslS-oTuGz3lR3QPvMHhkWZY_yoRo05aFBTpVBvqFHWmFfVLztDlf6b3GHDtwcS26HwKZOmkN7ChDh5p4yig0NJydXqBez0IfDwo59XdS2AaU-xxmeAJ0Vxf7EnAw6KIAApD_Xi1oZSFOD-D7QQVA7rplPlOb62w",
+                  isVerified: false,
+                  role: "VERIFIED MEMBER",
+                  roleColor: "text-[#6F7886]",
+                }}
+                mediaTitle="Anatomy of a Fall"
+                mediaHref="/movie/915935"
+                editionTag="Courtroom Drama"
+                rating={8.0}
+                containsSpoilers={true}
+                reviewText="The ambiguity surrounding Daniel's final courtroom testimony is what cements Triet's direction. We never actually know if Sandra orchestrated the recording or if Samuel intentionally induced his own demise. The true trial is memory itself."
+                likesCount={89}
+                commentsCount={19}
+                timeAgo="Yesterday"
+              />
+
+              {/* Review 3: Standard Editorial Deep Dive */}
               <ReviewCard
                 author={{
                   name: "Elena Rostova",
                   avatarUrl:
-                    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop",
+                    "https://lh3.googleusercontent.com/aida-public/AB6AXuCLvzgXbVZaODd2nainiIysJdzwXPY5dE3oLHcyCgpXosvkcSsMV1qoKALKON8lE-kZ2TOfJJPy6Jl93uiUtKMeYBlbfKFj7XjM41k5DBh3OqDrrzMq7Asf-kLGPC1L5ncyIxNqGFb6mNqQY32ymDX1zPJfgXdpj8u2YdSS1-aHzsQy7ZYUspGipkuwmrPJ3lvq3mhTlfzr_0pkDJyIkxtyKZV16RQx7udhKj-bmY-60O6qkgvzaNQcAQ",
                   isVerified: true,
+                  role: "CURATOR",
+                  roleColor: "text-[#F5C84B]",
                 }}
-                mediaTitle="Severance Season 2"
+                mediaTitle="Dune: Part Two"
+                mediaHref="/movie/693134"
+                editionTag="IMAX 70mm"
                 rating={9.0}
-                containsSpoilers={true}
-                reviewText="The reveal at the end of the Lumon testing floor completely turns Mark's motivations upside down. The dual identity resolution is hands down one of the most chilling cliffhangers on television."
-                likesCount={89}
-                commentsCount={41}
-                timeAgo="5 hours ago"
+                reviewText="Greig Fraser’s infrared photography on Giedi Prime is the single most audacious cinematography decision in modern blockbuster history. Villeneuve treats Herbert’s cautionary tale with the solemn reverence of religious mythos."
+                likesCount={134}
+                commentsCount={31}
+                timeAgo="3 days ago"
               />
             </div>
           </section>
