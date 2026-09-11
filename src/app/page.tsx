@@ -522,7 +522,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 }}
                 mediaTitle="Pather Panchali (1955)"
                 mediaHref="/movie/500"
-                rating={9.5}
+                rating="masterpiece"
                 bengaliQuote="সত্যজিৎ রায়ের এই মাস্টারপিস প্রতিটি দৃশ্যে প্রকৃতির ছন্দ আর মানুষের অনুভূতির এক বিরল মেলবন্ধন সৃষ্টি করে।"
                 reviewText="Subbu's camera floats through rural Bengal with an unflinching yet profoundly tender gaze. The new 4K transfer restores Subrata Mitra’s revolutionary natural lighting to its pristine brilliance."
                 seriesTag="Cinema Classic Series"
@@ -540,7 +540,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 }}
                 mediaTitle="Anatomy of a Fall (2023)"
                 mediaHref="/movie/915935"
-                rating={8.0}
+                rating="good"
                 containsSpoilers={true}
                 reviewText="The pivotal recording played in the third act completely re-contextualizes the argument. Sandra Hüller's quiet realization that Daniel had memorized his mother's cadence gives the ending its heartbreaking ambiguity."
                 seriesTag="Palme d'Or Analysis"
@@ -559,7 +559,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 mediaTitle="Dune: Part Two (2024)"
                 mediaHref="/movie/693134"
                 editionTag="IMAX 70mm"
-                rating={9.0}
+                rating="masterpiece"
                 reviewText="Seen in IMAX 70mm. The sound design during the worm-riding sequence vibrates your entire skeleton. Greig Fraser’s infrared photography on Giedi Prime delivers one of the most stark visual sequences in modern science fiction."
                 seriesTag="Sci-Fi Landmark Retrospective"
                 likesCount={312}

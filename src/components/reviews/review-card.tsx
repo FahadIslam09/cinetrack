@@ -2,20 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Star, Heart, MessageSquare, AlertTriangle } from "lucide-react";
+import { Star, Heart, MessageSquare, ShieldAlert, AlertTriangle } from "lucide-react";
+import { RatingCategory, getRatingConfig } from "@/lib/rating";
 
 export interface ReviewCardProps {
   author: {
     name: string;
     avatarUrl?: string;
-    isVerified?: boolean;
     role?: string;
     roleColor?: string;
+    isVerified?: boolean;
   };
   mediaTitle: string;
   mediaHref?: string;
   editionTag?: string;
-  rating?: number;
+  rating?: RatingCategory | string | number | null;
   reviewText: string;
   bengaliQuote?: string;
   containsSpoilers?: boolean;
@@ -92,12 +93,27 @@ export function ReviewCard({
             </div>
           </div>
 
-          {rating !== undefined && (
-            <span className="text-[#F5C84B] font-bold text-xs sm:text-sm flex items-center gap-1 shrink-0">
-              <Star className="w-3.5 h-3.5 fill-[#F5C84B] text-[#F5C84B]" />
-              {rating.toFixed(1)}
-            </span>
-          )}
+          {(() => {
+            const rConfig = getRatingConfig(rating);
+            if (rConfig) {
+              return (
+                <span
+                  className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider border shrink-0 ${rConfig.badgeClass}`}
+                >
+                  {rConfig.label}
+                </span>
+              );
+            }
+            if (typeof rating === "number") {
+              return (
+                <span className="text-[#F5C84B] font-bold text-xs sm:text-sm flex items-center gap-1 shrink-0">
+                  <Star className="w-3.5 h-3.5 fill-[#F5C84B] text-[#F5C84B]" />
+                  {rating.toFixed(1)}
+                </span>
+              );
+            }
+            return null;
+          })()}
         </div>
 
 

@@ -72,7 +72,21 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     films: logs.filter((l) => l.media.mediaType === "movie").length || 86,
     series: logs.filter((l) => l.media.mediaType === "series").length || 38,
     anime: logs.filter((l) => l.media.mediaType === "anime").length || 18,
-    meanScore: "8.3",
+  };
+
+  const tasteBreakdown = {
+    masterpiece:
+      logs.filter((l) => l.log.rating === "masterpiece").length ||
+      (isDemo ? 34 : 0),
+    good:
+      logs.filter((l) => l.log.rating === "good").length ||
+      (isDemo ? 68 : 0),
+    average:
+      logs.filter((l) => l.log.rating === "average").length ||
+      (isDemo ? 28 : 0),
+    poor:
+      logs.filter((l) => l.log.rating === "poor").length ||
+      (isDemo ? 12 : 0),
   };
 
   // Curator's Quadrant (Top 4 Favorites)
@@ -80,28 +94,28 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     {
       title: "Blade Runner 2049",
       year: "2017 • Denis Villeneuve",
-      rating: "10",
+      rating: "masterpiece" as const,
       quote: "“Visual brutalism paired with melancholic human inquiry.”",
       poster: "https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
     },
     {
       title: "Stalker",
       year: "1979 • Andrei Tarkovsky",
-      rating: "10",
+      rating: "masterpiece" as const,
       quote: "“The purest translation of existential faith into kinetic rhythm.”",
       poster: "https://image.tmdb.org/t/p/w500/lUEy6h5Cq18bKqS9eS8qS6v6pW4.jpg",
     },
     {
       title: "Arrival",
       year: "2016 • Denis Villeneuve",
-      rating: "9.8",
+      rating: "masterpiece" as const,
       quote: "“Linguistic determinism as a profound vessel for grief.”",
       poster: "https://image.tmdb.org/t/p/w500/x2O0hvQcbIRgUuYg8sE4LgKj9N2.jpg",
     },
     {
       title: "Perfect Blue",
       year: "1997 • Satoshi Kon",
-      rating: "9.7",
+      rating: "masterpiece" as const,
       quote: "“Dizzying match-cuts deconstructing early internet voyeurism.”",
       poster: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx437-GviWlU9bN4yP.jpg",
     },
@@ -219,28 +233,51 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             </div>
           </div>
 
-          {/* Mean Score Histogram */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-[#1D2734] border border-white/[0.04]">
-            <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 fill-[#F5C84B] text-[#F5C84B]" />
-              <span className="text-xs font-bold text-[#F5F7FA]">
-                {stats.meanScore} <span className="text-[#6F7886]">/ 10</span>
+          {/* Taste Profile Distribution */}
+          <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-[#1D2734] border border-white/[0.04]">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] uppercase font-bold tracking-wider text-[#F5F7FA] flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#F5C84B]" />
+                <span>Taste Profile</span>
               </span>
-              <span className="text-[10px] uppercase font-bold tracking-wider text-[#A8B0BD] ml-1">
-                MEAN SCORE
+              <span className="text-[10px] text-[#6F7886] font-semibold uppercase tracking-wider">
+                Personal Ratings
               </span>
             </div>
-            {/* Visual Mini Histogram Bars */}
-            <div className="flex items-end gap-1 h-5">
-              {[2, 4, 3, 5, 8, 14, 28, 45, 62, 38].map((h, i) => (
-                <div
-                  key={i}
-                  className={`w-1 rounded-t ${
-                    i >= 7 ? "bg-[#3B9EFF]" : "bg-white/20"
-                  }`}
-                  style={{ height: `${(h / 62) * 100}%` }}
-                />
-              ))}
+
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-2 pt-1 text-center">
+              <div className="p-2 rounded-lg bg-[#F5C84B]/10 border border-[#F5C84B]/20">
+                <span className="block text-sm sm:text-base font-extrabold text-[#F5C84B] leading-none">
+                  {tasteBreakdown.masterpiece}
+                </span>
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#F5C84B]/90 mt-1 block">
+                  Masterpieces
+                </span>
+              </div>
+              <div className="p-2 rounded-lg bg-[#3B9EFF]/10 border border-[#3B9EFF]/20">
+                <span className="block text-sm sm:text-base font-extrabold text-[#3B9EFF] leading-none">
+                  {tasteBreakdown.good}
+                </span>
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#3B9EFF]/90 mt-1 block">
+                  Good
+                </span>
+              </div>
+              <div className="p-2 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/20">
+                <span className="block text-sm sm:text-base font-extrabold text-[#F59E0B] leading-none">
+                  {tasteBreakdown.average}
+                </span>
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#F59E0B]/90 mt-1 block">
+                  Average
+                </span>
+              </div>
+              <div className="p-2 rounded-lg bg-[#F43F5E]/10 border border-[#F43F5E]/20">
+                <span className="block text-sm sm:text-base font-extrabold text-[#F43F5E] leading-none">
+                  {tasteBreakdown.poor}
+                </span>
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#F43F5E]/90 mt-1 block">
+                  Poor
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -285,8 +322,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     alt={item.title}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-[#0F141D]/85 backdrop-blur-sm text-[#F5C84B] text-[10px] font-bold flex items-center gap-0.5">
-                    ★ {item.rating}
+                  <div className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded bg-[#0F141D]/90 backdrop-blur-sm text-[#F5C84B] text-[10px] font-bold border border-[#F5C84B]/30 uppercase tracking-wider">
+                    Masterpiece
                   </div>
                 </div>
                 <div className="p-3 flex flex-col gap-1">
@@ -370,7 +407,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 isVerified: true,
               }}
               mediaTitle="Dune: Part Two"
-              rating={9.5}
+              rating="masterpiece"
               reviewText="Villeneuve achieves an astonishing sensory convergence of religious fervor and sonic weaponization. Greig Fraser's infrared cinematography during the Giedi Prime gladiatorial sequence creates an almost alien physical presence rarely allowed in high-budget cinema."
               likesCount={184}
               commentsCount={32}
@@ -384,7 +421,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 isVerified: true,
               }}
               mediaTitle="Severance — 'The Cold Harbor'"
-              rating={9.0}
+              rating="masterpiece"
               containsSpoilers={true}
               reviewText="The season finale ties the severed floor dialectic directly to corporate religious worship. The execution of the elevator descent sequence is unmatched in contemporary prestige television."
               likesCount={96}

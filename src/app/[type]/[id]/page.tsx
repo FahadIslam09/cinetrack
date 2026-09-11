@@ -119,9 +119,10 @@ export default async function MediaDetailsPage({ params }: PageProps) {
                     className="w-full h-full object-cover"
                   />
                 ) : null}
-                <span className="absolute top-1.5 left-1.5 bg-[#0F141D]/85 backdrop-blur-sm text-[#F5C84B] px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide flex items-center gap-0.5">
+                <span className="absolute top-1.5 left-1.5 bg-[#0F141D]/90 backdrop-blur-sm text-[#F5C84B] px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide flex items-center gap-1 border border-white/[0.08]">
+                  <span className="text-[#A8B0BD] text-[9px] font-semibold">IMDb</span>
                   <Star className="w-3 h-3 fill-[#F5C84B]" />
-                  {media.rating ? media.rating.toFixed(1) : "—"}
+                  <span>{media.rating ? media.rating.toFixed(1) : "—"}</span>
                 </span>
               </div>
 
@@ -271,7 +272,7 @@ export default async function MediaDetailsPage({ params }: PageProps) {
                   isVerified: true,
                 }}
                 mediaTitle={media.title}
-                rating={9.5}
+                rating="masterpiece"
                 reviewText="হিলদুর গুদনাদোত্তিরের শব্দের অনুরণন এবং সিনেমাটোগ্রাফি চলচ্চিত্রটিকে এক অন্য মাত্রায় নিয়ে গেছে। নিস্তব্ধতার যে ওজন থাকতে পারে, তা পরিচালক অত্যন্ত সংবেদনশীলতার সাথে ফুটিয়ে তুলেছেন।"
                 isBengali={true}
                 likesCount={142}
@@ -285,7 +286,7 @@ export default async function MediaDetailsPage({ params }: PageProps) {
                   isVerified: false,
                 }}
                 mediaTitle={media.title}
-                rating={8.0}
+                rating="good"
                 containsSpoilers={true}
                 reviewText="The second act pacing accelerates relentlessly toward a sequence that fundamentally questions the characters' allegiances. One of the strongest cinematic conclusions this year."
                 likesCount={88}

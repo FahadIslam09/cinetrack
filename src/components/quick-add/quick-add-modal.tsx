@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Star, Plus, Minus, Check, Film, Loader2 } from "lucide-react";
+import { X, Plus, Minus, Check, Film, Loader2 } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { upsertMediaLog } from "@/actions/tracking";
+import { RatingCategory, RATING_CONFIG, parseRating } from "@/lib/rating";
 
 interface QuickAddModalProps {
   media: NormalizedMedia | null;
@@ -11,7 +12,7 @@ interface QuickAddModalProps {
   onClose: () => void;
   initialLog?: {
     status?: string;
-    rating?: number | null;
+    rating?: RatingCategory | string | number | null;
     episodesWatched?: number;
     reviewText?: string | null;
     containsSpoilers?: boolean;
@@ -30,7 +31,7 @@ export function QuickAddModal({
   const [status, setStatus] = useState<
     "watching" | "completed" | "plan_to_watch" | "on_hold" | "dropped"
   >("watching");
-  const [rating, setRating] = useState<number | null>(null);
+  const [rating, setRating] = useState<RatingCategory | null>(null);
   const [episodes, setEpisodes] = useState<number>(0);
   const [review, setReview] = useState<string>("");
   const [containsSpoilers, setContainsSpoilers] = useState<boolean>(false);
@@ -43,7 +44,7 @@ export function QuickAddModal({
         (initialLog?.status as any) ||
           (media.mediaType === "movie" ? "completed" : "watching")
       );
-      setRating(initialLog?.rating !== undefined ? initialLog.rating : null);
+      setRating(parseRating(initialLog?.rating));
       setEpisodes(initialLog?.episodesWatched || 0);
       setReview(initialLog?.reviewText || "");
       setContainsSpoilers(initialLog?.containsSpoilers || false);
@@ -156,38 +157,81 @@ export function QuickAddModal({
             </div>
           </div>
 
-          {/* Rating Scale (10 Stars) */}
+          {/* CineTrack Personal Rating (Categorical) */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-[#A8B0BD]">
                 Your Rating
               </label>
-              <span className="text-xs font-bold text-[#F5C84B]">
-                {rating !== null ? `★ ${rating.toFixed(1)} / 10` : "Not Rated"}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-[#F5F7FA]">
+                  {rating ? (
+                    <span className={RATING_CONFIG[rating].textColor}>
+                      {RATING_CONFIG[rating].label}
+                    </span>
+                  ) : (
+                    <span className="text-[#6F7886]">Not rated</span>
+                  )}
+                </span>
+                {rating && (
+                  <button
+                    type="button"
+                    onClick={() => setRating(null)}
+                    className="text-[11px] text-[#6F7886] hover:text-[#F5F7FA] underline transition-colors cursor-pointer"
+                    title="Clear rating"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="flex items-center justify-between gap-0.5 sm:gap-1 bg-[#1D2734] p-2 rounded-lg border border-white/[0.06]">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((starValue) => {
-                const isSelected = rating !== null && rating >= starValue;
+
+            {/* Segmented interaction: 4 across on desktop/tablet, 2x2 grid on small mobile */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 bg-[#1D2734] p-1.5 rounded-xl border border-white/[0.06]">
+              {(
+                [
+                  {
+                    id: "poor",
+                    label: "Poor",
+                    activeClass: "bg-[#F43F5E]/15 text-[#F43F5E] border-[#F43F5E] shadow-sm shadow-[#F43F5E]/10",
+                    dotColor: "bg-[#F43F5E]",
+                  },
+                  {
+                    id: "average",
+                    label: "Average",
+                    activeClass: "bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B] shadow-sm shadow-[#F59E0B]/10",
+                    dotColor: "bg-[#F59E0B]",
+                  },
+                  {
+                    id: "good",
+                    label: "Good",
+                    activeClass: "bg-[#3B9EFF]/15 text-[#3B9EFF] border-[#3B9EFF] shadow-sm shadow-[#3B9EFF]/10",
+                    dotColor: "bg-[#3B9EFF]",
+                  },
+                  {
+                    id: "masterpiece",
+                    label: "Masterpiece",
+                    activeClass: "bg-[#F5C84B]/15 text-[#F5C84B] border-[#F5C84B] shadow-sm shadow-[#F5C84B]/10",
+                    dotColor: "bg-[#F5C84B]",
+                  },
+                ] as const
+              ).map((opt) => {
+                const isSelected = rating === opt.id;
                 return (
                   <button
-                    key={starValue}
+                    key={opt.id}
                     type="button"
-                    onClick={() => setRating(rating === starValue ? null : starValue)}
-                    className="flex-1 py-1.5 flex flex-col items-center gap-0.5 text-[#4B5563] hover:text-[#F5C84B] transition-all rounded hover:bg-white/[0.04] active:scale-95 touch-manipulation cursor-pointer"
+                    onClick={() => setRating(isSelected ? null : opt.id)}
+                    className={`h-10 px-2.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer touch-manipulation select-none ${
+                      isSelected
+                        ? opt.activeClass
+                        : "bg-[#151C27] border-white/[0.06] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] hover:border-white/[0.12]"
+                    }`}
+                    aria-pressed={isSelected}
                   >
-                    <Star
-                      className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${
-                        isSelected ? "fill-[#F5C84B] text-[#F5C84B] scale-110" : ""
-                      }`}
-                    />
-                    <span
-                      className={`text-[9px] font-semibold transition-colors ${
-                        isSelected ? "text-[#F5C84B]" : "text-[#4B5563]"
-                      }`}
-                    >
-                      {starValue}
-                    </span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${opt.dotColor} shrink-0 opacity-80`} />
+                    <span>{opt.label}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5 shrink-0 ml-0.5" />}
                   </button>
                 );
               })}

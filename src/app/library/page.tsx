@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { userMediaLogs, mediaItems, profiles } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { parseRating } from "@/lib/rating";
 
 interface LibraryPageProps {
   searchParams: Promise<{
@@ -30,7 +31,6 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
     anime: 0,
     watching: 0,
     completed: 0,
-    avgRating: 0,
     totalMinutes: 0,
   };
 
@@ -65,14 +65,6 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
       stats.watching = allUserLogs.filter((l) => l.log.status === "watching").length;
       stats.completed = allUserLogs.filter((l) => l.log.status === "completed").length;
 
-      const rated = allUserLogs.filter(
-        (l) => l.log.rating !== null && l.log.rating !== undefined
-      );
-      if (rated.length > 0) {
-        stats.avgRating =
-          rated.reduce((acc, curr) => acc + Number(curr.log.rating), 0) / rated.length;
-      }
-
       stats.totalMinutes = allUserLogs.reduce((acc, curr) => {
         const runtime = curr.media.runtime || 90;
         const eps = curr.log.episodesWatched || 1;
@@ -91,13 +83,13 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
           posterPath: l.media.posterPath || null,
           backdropPath: l.media.backdropPath || null,
           year: l.media.releaseDate ? l.media.releaseDate.substring(0, 4) : undefined,
-          rating: l.log.rating ? Number(l.log.rating) : 0,
+          rating: 8.0,
           totalEpisodes: l.media.totalEpisodes || 1,
           genres: l.media.genres || [],
           synopsis: l.media.synopsis || undefined,
         },
         status: l.log.status as any,
-        userRating: l.log.rating ? Number(l.log.rating) : undefined,
+        userRating: parseRating(l.log.rating),
         userEpisodes: l.log.episodesWatched,
         reviewText: l.log.reviewText,
         updatedAt: l.log.updatedAt ? l.log.updatedAt.toISOString() : undefined,
@@ -125,7 +117,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         genres: ["Drama", "History"],
       },
       status: "completed",
-      userRating: 9.5,
+      userRating: "masterpiece",
       updatedAt: "2024-03-10T12:00:00.000Z",
     },
     {
@@ -144,7 +136,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         genres: ["Animation", "Action", "Comedy"],
       },
       status: "completed",
-      userRating: 9.3,
+      userRating: "masterpiece",
       updatedAt: "2024-02-14T15:30:00.000Z",
     },
     {
@@ -163,7 +155,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         genres: ["Sci-Fi", "Mystery", "Drama"],
       },
       status: "watching",
-      userRating: 9.2,
+      userRating: "masterpiece",
       userEpisodes: 8,
       updatedAt: "2024-04-01T08:00:00.000Z",
     },
@@ -183,7 +175,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         genres: ["Comedy", "Sci-Fi", "Romance"],
       },
       status: "completed",
-      userRating: 8.8,
+      userRating: "good",
       updatedAt: "2024-01-20T21:00:00.000Z",
     },
     {
@@ -202,7 +194,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         genres: ["Drama", "History", "Action"],
       },
       status: "watching",
-      userRating: 9.1,
+      userRating: "good",
       userEpisodes: 7,
       updatedAt: "2024-04-12T18:40:00.000Z",
     },
@@ -222,7 +214,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         genres: ["Action", "Fantasy", "Animation"],
       },
       status: "completed",
-      userRating: 9.6,
+      userRating: "masterpiece",
       userEpisodes: 87,
       updatedAt: "2023-12-05T10:00:00.000Z",
     },
@@ -242,7 +234,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         genres: ["Fantasy", "Adventure", "Animation"],
       },
       status: "completed",
-      userRating: 9.4,
+      userRating: "masterpiece",
       userEpisodes: 28,
       updatedAt: "2024-03-22T19:00:00.000Z",
     },
@@ -262,7 +254,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         genres: ["Action", "Supernatural", "Animation"],
       },
       status: "completed",
-      userRating: 9.0,
+      userRating: "good",
       userEpisodes: 47,
       updatedAt: "2024-01-15T14:00:00.000Z",
     },
@@ -282,7 +274,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         genres: ["Drama", "Romance"],
       },
       status: "completed",
-      userRating: 8.7,
+      userRating: "good",
       updatedAt: "2023-11-20T22:15:00.000Z",
     },
     {
@@ -301,7 +293,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         genres: ["Drama", "Romance"],
       },
       status: "completed",
-      userRating: 8.4,
+      userRating: "average",
       updatedAt: "2024-05-02T16:00:00.000Z",
     },
     {
@@ -320,7 +312,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         genres: ["Action", "Fantasy", "Animation"],
       },
       status: "completed",
-      userRating: 8.9,
+      userRating: "good",
       userEpisodes: 55,
       updatedAt: "2024-02-28T11:00:00.000Z",
     },
@@ -340,9 +332,47 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         genres: ["Action", "Supernatural", "Animation"],
       },
       status: "completed",
-      userRating: 8.8,
+      userRating: "average",
       userEpisodes: 12,
       updatedAt: "2023-10-18T17:45:00.000Z",
+    },
+    {
+      id: "demo-13",
+      media: {
+        id: "tmdb:movie:634492",
+        source: "tmdb",
+        sourceId: "634492",
+        mediaType: "movie",
+        title: "Madame Web",
+        posterPath: "https://image.tmdb.org/t/p/w500/rULWuutDcN5NvtiZi4xZa35vY34.jpg",
+        backdropPath: null,
+        year: "2024",
+        rating: 5.2,
+        totalEpisodes: 1,
+        genres: ["Action", "Sci-Fi"],
+      },
+      status: "dropped",
+      userRating: "poor",
+      updatedAt: "2024-03-01T10:00:00.000Z",
+    },
+    {
+      id: "demo-14",
+      media: {
+        id: "tmdb:movie:693134",
+        source: "tmdb",
+        sourceId: "693134",
+        mediaType: "movie",
+        title: "Dune: Part Two",
+        posterPath: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+        backdropPath: null,
+        year: "2024",
+        rating: 8.6,
+        totalEpisodes: 1,
+        genres: ["Sci-Fi", "Adventure"],
+      },
+      status: "watching",
+      userRating: null,
+      updatedAt: "2024-04-10T12:00:00.000Z",
     },
   ];
 
@@ -358,7 +388,6 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
           anime: 36,
           watching: 8,
           completed: 118,
-          avgRating: 9.0,
           totalMinutes: 26400,
         };
 

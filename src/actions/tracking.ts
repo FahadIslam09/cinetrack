@@ -6,11 +6,12 @@ import { mediaItems, userMediaLogs, profiles } from "@/lib/db/schema";
 import { createClient } from "@/lib/supabase/server";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { eq, and } from "drizzle-orm";
+import { RatingCategory, isValidRating, parseRating } from "@/lib/rating";
 
 export interface LogMediaParams {
   media: NormalizedMedia;
   status: "watching" | "completed" | "plan_to_watch" | "on_hold" | "dropped";
-  rating?: number | null;
+  rating?: RatingCategory | null;
   episodesWatched?: number;
   reviewText?: string | null;
   containsSpoilers?: boolean;
@@ -64,6 +65,11 @@ export async function upsertMediaLog(params: LogMediaParams) {
       isFavorite = false,
     } = params;
 
+    if (rating !== undefined && rating !== null && !isValidRating(rating)) {
+      return { error: "Invalid rating. Allowed categories: poor, average, good, masterpiece." };
+    }
+    const finalRating = rating ? parseRating(rating) : null;
+
     // Atomic transaction: upsert media_items first, then user_media_logs
     await db.transaction(async (tx) => {
       // 1. Upsert metadata
@@ -108,7 +114,7 @@ export async function upsertMediaLog(params: LogMediaParams) {
           userId: user.id,
           mediaId: media.id,
           status,
-          rating: rating !== undefined && rating !== null ? String(rating) : null,
+          rating: finalRating,
           episodesWatched,
           reviewText: reviewText?.trim() || null,
           containsSpoilers,
@@ -119,7 +125,7 @@ export async function upsertMediaLog(params: LogMediaParams) {
           target: [userMediaLogs.userId, userMediaLogs.mediaId],
           set: {
             status,
-            rating: rating !== undefined && rating !== null ? String(rating) : null,
+            rating: finalRating,
             episodesWatched,
             reviewText: reviewText?.trim() || null,
             containsSpoilers,

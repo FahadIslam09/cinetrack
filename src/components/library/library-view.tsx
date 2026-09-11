@@ -12,24 +12,23 @@ import {
   Film,
   Tv,
   Sparkles,
-  Smile,
   SlidersHorizontal,
   ArrowUpDown,
   Check,
   Copy,
   X,
-  Flame,
   RotateCcw,
 } from "lucide-react";
 import { MediaCard } from "@/components/media/media-card";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
 import { NormalizedMedia } from "@/lib/media/normalize";
+import { RatingCategory, getRatingRank, RATING_CONFIG } from "@/lib/rating";
 
 export interface LibraryItem {
   id: string;
   media: NormalizedMedia;
   status: "watching" | "completed" | "plan_to_watch" | "on_hold" | "dropped";
-  userRating?: number | null;
+  userRating?: RatingCategory | string | number | null;
   userEpisodes?: number;
   reviewText?: string | null;
   updatedAt?: string | null;
@@ -50,7 +49,7 @@ interface LibraryViewProps {
     anime: number;
     watching: number;
     completed: number;
-    avgRating: number;
+    avgRating?: number;
     totalMinutes: number;
   };
   initialStatus?: string;
@@ -73,8 +72,10 @@ const GENRES = [
 ];
 
 const SORT_OPTIONS = [
-  { id: "highest_rated", label: "Highest Rated (Best First)" },
   { id: "recently_updated", label: "Recently Updated" },
+  { id: "masterpiece_first", label: "My Rating (Masterpiece First)" },
+  { id: "good_first", label: "My Rating (Good First)" },
+  { id: "poor_first", label: "My Rating (Poor First)" },
   { id: "release_year", label: "Release Year (Newest)" },
   { id: "title", label: "Title (A–Z)" },
 ];
@@ -88,11 +89,23 @@ export function LibraryView({
 }: LibraryViewProps) {
   const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [typeFilter, setTypeFilter] = useState(initialType);
+  const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("highest_rated");
+  const [sortBy, setSortBy] = useState("recently_updated");
   const [isCopied, setIsCopied] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+
+  // Compute dynamic taste counts across all library items
+  const tasteCounts = useMemo(() => {
+    return {
+      masterpiece: initialItems.filter((i) => i.userRating === "masterpiece").length,
+      good: initialItems.filter((i) => i.userRating === "good").length,
+      average: initialItems.filter((i) => i.userRating === "average").length,
+      poor: initialItems.filter((i) => i.userRating === "poor").length,
+      unrated: initialItems.filter((i) => !i.userRating).length,
+    };
+  }, [initialItems]);
 
   const days = Math.floor(stats.totalMinutes / (60 * 24));
   const hours = Math.floor((stats.totalMinutes % (60 * 24)) / 60);
@@ -106,6 +119,15 @@ export function LibraryView({
 
         // Media type filter
         if (typeFilter !== "all" && item.media.mediaType !== typeFilter) return false;
+
+        // Personal Rating Category filter
+        if (ratingFilter !== "all") {
+          if (ratingFilter === "not_rated") {
+            if (item.userRating !== null && item.userRating !== undefined) return false;
+          } else {
+            if (item.userRating !== ratingFilter) return false;
+          }
+        }
 
         // Genre filter
         if (selectedGenre !== "All") {
@@ -129,10 +151,35 @@ export function LibraryView({
         return true;
       })
       .sort((a, b) => {
-        if (sortBy === "highest_rated") {
-          const rA = a.userRating || a.media.rating || 0;
-          const rB = b.userRating || b.media.rating || 0;
-          return rB - rA;
+        if (sortBy === "masterpiece_first") {
+          const rA = getRatingRank(a.userRating);
+          const rB = getRatingRank(b.userRating);
+          if (rB !== rA) return rB - rA;
+          return (
+            new Date(b.updatedAt || 0).getTime() -
+            new Date(a.updatedAt || 0).getTime()
+          );
+        }
+        if (sortBy === "good_first") {
+          // Items marked 'good' first, then masterpiece, average, poor
+          const rankGood = (r: unknown) => (r === "good" ? 10 : getRatingRank(r));
+          const rA = rankGood(a.userRating);
+          const rB = rankGood(b.userRating);
+          if (rB !== rA) return rB - rA;
+          return (
+            new Date(b.updatedAt || 0).getTime() -
+            new Date(a.updatedAt || 0).getTime()
+          );
+        }
+        if (sortBy === "poor_first") {
+          // Only rated items first, ascending from poor to masterpiece
+          const rA = a.userRating ? getRatingRank(a.userRating) : 999;
+          const rB = b.userRating ? getRatingRank(b.userRating) : 999;
+          if (rA !== rB) return rA - rB;
+          return (
+            new Date(b.updatedAt || 0).getTime() -
+            new Date(a.updatedAt || 0).getTime()
+          );
         }
         if (sortBy === "release_year") {
           const yA = parseInt(a.media.year || "0", 10);
@@ -148,13 +195,22 @@ export function LibraryView({
           new Date(a.updatedAt || 0).getTime()
         );
       });
-  }, [initialItems, statusFilter, typeFilter, selectedGenre, searchQuery, sortBy]);
+  }, [
+    initialItems,
+    statusFilter,
+    typeFilter,
+    ratingFilter,
+    selectedGenre,
+    searchQuery,
+    sortBy,
+  ]);
 
   // Copy Profile URL or trigger Web Share
   const handleShareProfile = async () => {
-    const profileUrl = typeof window !== "undefined"
-      ? `${window.location.origin}/${user?.username ? `u/${user.username}` : "library"}`
-      : "https://cinetrack.app";
+    const profileUrl =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/${user?.username ? `u/${user.username}` : "library"}`
+        : "https://cinetrack.app";
 
     if (navigator.share) {
       try {
@@ -170,7 +226,11 @@ export function LibraryView({
     }
 
     try {
-      if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+      if (
+        typeof navigator !== "undefined" &&
+        navigator.clipboard &&
+        navigator.clipboard.writeText
+      ) {
         await navigator.clipboard.writeText(profileUrl);
       } else {
         const textArea = document.createElement("textarea");
@@ -190,26 +250,20 @@ export function LibraryView({
     }
   };
 
-  // Quick preset shortcuts for friend recommendation use cases
-  const applyPreset = (type: string, genre: string) => {
-    setTypeFilter(type);
-    setSelectedGenre(genre);
-    setStatusFilter("completed");
-    setSortBy("highest_rated");
-  };
-
   const hasActiveFilters =
     statusFilter !== "all" ||
     typeFilter !== "all" ||
+    ratingFilter !== "all" ||
     selectedGenre !== "All" ||
     searchQuery.trim() !== "";
 
   const resetFilters = () => {
     setStatusFilter("all");
     setTypeFilter("all");
+    setRatingFilter("all");
     setSelectedGenre("All");
     setSearchQuery("");
-    setSortBy("highest_rated");
+    setSortBy("recently_updated");
   };
 
   return (
@@ -321,14 +375,14 @@ export function LibraryView({
 
         <div className="p-3.5 sm:p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-[#F5C84B]/15 text-[#F5C84B] flex items-center justify-center shrink-0">
-            <Star className="w-5 h-5 fill-[#F5C84B]" />
+            <Sparkles className="w-5 h-5 fill-[#F5C84B]" />
           </div>
           <div className="min-w-0">
-            <div className="text-lg sm:text-xl font-bold text-[#F5F7FA] leading-none">
-              ★ {stats.avgRating > 0 ? stats.avgRating.toFixed(1) : "8.2"}
+            <div className="text-lg sm:text-xl font-bold text-[#F5C84B] leading-none">
+              {tasteCounts.masterpiece}
             </div>
             <div className="text-[11px] font-medium text-[#A8B0BD] mt-1">
-              Mean Rating
+              Masterpieces
             </div>
           </div>
         </div>
@@ -350,51 +404,7 @@ export function LibraryView({
         </div>
       </div>
 
-      {/* 3. Friend Recommendation Quick-Finder Banner */}
-      <div className="p-4 rounded-xl bg-gradient-to-r from-[#172233] via-[#151C27] to-[#151C27] border border-[#3B9EFF]/20 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#3B9EFF]/20 text-[#3B9EFF] flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <div>
-            <h3 className="text-xs sm:text-sm font-bold text-[#F5F7FA]">
-              Recommending to a friend?
-            </h3>
-            <p className="text-[11px] text-[#A8B0BD]">
-              Pick a mood or genre below to find your highest-rated titles instantly.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <button
-            type="button"
-            onClick={() => applyPreset("movie", "Comedy")}
-            className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#1D2734] hover:bg-[#2A374A] text-[#F5C84B] border border-white/[0.08] transition-colors flex items-center gap-1 cursor-pointer"
-          >
-            <Smile className="w-3.5 h-3.5" />
-            <span>Funny Movies</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset("all", "Sci-Fi")}
-            className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#1D2734] hover:bg-[#2A374A] text-[#3B9EFF] border border-white/[0.08] transition-colors flex items-center gap-1 cursor-pointer"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Mind-Bending Sci-Fi</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset("anime", "All")}
-            className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#1D2734] hover:bg-[#2A374A] text-[#A855F7] border border-white/[0.08] transition-colors flex items-center gap-1 cursor-pointer"
-          >
-            <Flame className="w-3.5 h-3.5" />
-            <span>Top Anime</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 4. Controls: Status Tabs, Search & Filters */}
+      {/* Controls: Status Tabs, My Rating, Search & Filters */}
       <div className="flex flex-col gap-3">
         {/* Status Filter Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
@@ -486,6 +496,65 @@ export function LibraryView({
             </select>
             <ArrowUpDown className="w-3.5 h-3.5 text-[#6F7886] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
+        </div>
+
+        {/* My Rating Categorical Filter Row */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#6F7886] mr-1 shrink-0">
+            My Rating:
+          </span>
+          {[
+            { id: "all", label: `All (${initialItems.length})` },
+            {
+              id: "masterpiece",
+              label: `Masterpiece (${tasteCounts.masterpiece})`,
+              dot: "bg-[#F5C84B]",
+              activeClass: "bg-[#F5C84B]/20 border-[#F5C84B] text-[#F5C84B]",
+            },
+            {
+              id: "good",
+              label: `Good (${tasteCounts.good})`,
+              dot: "bg-[#3B9EFF]",
+              activeClass: "bg-[#3B9EFF]/20 border-[#3B9EFF] text-[#3B9EFF]",
+            },
+            {
+              id: "average",
+              label: `Average (${tasteCounts.average})`,
+              dot: "bg-[#F59E0B]",
+              activeClass: "bg-[#F59E0B]/20 border-[#F59E0B] text-[#F59E0B]",
+            },
+            {
+              id: "poor",
+              label: `Poor (${tasteCounts.poor})`,
+              dot: "bg-[#F43F5E]",
+              activeClass: "bg-[#F43F5E]/20 border-[#F43F5E] text-[#F43F5E]",
+            },
+            {
+              id: "not_rated",
+              label: `Not Rated (${tasteCounts.unrated})`,
+              activeClass: "bg-white/20 border-white/40 text-white",
+            },
+          ].map((rTab) => {
+            const isSelected = ratingFilter === rTab.id;
+            return (
+              <button
+                key={rTab.id}
+                type="button"
+                onClick={() => setRatingFilter(rTab.id)}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer border select-none focus:outline-none focus-visible:outline-none flex items-center gap-1.5 ${
+                  isSelected
+                    ? rTab.activeClass ||
+                      "bg-[#3B9EFF] text-white border-[#3B9EFF] shadow-sm shadow-[#3B9EFF]/20"
+                    : "bg-[#151C27] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] border-white/[0.06] hover:border-white/[0.14]"
+                }`}
+              >
+                {rTab.dot && (
+                  <span className={`w-1.5 h-1.5 rounded-full ${rTab.dot} shrink-0`} />
+                )}
+                <span>{rTab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Quick Genre Pills (Especially Comedy for funny movie requests) */}

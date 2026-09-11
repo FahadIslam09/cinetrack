@@ -5,11 +5,12 @@ import Link from "next/link";
 import { Star, Plus, Check } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { QuickAddModal } from "../quick-add/quick-add-modal";
+import { RatingCategory, getRatingConfig } from "@/lib/rating";
 
 interface MediaCardProps {
   media: NormalizedMedia;
   status?: "watching" | "completed" | "plan_to_watch" | "on_hold" | "dropped";
-  userRating?: number;
+  userRating?: RatingCategory | string | number | null;
   userEpisodes?: number;
   badgeLabel?: string;
   className?: string;
@@ -20,6 +21,7 @@ export function MediaCard({
   media,
   status,
   userRating,
+  userEpisodes,
   badgeLabel,
   className,
   onUpdate,
@@ -130,19 +132,10 @@ export function MediaCard({
             </div>
           )}
 
-          <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-[#0F141D]/90 backdrop-blur font-bold text-[10px] flex items-center gap-0.5 pointer-events-none shadow-sm border border-white/[0.06] z-10">
-            <Star
-              className={`w-3 h-3 ${
-                userRating ? "fill-[#F5C84B] text-[#F5C84B]" : "fill-[#F5C84B]/70 text-[#F5C84B]/70"
-              }`}
-            />
-            <span className={userRating ? "text-[#F5C84B]" : "text-[#F5F7FA]"}>
-              {userRating
-                ? userRating.toFixed(1)
-                : media.rating
-                ? media.rating.toFixed(1)
-                : "—"}
-            </span>
+          {/* Top-Right External Rating Pill (IMDb / TMDb - strictly external) */}
+          <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-[#0F141D]/90 backdrop-blur font-bold text-[10px] flex items-center gap-0.5 pointer-events-none shadow-sm border border-white/[0.06] z-10 text-[#F5F7FA]">
+            <Star className="w-3 h-3 fill-[#F5C84B]/70 text-[#F5C84B]/70" />
+            <span>{media.rating ? media.rating.toFixed(1) : "—"}</span>
           </div>
 
           {/* Mobile Always-Visible Quick Action Button */}
@@ -173,15 +166,30 @@ export function MediaCard({
         >
           {media.title}
         </Link>
-        <div className="flex items-center justify-between text-[11px] font-medium mt-0.5 text-[#6F7886]">
+        <div className="flex items-center justify-between text-[11px] font-medium mt-0.5 text-[#6F7886] gap-1.5">
           <span className="truncate">
             {media.year || "2024"} · {formatText}
           </span>
-          {userRating && (
-            <span className="text-[10px] text-[#A8B0BD] font-medium shrink-0">
-              You: <strong className="text-[#F5C84B]">★ {userRating.toFixed(1)}</strong>
-            </span>
-          )}
+          {(() => {
+            const rConfig = getRatingConfig(userRating);
+            if (rConfig) {
+              return (
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded border shrink-0 uppercase tracking-wider ${rConfig.badgeClass}`}
+                >
+                  {rConfig.label}
+                </span>
+              );
+            }
+            if (status) {
+              return (
+                <span className="text-[10px] text-[#6F7886] font-medium shrink-0">
+                  Not rated
+                </span>
+              );
+            }
+            return null;
+          })()}
         </div>
       </div>
 
@@ -190,6 +198,11 @@ export function MediaCard({
         media={media}
         isOpen={isQuickAddOpen}
         onClose={() => setIsQuickAddOpen(false)}
+        initialLog={{
+          status,
+          rating: userRating,
+          episodesWatched: userEpisodes,
+        }}
         onSuccess={onUpdate}
       />
     </>
