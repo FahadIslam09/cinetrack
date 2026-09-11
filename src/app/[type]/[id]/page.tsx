@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Star, Plus, Film, Tv, Sparkles, Check, Bookmark } from "lucide-react";
+import { ArrowLeft, Star, Plus, Film, Tv, Check, Bookmark } from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { ReviewCard } from "@/components/reviews/review-card";

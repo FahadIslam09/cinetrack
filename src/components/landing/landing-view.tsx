@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import {
   Film,
   Tv,
-  Sparkles,
   Star,
   CheckCircle2,
   BookmarkPlus,

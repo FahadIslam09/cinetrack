@@ -8,7 +8,7 @@ import {
   Clock,
   Film,
   Tv,
-  Sparkles,
+  Crown,
   ChevronRight,
   Heart,
   Plus,
@@ -237,7 +237,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-[#1D2734] border border-white/[0.04]">
             <div className="flex items-center justify-between">
               <span className="text-[11px] uppercase font-bold tracking-wider text-[#F5F7FA] flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#F5C84B]" />
+                <Crown className="w-3.5 h-3.5 text-[#F5C84B]" />
                 <span>Taste Profile</span>
               </span>
               <span className="text-[10px] text-[#6F7886] font-semibold uppercase tracking-wider">

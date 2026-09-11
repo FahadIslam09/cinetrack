@@ -11,7 +11,8 @@ import {
   CheckCircle2,
   Film,
   Tv,
-  Sparkles,
+  Crown,
+  Flame,
   SlidersHorizontal,
   ArrowUpDown,
   ChevronDown,
@@ -272,7 +273,7 @@ export function LibraryView({
     { id: "all", label: "All Formats" },
     { id: "movie", label: "Movies", icon: <Film className="w-3.5 h-3.5" /> },
     { id: "series", label: "TV Shows", icon: <Tv className="w-3.5 h-3.5" /> },
-    { id: "anime", label: "Anime", icon: <Sparkles className="w-3.5 h-3.5" /> },
+    { id: "anime", label: "Anime", icon: <Flame className="w-3.5 h-3.5" /> },
   ], []);
 
   const ratingOptions = useMemo<DropdownOption[]>(() => [
@@ -574,7 +575,7 @@ export function LibraryView({
 
         <div className="p-3.5 sm:p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-[#F5C84B]/15 text-[#F5C84B] flex items-center justify-center shrink-0">
-            <Sparkles className="w-5 h-5 fill-[#F5C84B]" />
+            <Crown className="w-5 h-5 fill-[#F5C84B]/20" />
           </div>
           <div className="min-w-0">
             <div className="text-lg sm:text-xl font-bold text-[#F5C84B] leading-none">
