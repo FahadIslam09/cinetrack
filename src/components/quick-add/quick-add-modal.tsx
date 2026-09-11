@@ -113,6 +113,9 @@ export function QuickAddModal({
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const activeSearchIdRef = useRef<number>(0);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const searchTypeRef = useRef<"all" | "movie" | "series" | "anime">("all");
 
   // Watch info form state
   const [status, setStatus] = useState<WatchStatus>("watching");
@@ -174,6 +177,10 @@ export function QuickAddModal({
         setStep(1);
         setSearchQuery("");
         setSearchResults([]);
+        setSearchType("all");
+        searchTypeRef.current = "all";
+        setIsSearching(false);
+        setSearchError(null);
         setStatus("watching");
         setRating(null);
         setEpisodes(0);
@@ -188,9 +195,60 @@ export function QuickAddModal({
     }
   }, [isOpen, media, initialLog]);
 
-  // Live search debouncing
+  // Keep searchTypeRef in sync
+  useEffect(() => {
+    searchTypeRef.current = searchType;
+  }, [searchType]);
+
+  // Immediate search execution helper
+  const executeSearch = async (
+    query: string,
+    type: "all" | "movie" | "series" | "anime"
+  ) => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setSearchResults([]);
+      setIsSearching(false);
+      setSearchError(null);
+      return;
+    }
+
+    const searchId = ++activeSearchIdRef.current;
+    setIsSearching(true);
+    setSearchError(null);
+
+    try {
+      const res = await fetch(
+        `/api/search?q=${encodeURIComponent(trimmed)}&type=${type}`
+      );
+      if (searchId !== activeSearchIdRef.current) return;
+
+      if (!res.ok) {
+        throw new Error("Search service temporarily unavailable");
+      }
+      const data = await res.json();
+      if (searchId !== activeSearchIdRef.current) return;
+
+      setSearchResults(data.results || []);
+    } catch (err: any) {
+      if (searchId !== activeSearchIdRef.current) return;
+      console.error("QuickAdd search error:", err);
+      setSearchError(err.message || "Failed to search titles");
+      setSearchResults([]);
+    } finally {
+      if (searchId === activeSearchIdRef.current) {
+        setIsSearching(false);
+      }
+    }
+  };
+
+  // Debounced search on input typing
   useEffect(() => {
     if (!isOpen || step !== 1) return;
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
 
     const trimmed = searchQuery.trim();
     if (!trimmed) {
@@ -200,30 +258,31 @@ export function QuickAddModal({
       return;
     }
 
-    const timer = setTimeout(async () => {
-      setIsSearching(true);
-      setSearchError(null);
-
-      try {
-        const res = await fetch(
-          `/api/search?q=${encodeURIComponent(trimmed)}&type=${searchType}`
-        );
-        if (!res.ok) {
-          throw new Error("Search service temporarily unavailable");
-        }
-        const data = await res.json();
-        setSearchResults(data.results || []);
-      } catch (err: any) {
-        console.error("QuickAdd search error:", err);
-        setSearchError(err.message || "Failed to search titles");
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
+    debounceTimerRef.current = setTimeout(() => {
+      executeSearch(searchQuery, searchTypeRef.current);
     }, 300);
 
-    return () => clearTimeout(timer);
-  }, [searchQuery, searchType, isOpen, step]);
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [searchQuery, isOpen, step]);
+
+  // Handle format filter click immediately without 300ms debounce lag
+  const handleFilterClick = (newType: "all" | "movie" | "series" | "anime") => {
+    if (newType === searchType) return;
+    setSearchType(newType);
+    searchTypeRef.current = newType;
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    if (searchQuery.trim()) {
+      executeSearch(searchQuery, newType);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -313,7 +372,7 @@ export function QuickAddModal({
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
     >
       <div
-        className="w-full max-w-lg bg-[#151C27] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92dvh] sm:max-h-[88vh] animate-in zoom-in-95 duration-200"
+        className="w-full max-w-lg bg-[#151C27] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[88dvh] sm:h-[620px] max-h-[92dvh] sm:max-h-[88vh] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header & Step Indicator */}
@@ -458,7 +517,7 @@ export function QuickAddModal({
                     <button
                       key={fmt.id}
                       type="button"
-                      onClick={() => setSearchType(fmt.id as any)}
+                      onClick={() => handleFilterClick(fmt.id as any)}
                       className={`h-7 px-2.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-all duration-150 whitespace-nowrap cursor-pointer shrink-0 border select-none outline-none focus:outline-none focus-visible:outline-none active:scale-95 ${
                         isActive
                           ? "bg-[#3B9EFF] text-white border-[#3B9EFF] shadow-sm shadow-[#3B9EFF]/25"
@@ -473,81 +532,97 @@ export function QuickAddModal({
               </div>
 
               {/* Search Results / States */}
-              <div className="flex-1 min-h-[260px] flex flex-col">
-                {isSearching ? (
-                  <div className="flex-1 flex flex-col items-center justify-center gap-2.5 py-12 text-[#A8B0BD]">
+              <div className="flex-1 min-h-[320px] flex flex-col relative">
+                {searchResults.length > 0 ? (
+                  <div className="relative flex-1 flex flex-col min-h-0">
+                    {/* In-place Loading Overlay when updating existing results */}
+                    {isSearching && (
+                      <div className="absolute inset-0 bg-[#151C27]/50 backdrop-blur-[1px] rounded-xl z-10 flex items-center justify-center pointer-events-none transition-all duration-150">
+                        <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[#1D2734] border border-white/[0.1] shadow-xl text-xs font-semibold text-[#F5F7FA]">
+                          <Loader2 className="w-4 h-4 text-[#3B9EFF] animate-spin" />
+                          <span>Updating titles...</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div
+                      className={`space-y-2 overflow-y-auto flex-1 modal-scrollbar pr-1 transition-opacity duration-150 ${
+                        isSearching ? "opacity-35 pointer-events-none" : "opacity-100"
+                      }`}
+                    >
+                      {searchResults.map((item) => (
+                        <div
+                          key={item.id}
+                          onClick={() => handleSelectMedia(item)}
+                          className="group flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#1D2734]/70 hover:bg-[#1D2734] border border-white/[0.04] hover:border-[#3B9EFF]/40 transition-all cursor-pointer select-none active:scale-[0.99]"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            {item.posterPath ? (
+                              <img
+                                src={item.posterPath}
+                                alt={item.title}
+                                className="w-11 h-16 rounded-lg object-cover bg-[#151C27] shrink-0 shadow-md"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="w-11 h-16 rounded-lg bg-[#151C27] shrink-0 flex items-center justify-center text-[#6F7886] border border-white/[0.04]">
+                                {item.mediaType === "movie" ? (
+                                  <Film className="w-5 h-5" />
+                                ) : item.mediaType === "anime" ? (
+                                  <Flame className="w-5 h-5" />
+                                ) : (
+                                  <Tv className="w-5 h-5" />
+                                )}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <h4 className="font-bold text-sm text-[#F5F7FA] group-hover:text-[#3B9EFF] transition-colors truncate">
+                                {item.title}
+                              </h4>
+                              <div className="flex items-center gap-2 mt-1">
+                                {renderFormatBadge(item.mediaType)}
+                                {item.year && (
+                                  <span className="text-xs text-[#A8B0BD]">
+                                    {item.year}
+                                  </span>
+                                )}
+                                {item.rating > 0 && (
+                                  <span className="text-xs font-semibold text-[#F5C84B] flex items-center gap-1">
+                                    <Star className="w-3 h-3 fill-[#F5C84B]" />
+                                    <span>{item.rating.toFixed(1)}</span>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="shrink-0 pr-1">
+                            <div className="w-8 h-8 rounded-full bg-white/[0.06] group-hover:bg-[#3B9EFF] text-[#A8B0BD] group-hover:text-white flex items-center justify-center transition-all">
+                              <ChevronRight className="w-4 h-4" />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : isSearching ? (
+                  <div className="flex-1 min-h-[320px] flex flex-col items-center justify-center gap-2.5 py-12 text-[#A8B0BD]">
                     <Loader2 className="w-7 h-7 text-[#3B9EFF] animate-spin" />
                     <p className="text-xs font-medium">Searching titles...</p>
                   </div>
                 ) : searchError ? (
-                  <div className="flex-1 flex flex-col items-center justify-center gap-2 py-10 text-center">
+                  <div className="flex-1 min-h-[320px] flex flex-col items-center justify-center gap-2 py-10 text-center">
                     <p className="text-sm text-[#F43F5E]">{searchError}</p>
                     <button
                       type="button"
-                      onClick={() => setSearchQuery((q) => q + " ")}
+                      onClick={() => executeSearch(searchQuery, searchType)}
                       className="text-xs text-[#3B9EFF] hover:underline cursor-pointer"
                     >
                       Retry search
                     </button>
                   </div>
-                ) : searchResults.length > 0 ? (
-                  <div className="space-y-2 overflow-y-auto max-h-[380px] modal-scrollbar pr-1">
-                    {searchResults.map((item) => (
-                      <div
-                        key={item.id}
-                        onClick={() => handleSelectMedia(item)}
-                        className="group flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#1D2734]/70 hover:bg-[#1D2734] border border-white/[0.04] hover:border-[#3B9EFF]/40 transition-all cursor-pointer select-none active:scale-[0.99]"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          {item.posterPath ? (
-                            <img
-                              src={item.posterPath}
-                              alt={item.title}
-                              className="w-11 h-16 rounded-lg object-cover bg-[#151C27] shrink-0 shadow-md"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="w-11 h-16 rounded-lg bg-[#151C27] shrink-0 flex items-center justify-center text-[#6F7886] border border-white/[0.04]">
-                              {item.mediaType === "movie" ? (
-                                <Film className="w-5 h-5" />
-                              ) : item.mediaType === "anime" ? (
-                                <Flame className="w-5 h-5" />
-                              ) : (
-                                <Tv className="w-5 h-5" />
-                              )}
-                            </div>
-                          )}
-                          <div className="min-w-0">
-                            <h4 className="font-bold text-sm text-[#F5F7FA] group-hover:text-[#3B9EFF] transition-colors truncate">
-                              {item.title}
-                            </h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              {renderFormatBadge(item.mediaType)}
-                              {item.year && (
-                                <span className="text-xs text-[#A8B0BD]">
-                                  {item.year}
-                                </span>
-                              )}
-                              {item.rating > 0 && (
-                                <span className="text-xs font-semibold text-[#F5C84B] flex items-center gap-1">
-                                  <Star className="w-3 h-3 fill-[#F5C84B]" />
-                                  <span>{item.rating.toFixed(1)}</span>
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="shrink-0 pr-1">
-                          <div className="w-8 h-8 rounded-full bg-white/[0.06] group-hover:bg-[#3B9EFF] text-[#A8B0BD] group-hover:text-white flex items-center justify-center transition-all">
-                            <ChevronRight className="w-4 h-4" />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 ) : searchQuery.trim().length > 0 ? (
-                  <div className="flex-1 flex flex-col items-center justify-center gap-2 py-12 text-center text-[#A8B0BD]">
+                  <div className="flex-1 min-h-[320px] flex flex-col items-center justify-center gap-2 py-12 text-center text-[#A8B0BD]">
                     <Search className="w-8 h-8 text-[#6F7886]/60" />
                     <p className="text-sm font-medium text-[#F5F7FA]">
                       No titles found
@@ -557,7 +632,7 @@ export function QuickAddModal({
                     </p>
                   </div>
                 ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center gap-3 py-12 text-center text-[#A8B0BD]">
+                  <div className="flex-1 min-h-[320px] flex flex-col items-center justify-center gap-3 py-12 text-center text-[#A8B0BD]">
                     <div className="w-12 h-12 rounded-2xl bg-[#1D2734] border border-white/[0.06] flex items-center justify-center text-[#3B9EFF]">
                       <Search className="w-6 h-6" />
                     </div>
