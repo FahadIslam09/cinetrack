@@ -491,7 +491,11 @@ export function MediaCard({
                 e.stopPropagation();
                 setIsQuickAddOpen(true);
               }}
-              className="pointer-events-auto px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs font-semibold hover:bg-[#3B9EFF] hover:border-[#3B9EFF] shadow-2xl transition-all duration-200 active:scale-95 flex items-center gap-2 cursor-pointer"
+              className={`pointer-events-auto px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 backdrop-blur-xl text-white text-xs font-semibold shadow-2xl transition-all duration-200 active:scale-95 flex items-center gap-2 cursor-pointer ${
+                localStatus
+                  ? "border border-white/20 hover:border-[#22C55E] hover:shadow-[0_0_16px_rgba(34,197,94,0.35)]"
+                  : "border border-white/20 hover:border-[#3B9EFF] hover:shadow-[0_0_16px_rgba(59,158,255,0.35)]"
+              }`}
             >
               {localStatus ? (
                 <>
