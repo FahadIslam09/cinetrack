@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   Search,
@@ -81,6 +81,157 @@ const SORT_OPTIONS = [
   { id: "title", label: "Title (A–Z)" },
 ];
 
+interface DropdownOption {
+  id: string;
+  label: string;
+  count?: number;
+  dot?: string;
+  icon?: React.ReactNode;
+  color?: string;
+}
+
+interface CustomDropdownProps {
+  value: string;
+  onChange: (val: string) => void;
+  options: DropdownOption[];
+  align?: "left" | "right";
+  className?: string;
+  menuWidth?: string;
+  ariaLabel?: string;
+  suffixIcon?: "chevron" | "sort";
+  triggerLabel?: string;
+}
+
+function CustomDropdown({
+  value,
+  onChange,
+  options,
+  align = "left",
+  className = "",
+  menuWidth,
+  ariaLabel,
+  suffixIcon = "chevron",
+  triggerLabel,
+}: CustomDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const selectedOption = options.find((opt) => opt.id === value) || options[0];
+  const isFiltered = value !== "all" && value !== "All" && value !== "recently_updated";
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  const displayLabel = triggerLabel || selectedOption?.label;
+
+  return (
+    <div ref={dropdownRef} className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        aria-label={ariaLabel}
+        aria-expanded={isOpen}
+        className={`w-full h-9 px-3 rounded-lg text-xs font-medium flex items-center justify-between gap-1.5 transition-all duration-150 cursor-pointer border select-none ${
+          isFiltered
+            ? "bg-[#3B9EFF]/12 border-[#3B9EFF]/60 text-[#3B9EFF] font-semibold shadow-[0_0_12px_rgba(59,158,255,0.12)]"
+            : isOpen
+            ? "bg-[#1A2330] border-[#3B9EFF]/50 text-[#F5F7FA] ring-2 ring-[#3B9EFF]/20"
+            : "bg-[#151C27] hover:bg-[#1A2330] border-white/[0.08] hover:border-white/[0.18] text-[#A8B0BD] hover:text-[#F5F7FA]"
+        }`}
+      >
+        <span className="flex items-center gap-1.5 truncate">
+          {selectedOption?.dot && (
+            <span className={`w-2 h-2 rounded-full ${selectedOption.dot} shrink-0`} />
+          )}
+          {selectedOption?.icon && (
+            <span className="shrink-0 text-[#3B9EFF]">{selectedOption.icon}</span>
+          )}
+          <span className="truncate">{displayLabel}</span>
+        </span>
+
+        {suffixIcon === "sort" ? (
+          <ArrowUpDown
+            className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+              isFiltered || isOpen ? "text-[#3B9EFF]" : "text-[#6F7886]"
+            }`}
+          />
+        ) : (
+          <ChevronDown
+            className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
+              isOpen ? "rotate-180 text-[#3B9EFF]" : isFiltered ? "text-[#3B9EFF]" : "text-[#6F7886]"
+            }`}
+          />
+        )}
+      </button>
+
+      {isOpen && (
+        <div
+          className={`absolute top-full mt-1.5 z-50 ${
+            align === "right" ? "right-0" : "left-0"
+          } ${menuWidth || "min-w-[170px]"} max-w-[280px] bg-[#121824]/95 backdrop-blur-xl border border-white/[0.12] shadow-2xl shadow-black/80 rounded-xl overflow-hidden p-1 animate-in fade-in zoom-in-95 duration-150`}
+        >
+          <div className="max-h-[190px] overflow-y-auto custom-scrollbar pr-1.5 flex flex-col gap-0.5">
+            {options.map((opt) => {
+              const isSelected = opt.id === value;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => {
+                    onChange(opt.id);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors text-left ${
+                    isSelected
+                      ? "bg-[#3B9EFF]/15 text-[#3B9EFF] font-semibold"
+                      : "text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-white/[0.06]"
+                  }`}
+                >
+                  <span className="flex items-center gap-2 truncate">
+                    {opt.dot && <span className={`w-2 h-2 rounded-full ${opt.dot} shrink-0`} />}
+                    {opt.icon && <span className="shrink-0">{opt.icon}</span>}
+                    <span className={`truncate ${opt.color || ""}`}>{opt.label}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 shrink-0">
+                    {opt.count !== undefined && (
+                      <span
+                        className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                          isSelected
+                            ? "bg-[#3B9EFF]/20 text-[#3B9EFF]"
+                            : "bg-white/[0.05] text-[#6F7886]"
+                        }`}
+                      >
+                        {opt.count}
+                      </span>
+                    )}
+                    {isSelected && <Check className="w-3.5 h-3.5 text-[#3B9EFF] shrink-0" />}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function LibraryView({
   initialItems,
   user,
@@ -107,6 +258,53 @@ export function LibraryView({
       unrated: initialItems.filter((i) => !i.userRating).length,
     };
   }, [initialItems]);
+
+  const statusOptions = useMemo<DropdownOption[]>(() => [
+    { id: "all", label: "All", count: initialItems.length },
+    { id: "watching", label: "Watching", count: stats.watching, dot: "bg-[#3B9EFF] shadow-[0_0_8px_rgba(59,158,255,0.7)]" },
+    { id: "completed", label: "Completed", count: stats.completed, dot: "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]" },
+    { id: "plan_to_watch", label: "Plan to Watch", dot: "bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.7)]" },
+    { id: "on_hold", label: "On Hold", dot: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.7)]" },
+    { id: "dropped", label: "Dropped", dot: "bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.7)]" },
+  ], [initialItems.length, stats.watching, stats.completed]);
+
+  const formatOptions = useMemo<DropdownOption[]>(() => [
+    { id: "all", label: "All Formats" },
+    { id: "movie", label: "Movies", icon: <Film className="w-3.5 h-3.5" /> },
+    { id: "series", label: "TV Shows", icon: <Tv className="w-3.5 h-3.5" /> },
+    { id: "anime", label: "Anime", icon: <Sparkles className="w-3.5 h-3.5" /> },
+  ], []);
+
+  const ratingOptions = useMemo<DropdownOption[]>(() => [
+    { id: "all", label: "All Ratings", count: initialItems.length },
+    { id: "masterpiece", label: "Masterpiece", dot: "bg-[#F5C84B] shadow-[0_0_8px_rgba(245,200,75,0.7)]", count: tasteCounts.masterpiece, color: "text-[#F5C84B]" },
+    { id: "good", label: "Good", dot: "bg-[#3B9EFF] shadow-[0_0_8px_rgba(59,158,255,0.7)]", count: tasteCounts.good, color: "text-[#3B9EFF]" },
+    { id: "average", label: "Average", dot: "bg-[#F59E0B] shadow-[0_0_8px_rgba(245,158,11,0.7)]", count: tasteCounts.average, color: "text-[#F59E0B]" },
+    { id: "poor", label: "Poor", dot: "bg-[#F43F5E] shadow-[0_0_8px_rgba(244,63,94,0.7)]", count: tasteCounts.poor, color: "text-[#F43F5E]" },
+    { id: "not_rated", label: "Not Rated", dot: "bg-white/30", count: tasteCounts.unrated },
+  ], [initialItems.length, tasteCounts]);
+
+  const genreOptions = useMemo<DropdownOption[]>(() => [
+    { id: "All", label: "All Genres" },
+    ...GENRES.filter((g) => g !== "All").map((g) => ({ id: g, label: g })),
+  ], []);
+
+  const sortOptions = useMemo<DropdownOption[]>(() => 
+    SORT_OPTIONS.map((opt) => ({
+      id: opt.id,
+      label: opt.label,
+    })),
+  []);
+
+  const selectedStatusOpt = statusOptions.find((o) => o.id === statusFilter) || statusOptions[0];
+  const statusTriggerLabel = selectedStatusOpt.count !== undefined
+    ? `${selectedStatusOpt.label} (${selectedStatusOpt.count})`
+    : selectedStatusOpt.label;
+
+  const selectedRatingOpt = ratingOptions.find((o) => o.id === ratingFilter) || ratingOptions[0];
+  const ratingTriggerLabel = selectedRatingOpt.count !== undefined
+    ? `${selectedRatingOpt.label} (${selectedRatingOpt.count})`
+    : selectedRatingOpt.label;
 
   const days = Math.floor(stats.totalMinutes / (60 * 24));
   const hours = Math.floor((stats.totalMinutes % (60 * 24)) / 60);
@@ -405,153 +603,93 @@ export function LibraryView({
         </div>
       </div>
 
-      {/* Controls: Status Tabs, My Rating, Search & Filters */}
-      <div className="flex flex-col gap-3">
-        {/* Status Filter Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
-          {[
-            { id: "all", label: `All (${initialItems.length})` },
-            { id: "watching", label: `Watching (${stats.watching})` },
-            { id: "completed", label: `Completed (${stats.completed})` },
-            { id: "plan_to_watch", label: "Plan to Watch" },
-            { id: "on_hold", label: "On Hold" },
-            { id: "dropped", label: "Dropped" },
-          ].map((tab) => {
-            const isActive = statusFilter === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setStatusFilter(tab.id)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer select-none focus:outline-none focus-visible:outline-none border ${
-                  isActive
-                    ? "bg-[#3B9EFF] text-white border-[#3B9EFF] shadow-sm shadow-[#3B9EFF]/20"
-                    : "bg-[#151C27] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] border-white/[0.06] hover:border-white/[0.14]"
-                }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-
+      {/* Controls: Search, Status & Filter Dropdowns */}
+      <div className="flex flex-col gap-2.5">
         {/* Unified Search & Dropdown Filters Bar */}
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5">
-          {/* Instant Client Search */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-[#6F7886] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filter by title or genre..."
-              className="w-full h-9 pl-9 pr-8 rounded-lg bg-[#151C27] border border-white/[0.08] text-xs text-[#F5F7FA] placeholder-[#6F7886] focus:outline-none focus:border-[#3B9EFF] transition-colors"
+          {/* Row 1 on Mobile: Status Dropdown + Search Input Inline */}
+          <div className="flex items-center gap-2 flex-1">
+            {/* Status Dropdown */}
+            <CustomDropdown
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={statusOptions}
+              triggerLabel={statusTriggerLabel}
+              align="left"
+              className="shrink-0 w-[125px] sm:w-[140px]"
+              menuWidth="w-[185px]"
+              ariaLabel="Filter by watch status"
             />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6F7886] hover:text-white p-0.5"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+
+            {/* Instant Client Search */}
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-[#6F7886] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Filter by title or genre..."
+                className="w-full h-9 pl-9 pr-8 rounded-lg bg-[#151C27] border border-white/[0.08] text-xs text-[#F5F7FA] placeholder-[#6F7886] focus:outline-none focus:border-[#3B9EFF] transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6F7886] hover:text-white p-0.5"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* 4 Compact Filter Dropdowns: 2x2 Grid on Mobile, 4 Columns on Tablet, Flex on Desktop */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:flex lg:items-center gap-2 w-full lg:w-auto shrink-0">
             {/* 1. Format */}
-            <div className="relative w-full lg:w-auto">
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                aria-label="Filter by format"
-                className={`w-full h-9 pl-3 pr-7 rounded-lg text-xs font-medium cursor-pointer appearance-none border transition-colors focus:outline-none focus:border-[#3B9EFF] ${
-                  typeFilter !== "all"
-                    ? "bg-[#3B9EFF]/15 border-[#3B9EFF] text-[#3B9EFF] font-semibold"
-                    : "bg-[#151C27] border-white/[0.08] text-[#A8B0BD] hover:border-white/[0.16] hover:text-white"
-                }`}
-              >
-                <option value="all" className="bg-[#151C27] text-white">All Formats</option>
-                <option value="movie" className="bg-[#151C27] text-white">Movies</option>
-                <option value="series" className="bg-[#151C27] text-white">TV Shows</option>
-                <option value="anime" className="bg-[#151C27] text-white">Anime</option>
-              </select>
-              <ChevronDown className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${
-                typeFilter !== "all" ? "text-[#3B9EFF]" : "text-[#6F7886]"
-              }`} />
-            </div>
+            <CustomDropdown
+              value={typeFilter}
+              onChange={setTypeFilter}
+              options={formatOptions}
+              align="left"
+              className="w-full lg:w-auto lg:min-w-[125px]"
+              menuWidth="w-[165px]"
+              ariaLabel="Filter by format"
+            />
 
             {/* 2. Rating */}
-            <div className="relative w-full lg:w-auto">
-              <select
-                value={ratingFilter}
-                onChange={(e) => setRatingFilter(e.target.value)}
-                aria-label="Filter by personal rating"
-                className={`w-full h-9 pl-3 pr-7 rounded-lg text-xs font-medium cursor-pointer appearance-none border transition-colors focus:outline-none focus:border-[#3B9EFF] ${
-                  ratingFilter !== "all"
-                    ? "bg-[#3B9EFF]/15 border-[#3B9EFF] text-[#3B9EFF] font-semibold"
-                    : "bg-[#151C27] border-white/[0.08] text-[#A8B0BD] hover:border-white/[0.16] hover:text-white"
-                }`}
-              >
-                <option value="all" className="bg-[#151C27] text-white">All Ratings ({initialItems.length})</option>
-                <option value="masterpiece" className="bg-[#151C27] text-[#F5C84B]">★ Masterpiece ({tasteCounts.masterpiece})</option>
-                <option value="good" className="bg-[#151C27] text-[#3B9EFF]">★ Good ({tasteCounts.good})</option>
-                <option value="average" className="bg-[#151C27] text-[#F59E0B]">★ Average ({tasteCounts.average})</option>
-                <option value="poor" className="bg-[#151C27] text-[#F43F5E]">★ Poor ({tasteCounts.poor})</option>
-                <option value="not_rated" className="bg-[#151C27] text-[#A8B0BD]">Not Rated ({tasteCounts.unrated})</option>
-              </select>
-              <ChevronDown className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${
-                ratingFilter !== "all" ? "text-[#3B9EFF]" : "text-[#6F7886]"
-              }`} />
-            </div>
+            <CustomDropdown
+              value={ratingFilter}
+              onChange={setRatingFilter}
+              options={ratingOptions}
+              triggerLabel={ratingTriggerLabel}
+              align="right"
+              className="w-full lg:w-auto lg:min-w-[140px]"
+              menuWidth="w-[195px]"
+              ariaLabel="Filter by personal rating"
+            />
 
             {/* 3. Genre */}
-            <div className="relative w-full lg:w-auto">
-              <select
-                value={selectedGenre}
-                onChange={(e) => setSelectedGenre(e.target.value)}
-                aria-label="Filter by genre"
-                className={`w-full h-9 pl-3 pr-7 rounded-lg text-xs font-medium cursor-pointer appearance-none border transition-colors focus:outline-none focus:border-[#3B9EFF] ${
-                  selectedGenre !== "All"
-                    ? "bg-[#3B9EFF]/15 border-[#3B9EFF] text-[#3B9EFF] font-semibold"
-                    : "bg-[#151C27] border-white/[0.08] text-[#A8B0BD] hover:border-white/[0.16] hover:text-white"
-                }`}
-              >
-                <option value="All" className="bg-[#151C27] text-white">All Genres</option>
-                {GENRES.filter((g) => g !== "All").map((g) => (
-                  <option key={g} value={g} className="bg-[#151C27] text-white">
-                    {g}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${
-                selectedGenre !== "All" ? "text-[#3B9EFF]" : "text-[#6F7886]"
-              }`} />
-            </div>
+            <CustomDropdown
+              value={selectedGenre}
+              onChange={setSelectedGenre}
+              options={genreOptions}
+              align="left"
+              className="w-full lg:w-auto lg:min-w-[125px]"
+              menuWidth="w-[170px]"
+              ariaLabel="Filter by genre"
+            />
 
             {/* 4. Sort */}
-            <div className="relative w-full lg:w-auto">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                aria-label="Sort library titles"
-                className={`w-full h-9 pl-3 pr-7 rounded-lg text-xs font-medium cursor-pointer appearance-none border transition-colors focus:outline-none focus:border-[#3B9EFF] ${
-                  sortBy !== "updated_desc"
-                    ? "bg-[#3B9EFF]/15 border-[#3B9EFF] text-[#3B9EFF] font-semibold"
-                    : "bg-[#151C27] border-white/[0.08] text-[#A8B0BD] hover:border-white/[0.16] hover:text-white"
-                }`}
-              >
-                {SORT_OPTIONS.map((opt) => (
-                  <option key={opt.id} value={opt.id} className="bg-[#151C27] text-white">
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              <ArrowUpDown className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${
-                sortBy !== "updated_desc" ? "text-[#3B9EFF]" : "text-[#6F7886]"
-              }`} />
-            </div>
+            <CustomDropdown
+              value={sortBy}
+              onChange={setSortBy}
+              options={sortOptions}
+              align="right"
+              className="w-full lg:w-auto lg:min-w-[160px]"
+              menuWidth="w-[230px]"
+              suffixIcon="sort"
+              ariaLabel="Sort library titles"
+            />
           </div>
         </div>
 
