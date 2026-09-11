@@ -25,6 +25,8 @@ export interface MediaCardProps {
   currentSeason?: number;
   currentEpisode?: number;
   seasons?: SeasonInfo[];
+  reviewText?: string | null;
+  containsSpoilers?: boolean;
   badgeLabel?: string;
   tagLabel?: string;
   subMeta?: string;
@@ -41,6 +43,8 @@ export function MediaCard({
   currentSeason,
   currentEpisode,
   seasons,
+  reviewText,
+  containsSpoilers,
   badgeLabel,
   tagLabel,
   subMeta,
@@ -653,6 +657,8 @@ export function MediaCard({
           episodesWatched: progressInfo.watched,
           currentSeason: localSeason,
           currentEpisode: localEpisode,
+          reviewText: reviewText,
+          containsSpoilers: containsSpoilers,
         }}
         onSuccess={onUpdate}
       />

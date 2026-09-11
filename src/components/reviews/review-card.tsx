@@ -88,7 +88,18 @@ export function ReviewCard({
                 </span>
               </div>
               <p className="text-[11px] text-[#6F7886] mt-0.5 truncate">
-                Reviewed {mediaTitle} {editionTag ? `(${editionTag})` : ""}
+                Reviewed{" "}
+                {mediaHref ? (
+                  <Link
+                    href={mediaHref}
+                    className="text-[#dee2ef] font-medium hover:text-[#3B9EFF] hover:underline transition-colors"
+                  >
+                    {mediaTitle}
+                  </Link>
+                ) : (
+                  <span className="text-[#dee2ef] font-medium">{mediaTitle}</span>
+                )}{" "}
+                {editionTag ? `(${editionTag})` : ""}
               </p>
             </div>
           </div>

@@ -94,6 +94,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         currentSeason: l.log.currentSeason ?? 1,
         currentEpisode: l.log.currentEpisode ?? 1,
         reviewText: l.log.reviewText,
+        containsSpoilers: Boolean(l.log.containsSpoilers),
         updatedAt: l.log.updatedAt ? l.log.updatedAt.toISOString() : undefined,
       }));
     } catch (err) {

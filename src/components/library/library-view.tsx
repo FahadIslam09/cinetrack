@@ -38,6 +38,7 @@ export interface LibraryItem {
   currentEpisode?: number;
   seasons?: SeasonInfo[];
   reviewText?: string | null;
+  containsSpoilers?: boolean;
   updatedAt?: string | null;
 }
 
@@ -585,6 +586,8 @@ export function LibraryView({
               currentSeason={item.currentSeason}
               currentEpisode={item.currentEpisode}
               seasons={item.seasons}
+              reviewText={item.reviewText}
+              containsSpoilers={item.containsSpoilers}
               className="w-full"
             />
           ))}

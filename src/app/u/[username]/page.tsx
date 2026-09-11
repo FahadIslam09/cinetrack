@@ -89,6 +89,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       (isDemo ? 12 : 0),
   };
 
+  const userReviews = logs.filter(
+    (l) => l.log.reviewText && l.log.reviewText.trim().length > 0
+  );
+
   // Curator's Quadrant (Top 4 Favorites)
   const curatorQuadrant = [
     {
@@ -294,7 +298,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             Recent Logs
           </button>
           <button className="px-3 py-1.5 text-[#A8B0BD] hover:text-white transition-colors">
-            Reviews (28)
+            Reviews ({isDemo ? 28 : userReviews.length})
           </button>
         </div>
 
@@ -400,34 +404,75 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           </div>
 
           <div className="space-y-3">
-            <ReviewCard
-              author={{
-                name: user.fullName,
-                avatarUrl: user.avatarUrl,
-                isVerified: true,
-              }}
-              mediaTitle="Dune: Part Two"
-              rating="masterpiece"
-              reviewText="Villeneuve achieves an astonishing sensory convergence of religious fervor and sonic weaponization. Greig Fraser's infrared cinematography during the Giedi Prime gladiatorial sequence creates an almost alien physical presence rarely allowed in high-budget cinema."
-              likesCount={184}
-              commentsCount={32}
-              timeAgo="Yesterday"
-            />
+            {userReviews.length > 0 ? (
+              userReviews.map((item) => {
+                const mediaType = item.media.mediaType;
+                const mediaHref = `/${mediaType === "movie" ? "movie" : mediaType === "anime" ? "anime" : "tv"}/${item.media.sourceId}`;
+                const timeAgo = item.log.updatedAt
+                  ? new Intl.DateTimeFormat("en", {
+                      month: "short",
+                      day: "numeric",
+                    }).format(new Date(item.log.updatedAt))
+                  : "Recently";
 
-            <ReviewCard
-              author={{
-                name: user.fullName,
-                avatarUrl: user.avatarUrl,
-                isVerified: true,
-              }}
-              mediaTitle="Severance — 'The Cold Harbor'"
-              rating="masterpiece"
-              containsSpoilers={true}
-              reviewText="The season finale ties the severed floor dialectic directly to corporate religious worship. The execution of the elevator descent sequence is unmatched in contemporary prestige television."
-              likesCount={96}
-              commentsCount={14}
-              timeAgo="3 days ago"
-            />
+                return (
+                  <ReviewCard
+                    key={item.log.id}
+                    author={{
+                      name: user.fullName || user.username,
+                      avatarUrl: user.avatarUrl,
+                      isVerified: Boolean(profile),
+                    }}
+                    mediaTitle={item.media.title}
+                    mediaHref={mediaHref}
+                    rating={item.log.rating}
+                    containsSpoilers={Boolean(item.log.containsSpoilers)}
+                    reviewText={item.log.reviewText}
+                    likesCount={0}
+                    commentsCount={0}
+                    timeAgo={timeAgo}
+                  />
+                );
+              })
+            ) : isDemo ? (
+              <>
+                <ReviewCard
+                  author={{
+                    name: user.fullName,
+                    avatarUrl: user.avatarUrl,
+                    isVerified: true,
+                  }}
+                  mediaTitle="Dune: Part Two"
+                  rating="masterpiece"
+                  reviewText="Villeneuve achieves an astonishing sensory convergence of religious fervor and sonic weaponization. Greig Fraser's infrared cinematography during the Giedi Prime gladiatorial sequence creates an almost alien physical presence rarely allowed in high-budget cinema."
+                  likesCount={184}
+                  commentsCount={32}
+                  timeAgo="Yesterday"
+                />
+
+                <ReviewCard
+                  author={{
+                    name: user.fullName,
+                    avatarUrl: user.avatarUrl,
+                    isVerified: true,
+                  }}
+                  mediaTitle="Severance — 'The Cold Harbor'"
+                  rating="masterpiece"
+                  containsSpoilers={true}
+                  reviewText="The season finale ties the severed floor dialectic directly to corporate religious worship. The execution of the elevator descent sequence is unmatched in contemporary prestige television."
+                  likesCount={96}
+                  commentsCount={14}
+                  timeAgo="3 days ago"
+                />
+              </>
+            ) : (
+              <div className="p-8 rounded-xl bg-[#151C27] border border-white/[0.06] text-center flex flex-col items-center justify-center gap-2">
+                <p className="text-sm font-semibold text-[#F5F7FA]">No dispatches published yet</p>
+                <p className="text-xs text-[#6F7886] max-w-sm">
+                  Personal reviews and summaries logged for titles will appear here on your public profile.
+                </p>
+              </div>
+            )}
           </div>
         </section>
 
