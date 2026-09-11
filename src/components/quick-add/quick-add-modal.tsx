@@ -459,10 +459,10 @@ export function QuickAddModal({
                       key={fmt.id}
                       type="button"
                       onClick={() => setSearchType(fmt.id as any)}
-                      className={`h-7 px-2.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer shrink-0 ${
+                      className={`h-7 px-2.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-all duration-150 whitespace-nowrap cursor-pointer shrink-0 border select-none outline-none focus:outline-none focus-visible:outline-none active:scale-95 ${
                         isActive
-                          ? "bg-[#3B9EFF] text-white shadow-sm shadow-[#3B9EFF]/25"
-                          : "bg-[#1D2734] text-[#A8B0BD] hover:text-white hover:bg-[#253244] border border-white/[0.04]"
+                          ? "bg-[#3B9EFF] text-white border-[#3B9EFF] shadow-sm shadow-[#3B9EFF]/25"
+                          : "bg-[#1D2734] text-[#A8B0BD] hover:text-white hover:bg-[#253244] border-white/[0.06] hover:border-white/[0.14]"
                       }`}
                     >
                       {Icon && <Icon className="w-3 h-3" />}
@@ -636,10 +636,10 @@ export function QuickAddModal({
                         key={st}
                         type="button"
                         onClick={() => setStatus(st)}
-                        className={`h-10 px-3 rounded-xl text-xs font-semibold border transition-all flex items-center gap-2 cursor-pointer active:scale-95 ${
+                        className={`h-10 px-3 rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center gap-2 cursor-pointer active:scale-95 select-none outline-none focus:outline-none focus-visible:outline-none ${
                           isActive
                             ? `${cfg.bg} ${cfg.border} ${cfg.text} shadow-sm`
-                            : "bg-[#1D2734] border-white/[0.06] text-[#A8B0BD] hover:text-white hover:bg-[#253244]"
+                            : "bg-[#1D2734] border-white/[0.06] text-[#A8B0BD] hover:text-white hover:bg-[#253244] hover:border-white/[0.14]"
                         }`}
                       >
                         <Icon className="w-4 h-4 shrink-0" />
@@ -727,10 +727,10 @@ export function QuickAddModal({
                         key={catId}
                         type="button"
                         onClick={() => setRating(isSelected ? null : catId)}
-                        className={`h-10 px-2.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer ${
+                        className={`h-10 px-2.5 rounded-lg text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none ${
                           isSelected
                             ? `${def.activeBg} ${def.activeBorder} ${def.activeText} shadow-sm`
-                            : "bg-[#151C27] border-white/[0.06] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330]"
+                            : "bg-[#151C27] border-white/[0.06] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] hover:border-white/[0.14]"
                         }`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full ${def.dotColor} shrink-0`} />

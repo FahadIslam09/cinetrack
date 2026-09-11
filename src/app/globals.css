@@ -55,9 +55,12 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+button,
 button:focus,
-button:focus-visible {
-  outline: none;
+button:focus-visible,
+button:active {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
 /* Hide scrollbars for horizontal shelves */
