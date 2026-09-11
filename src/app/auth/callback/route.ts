@@ -5,9 +5,13 @@ import { profiles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/library";
+
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "localhost:3000";
+  const protocol = request.headers.get("x-forwarded-proto") || (host.includes("localhost") || host.includes("127.0.0.1") || host.includes("192.168.") ? "http" : "https");
+  const origin = `${protocol}://${host}`;
 
   if (code) {
     const supabase = await createClient();

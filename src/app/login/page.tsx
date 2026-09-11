@@ -264,11 +264,10 @@ function LoginForm() {
         )}
 
         {/* Google OAuth Button */}
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          disabled={googleLoading || loading}
-          className="w-full h-11 sm:h-12 rounded-xl bg-white hover:bg-gray-100 text-gray-900 font-semibold text-xs sm:text-sm flex items-center justify-center gap-3 shadow-md active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+        <Link
+          href={`/auth/login/google${next !== "/library" ? `?next=${encodeURIComponent(next)}` : ""}`}
+          onClick={() => setGoogleLoading(true)}
+          className="w-full h-11 sm:h-12 rounded-xl bg-white hover:bg-gray-100 text-gray-900 font-semibold text-xs sm:text-sm flex items-center justify-center gap-3 shadow-md active:scale-95 transition-all cursor-pointer"
         >
           {googleLoading ? (
             <Loader2 className="w-4 h-4 animate-spin text-gray-900" />
@@ -293,7 +292,7 @@ function LoginForm() {
             </svg>
           )}
           <span>Continue with Google</span>
-        </button>
+        </Link>
 
         {/* Divider */}
         <div className="flex items-center gap-3 my-5">
