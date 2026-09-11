@@ -711,7 +711,7 @@ export function QuickAddModal({
                         key={st}
                         type="button"
                         onClick={() => setStatus(st)}
-                        className={`h-10 px-3 rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center gap-2 cursor-pointer active:scale-95 select-none outline-none focus:outline-none focus-visible:outline-none ${
+                        className={`h-10 px-3 rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center gap-2 min-w-0 cursor-pointer active:scale-95 select-none outline-none focus:outline-none focus-visible:outline-none ${
                           isActive
                             ? `${cfg.bg} ${cfg.border} ${cfg.text} shadow-sm`
                             : "bg-[#1D2734] border-white/[0.06] text-[#A8B0BD] hover:text-white hover:bg-[#253244] hover:border-white/[0.14]"
@@ -802,7 +802,7 @@ export function QuickAddModal({
                         key={catId}
                         type="button"
                         onClick={() => setRating(isSelected ? null : catId)}
-                        className={`h-10 px-2.5 rounded-lg text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none ${
+                        className={`h-10 px-2 rounded-lg text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-1.5 min-w-0 active:scale-95 cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none ${
                           isSelected
                             ? `${def.activeBg} ${def.activeBorder} ${def.activeText} shadow-sm`
                             : "bg-[#151C27] border-white/[0.06] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] hover:border-white/[0.14]"
@@ -810,7 +810,6 @@ export function QuickAddModal({
                       >
                         <span className={`w-1.5 h-1.5 rounded-full ${def.dotColor} shrink-0`} />
                         <span>{def.label}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 shrink-0 ml-0.5" />}
                       </button>
                     );
                   })}
