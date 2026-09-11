@@ -44,6 +44,18 @@ export function CustomDropdown({
   const [isOpen, setIsOpen] = useState(false);
   const [openUpward, setOpenUpward] = useState(dropDirection === "up");
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const selectedItemRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (dropDirection === "up") setOpenUpward(true);
+    else if (dropDirection === "down") setOpenUpward(false);
+  }, [dropDirection]);
+
+  useEffect(() => {
+    if (isOpen && selectedItemRef.current) {
+      selectedItemRef.current.scrollIntoView({ block: "nearest" });
+    }
+  }, [isOpen]);
 
   const selectedOption = options.find((opt) => opt.id === value) || options[0];
   const isFiltered =
@@ -65,11 +77,24 @@ export function CustomDropdown({
           document.documentElement;
         const parentRect = scrollParent.getBoundingClientRect();
 
-        const spaceBelow = parentRect.bottom - rect.bottom;
-        const spaceAbove = rect.top - parentRect.top;
+        const viewportBottom = window.innerHeight;
+        const effectiveBottom =
+          scrollParent && scrollParent !== document.documentElement
+            ? Math.min(parentRect.bottom, viewportBottom)
+            : viewportBottom;
 
-        // If space below is less than 210px and space above has more clearance, open upward
-        setOpenUpward(spaceBelow < 210 && spaceAbove > spaceBelow);
+        const viewportTop = 0;
+        const effectiveTop =
+          scrollParent && scrollParent !== document.documentElement
+            ? Math.max(parentRect.top, viewportTop)
+            : viewportTop;
+
+        const spaceBelow = effectiveBottom - rect.bottom;
+        const spaceAbove = rect.top - effectiveTop;
+
+        const MENU_HEIGHT = 205;
+        // Default: opens downward. If no space below and more clearance above, open upward
+        setOpenUpward(spaceBelow < MENU_HEIGHT && spaceAbove > spaceBelow);
       }
     }
     setIsOpen((prev) => !prev);
@@ -154,6 +179,7 @@ export function CustomDropdown({
               return (
                 <button
                   key={opt.id}
+                  ref={isSelected ? selectedItemRef : undefined}
                   type="button"
                   onClick={() => {
                     onChange(opt.id);

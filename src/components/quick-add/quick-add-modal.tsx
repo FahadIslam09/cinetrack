@@ -940,7 +940,7 @@ export function QuickAddModal({
 
               {/* Watch Progress (TV & Anime) - Clean, compact, only for Watching status */}
               {selectedMedia.mediaType !== "movie" && status === "watching" && (
-                <div className="flex flex-col gap-2 rounded-xl bg-[#1D2734]/50 border border-white/[0.06] p-3 animate-in fade-in duration-200">
+                <div className="relative z-20 flex flex-col gap-2 rounded-xl bg-[#1D2734]/50 border border-white/[0.06] p-3 animate-in fade-in duration-200">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-semibold uppercase tracking-wider text-[#A8B0BD]">
                       Watch Progress
@@ -973,7 +973,7 @@ export function QuickAddModal({
                           menuWidth="w-full min-w-[150px]"
                           buttonClassName="h-10 rounded-xl"
                           highlightActive={false}
-                          dropDirection="up"
+                          dropDirection="auto"
                           ariaLabel="Select Season"
                         />
                       </div>
@@ -991,7 +991,8 @@ export function QuickAddModal({
                           menuWidth="w-full min-w-[150px]"
                           buttonClassName="h-10 rounded-xl"
                           highlightActive={false}
-                          dropDirection="up"
+                          dropDirection="auto"
+                          align="right"
                           ariaLabel="Select Episode"
                         />
                       </div>
