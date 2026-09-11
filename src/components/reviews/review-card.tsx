@@ -45,6 +45,9 @@ export function ReviewCard({
   const [revealed, setRevealed] = useState(!containsSpoilers);
   const [likes, setLikes] = useState(likesCount);
   const [liked, setLiked] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const isLong = (reviewText?.length || 0) > 180 || (reviewText?.split("\n").length || 0) > 3;
 
   const toggleLike = () => {
     setLiked(!liked);
@@ -65,66 +68,65 @@ export function ReviewCard({
     <div className="flex flex-col justify-between p-4 sm:p-5 rounded-xl bg-[#1D2734] hover:bg-[#1A2330] border border-white/[0.06] transition-colors gap-3.5 shadow-sm">
       <div>
         {/* Critic Header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            {author.avatarUrl ? (
-              <img
-                src={author.avatarUrl}
-                alt={author.name}
-                className="w-9 h-9 rounded-full object-cover ring-1 ring-white/10 shrink-0 bg-[#151C27]"
-              />
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-[#3B9EFF]/20 border border-[#3B9EFF]/30 flex items-center justify-center text-xs font-bold text-[#3B9EFF] shrink-0">
-                {author.name.slice(0, 2).toUpperCase()}
-              </div>
-            )}
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 className="font-bold text-sm text-[#F5F7FA] leading-tight truncate">
-                  {author.name}
-                </h4>
-                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${badgeBg}`}>
-                  {roleText}
-                </span>
-              </div>
-              <p className="text-[11px] text-[#6F7886] mt-0.5 truncate">
-                Reviewed{" "}
-                {mediaHref ? (
-                  <Link
-                    href={mediaHref}
-                    className="text-[#dee2ef] font-medium hover:text-[#3B9EFF] hover:underline transition-colors"
-                  >
-                    {mediaTitle}
-                  </Link>
-                ) : (
-                  <span className="text-[#dee2ef] font-medium">{mediaTitle}</span>
-                )}{" "}
-                {editionTag ? `(${editionTag})` : ""}
-              </p>
+        <div className="flex items-center gap-2.5 mb-3">
+          {author.avatarUrl ? (
+            <img
+              src={author.avatarUrl}
+              alt={author.name}
+              className="w-9 h-9 rounded-full object-cover ring-1 ring-white/10 shrink-0 bg-[#151C27]"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-[#3B9EFF]/20 border border-[#3B9EFF]/30 flex items-center justify-center text-xs font-bold text-[#3B9EFF] shrink-0">
+              {author.name.slice(0, 2).toUpperCase()}
             </div>
-          </div>
+          )}
 
-          {(() => {
-            const rConfig = getRatingConfig(rating);
-            if (rConfig) {
-              return (
-                <span
-                  className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider border shrink-0 ${rConfig.badgeClass}`}
+          <div className="flex-1 min-w-0">
+            {/* Top Row: Name on left, Rating on right (same line) */}
+            <div className="flex items-center justify-between gap-2">
+              <h4 className="font-bold text-sm text-[#F5F7FA] leading-tight truncate">
+                {author.name}
+              </h4>
+
+              {(() => {
+                const rConfig = getRatingConfig(rating);
+                if (rConfig) {
+                  return (
+                    <span
+                      className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider border shrink-0 ${rConfig.badgeClass}`}
+                    >
+                      {rConfig.label}
+                    </span>
+                  );
+                }
+                if (typeof rating === "number") {
+                  return (
+                    <span className="text-[#F5C84B] font-bold text-xs sm:text-sm flex items-center gap-1 shrink-0">
+                      <Star className="w-3.5 h-3.5 fill-[#F5C84B] text-[#F5C84B]" />
+                      {rating.toFixed(1)}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
+            </div>
+
+            {/* Bottom Row: Reviewed title */}
+            <p className="text-[11px] text-[#6F7886] mt-0.5 truncate">
+              Reviewed{" "}
+              {mediaHref ? (
+                <Link
+                  href={mediaHref}
+                  className="text-[#dee2ef] font-medium hover:text-[#3B9EFF] hover:underline transition-colors"
                 >
-                  {rConfig.label}
-                </span>
-              );
-            }
-            if (typeof rating === "number") {
-              return (
-                <span className="text-[#F5C84B] font-bold text-xs sm:text-sm flex items-center gap-1 shrink-0">
-                  <Star className="w-3.5 h-3.5 fill-[#F5C84B] text-[#F5C84B]" />
-                  {rating.toFixed(1)}
-                </span>
-              );
-            }
-            return null;
-          })()}
+                  {mediaTitle}
+                </Link>
+              ) : (
+                <span className="text-[#dee2ef] font-medium">{mediaTitle}</span>
+              )}{" "}
+              {editionTag ? `(${editionTag})` : ""}
+            </p>
+          </div>
         </div>
 
 
@@ -139,7 +141,7 @@ export function ReviewCard({
         {/* Review Body with Spoiler Guard */}
         {containsSpoilers && !revealed ? (
           <div className="relative rounded-lg overflow-hidden min-h-[90px] flex items-center justify-center">
-            <p className="blur-md select-none pointer-events-none text-xs sm:text-sm text-[#A8B0BD] leading-relaxed">
+            <p className="blur-md select-none pointer-events-none text-xs sm:text-sm text-[#A8B0BD] leading-relaxed line-clamp-3">
               {reviewText}
             </p>
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0F141D]/80 backdrop-blur-sm p-3 text-center z-10 rounded-lg">
@@ -157,13 +159,26 @@ export function ReviewCard({
             </div>
           </div>
         ) : (
-          <p
-            className={`text-xs sm:text-sm text-[#A8B0BD] leading-relaxed ${
-              isBengali ? "font-bengali text-[15px] leading-7 text-[#F5F7FA]" : ""
-            }`}
-          >
-            {reviewText}
-          </p>
+          <div>
+            <p
+              className={`text-xs sm:text-sm text-[#A8B0BD] leading-relaxed whitespace-pre-line ${
+                !isExpanded ? "line-clamp-3" : ""
+              } ${
+                isBengali ? "font-bengali text-[15px] leading-7 text-[#F5F7FA]" : ""
+              }`}
+            >
+              {reviewText}
+            </p>
+            {isLong && (
+              <button
+                type="button"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="mt-1.5 text-xs font-semibold text-[#3B9EFF] hover:underline cursor-pointer transition-colors focus:outline-none block"
+              >
+                {isExpanded ? "See Less" : "See More"}
+              </button>
+            )}
+          </div>
         )}
       </div>
 

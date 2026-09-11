@@ -397,10 +397,9 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
               {/* Review Card */}
               <ReviewCard
                 author={{
-                  name: contextualReview.author.fullName,
+                  name: contextualReview.author.fullName || contextualReview.author.username,
                   avatarUrl: contextualReview.author.avatarUrl,
                   isVerified: contextualReview.author.isVerified,
-                  role: `@${contextualReview.author.username}`,
                 }}
                 mediaTitle={media.title}
                 rating={contextualReview.rating}
