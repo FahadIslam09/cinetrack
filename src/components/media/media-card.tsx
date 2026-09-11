@@ -144,6 +144,25 @@ export function MediaCard({
                 : "—"}
             </span>
           </div>
+
+          {/* Mobile Always-Visible Quick Action Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsQuickAddOpen(true);
+            }}
+            className="md:hidden absolute bottom-1.5 right-1.5 w-7 h-7 rounded-full bg-[#151C27]/90 backdrop-blur border border-white/15 text-white flex items-center justify-center shadow-lg active:scale-90 z-20 cursor-pointer"
+            title={status ? "Update in Library" : "Add to Library"}
+            aria-label={status ? "Update in Library" : "Add to Library"}
+          >
+            {status === "completed" ? (
+              <Check className="w-3.5 h-3.5 text-[#22C55E]" />
+            ) : (
+              <Plus className="w-3.5 h-3.5 text-[#3B9EFF]" />
+            )}
+          </button>
         </div>
 
         {/* Metadata Below Poster */}
