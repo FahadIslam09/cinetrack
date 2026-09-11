@@ -101,6 +101,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       rating: "masterpiece" as const,
       quote: "“Visual brutalism paired with melancholic human inquiry.”",
       poster: "https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
+      href: "/movie/335984",
     },
     {
       title: "Stalker",
@@ -108,6 +109,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       rating: "masterpiece" as const,
       quote: "“The purest translation of existential faith into kinetic rhythm.”",
       poster: "https://image.tmdb.org/t/p/w500/lUEy6h5Cq18bKqS9eS8qS6v6pW4.jpg",
+      href: "/movie/1398",
     },
     {
       title: "Arrival",
@@ -115,6 +117,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       rating: "masterpiece" as const,
       quote: "“Linguistic determinism as a profound vessel for grief.”",
       poster: "https://image.tmdb.org/t/p/w500/x2O0hvQcbIRgUuYg8sE4LgKj9N2.jpg",
+      href: "/movie/329865",
     },
     {
       title: "Perfect Blue",
@@ -122,6 +125,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       rating: "masterpiece" as const,
       quote: "“Dizzying match-cuts deconstructing early internet voyeurism.”",
       poster: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx437-GviWlU9bN4yP.jpg",
+      href: "/anime/1024",
     },
   ];
 
@@ -316,9 +320,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {curatorQuadrant.map((item) => (
-              <div
+              <Link
                 key={item.title}
-                className="flex flex-col rounded-xl overflow-hidden bg-[#151C27] border border-white/[0.06] shadow-sm group"
+                href={`${item.href}?from=${user.username}`}
+                className="flex flex-col rounded-xl overflow-hidden bg-[#151C27] border border-white/[0.06] shadow-sm group hover:border-[#3B9EFF]/40 transition-colors cursor-pointer"
               >
                 <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#1D2734]">
                   <img
@@ -331,7 +336,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   </div>
                 </div>
                 <div className="p-3 flex flex-col gap-1">
-                  <h3 className="font-bold text-xs text-[#F5F7FA] truncate">
+                  <h3 className="font-bold text-xs text-[#F5F7FA] truncate group-hover:text-[#3B9EFF] transition-colors">
                     {item.title}
                   </h3>
                   <span className="text-[10px] text-[#A8B0BD] truncate">
@@ -341,7 +346,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     {item.quote}
                   </p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
@@ -354,14 +359,19 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-3">
+            <Link
+              href={`/series/97951?from=${user.username}`}
+              className="p-3.5 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-3 hover:border-[#3B9EFF]/40 transition-colors group cursor-pointer"
+            >
               <img
                 src="https://image.tmdb.org/t/p/w185/7q41C2Z5iQzF5iM7B3zQk8c8Q7r.jpg"
                 alt="Severance"
                 className="w-12 h-16 rounded-lg object-cover bg-[#1D2734]"
               />
               <div className="flex-1 min-w-0">
-                <h4 className="font-bold text-sm text-[#F5F7FA] truncate">Severance</h4>
+                <h4 className="font-bold text-sm text-[#F5F7FA] group-hover:text-[#3B9EFF] transition-colors truncate">
+                  Severance
+                </h4>
                 <p className="text-xs text-[#A8B0BD]">Season 2 • Apple TV+</p>
                 <div className="flex items-center justify-between text-[11px] text-[#3B9EFF] font-semibold mt-2">
                   <span>Ep 7/10</span>
@@ -371,16 +381,21 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   <div className="w-[70%] h-full bg-[#3B9EFF]" />
                 </div>
               </div>
-            </div>
+            </Link>
 
-            <div className="p-3.5 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-3">
+            <Link
+              href={`/anime/113415?from=${user.username}`}
+              className="p-3.5 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-3 hover:border-[#3B9EFF]/40 transition-colors group cursor-pointer"
+            >
               <img
                 src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx136430-b3k09n8yL0b6.jpg"
                 alt="Vinland Saga"
                 className="w-12 h-16 rounded-lg object-cover bg-[#1D2734]"
               />
               <div className="flex-1 min-w-0">
-                <h4 className="font-bold text-sm text-[#F5F7FA] truncate">Vinland Saga</h4>
+                <h4 className="font-bold text-sm text-[#F5F7FA] group-hover:text-[#3B9EFF] transition-colors truncate">
+                  Vinland Saga
+                </h4>
                 <p className="text-xs text-[#A8B0BD]">Season 2 • MAPPA</p>
                 <div className="flex items-center justify-between text-[11px] text-[#3B9EFF] font-semibold mt-2">
                   <span>Ep 22/24</span>
@@ -390,7 +405,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   <div className="w-[91%] h-full bg-[#3B9EFF]" />
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         </section>
 
@@ -407,7 +422,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             {userReviews.length > 0 ? (
               userReviews.map((item) => {
                 const mediaType = item.media.mediaType;
-                const mediaHref = `/${mediaType === "movie" ? "movie" : mediaType === "anime" ? "anime" : "tv"}/${item.media.sourceId}`;
+                const mediaHref = `/${mediaType === "movie" ? "movie" : mediaType === "anime" ? "anime" : "tv"}/${item.media.sourceId}?from=${user.username}`;
                 const timeAgo = item.log.updatedAt
                   ? new Intl.DateTimeFormat("en", {
                       month: "short",
@@ -443,6 +458,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     isVerified: true,
                   }}
                   mediaTitle="Dune: Part Two"
+                  mediaHref={`/movie/693134?from=${user.username}`}
                   rating="masterpiece"
                   reviewText="Villeneuve achieves an astonishing sensory convergence of religious fervor and sonic weaponization. Greig Fraser's infrared cinematography during the Giedi Prime gladiatorial sequence creates an almost alien physical presence rarely allowed in high-budget cinema."
                   likesCount={184}
@@ -457,6 +473,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     isVerified: true,
                   }}
                   mediaTitle="Severance — 'The Cold Harbor'"
+                  mediaHref={`/series/97951?from=${user.username}`}
                   rating="masterpiece"
                   containsSpoilers={true}
                   reviewText="The season finale ties the severed floor dialectic directly to corporate religious worship. The execution of the elevator descent sequence is unmatched in contemporary prestige television."

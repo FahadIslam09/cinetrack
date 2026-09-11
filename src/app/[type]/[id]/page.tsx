@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Star, Plus, Film, Tv, Check, Bookmark } from "lucide-react";
+import { ArrowLeft, Star, Plus, Film, Tv, Check, Bookmark, ChevronRight } from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { ReviewCard } from "@/components/reviews/review-card";
@@ -16,16 +16,25 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getUserMediaLog } from "@/actions/tracking";
 import { MediaDetailsActions } from "./actions-client";
+import { db } from "@/lib/db";
+import { profiles, userMediaLogs } from "@/lib/db/schema";
+import { eq, and, isNotNull, desc } from "drizzle-orm";
 
 interface PageProps {
   params: Promise<{
     type: string;
     id: string;
   }>;
+  searchParams?: Promise<{
+    from?: string;
+    ref?: string;
+  }>;
 }
 
-export default async function MediaDetailsPage({ params }: PageProps) {
+export default async function MediaDetailsPage({ params, searchParams }: PageProps) {
   const { type, id } = await params;
+  const resolvedSearchParams = (await searchParams) || {};
+  const fromUsername = resolvedSearchParams.from || resolvedSearchParams.ref;
 
   let media: NormalizedMedia | null = null;
   let rawDetails: any = null;
@@ -50,6 +59,154 @@ export default async function MediaDetailsPage({ params }: PageProps) {
 
   // Fetch user tracking log for this title if authenticated
   const userLog = await getUserMediaLog(media.id);
+
+  // Fetch contextual curator review if user arrived from a specific profile (?from=username)
+  let contextualReview: {
+    author: {
+      username: string;
+      fullName: string;
+      avatarUrl?: string;
+      isVerified?: boolean;
+    };
+    rating?: string | null;
+    reviewText: string;
+    containsSpoilers: boolean;
+    updatedAt?: Date | null;
+  } | null = null;
+
+  if (fromUsername) {
+    const cleanUsername = fromUsername.replace(/^@/, "").toLowerCase().trim();
+    try {
+      const [refProfile] = await db
+        .select()
+        .from(profiles)
+        .where(eq(profiles.username, cleanUsername))
+        .limit(1);
+
+      if (refProfile) {
+        const [refLog] = await db
+          .select()
+          .from(userMediaLogs)
+          .where(
+            and(
+              eq(userMediaLogs.userId, refProfile.id),
+              eq(userMediaLogs.mediaId, media.id)
+            )
+          )
+          .limit(1);
+
+        if (refLog && refLog.reviewText && refLog.reviewText.trim().length > 0) {
+          contextualReview = {
+            author: {
+              username: refProfile.username,
+              fullName: refProfile.fullName || refProfile.username,
+              avatarUrl: refProfile.avatarUrl || undefined,
+              isVerified: true,
+            },
+            rating: refLog.rating,
+            reviewText: refLog.reviewText.trim(),
+            containsSpoilers: Boolean(refLog.containsSpoilers),
+            updatedAt: refLog.updatedAt,
+          };
+        }
+      } else if (cleanUsername === "elenavance") {
+        // Fallback demo curator review if testing demo profile Elena Vance
+        if (
+          media.title.toLowerCase().includes("dune") ||
+          id === "693134"
+        ) {
+          contextualReview = {
+            author: {
+              username: "elenavance",
+              fullName: "Elena Vance",
+              avatarUrl:
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop",
+              isVerified: true,
+            },
+            rating: "masterpiece",
+            reviewText:
+              "Villeneuve achieves an astonishing sensory convergence of religious fervor and sonic weaponization. Greig Fraser's infrared cinematography during the Giedi Prime gladiatorial sequence creates an almost alien physical presence rarely allowed in high-budget cinema.",
+            containsSpoilers: false,
+            updatedAt: new Date(),
+          };
+        } else if (
+          media.title.toLowerCase().includes("severance") ||
+          id === "97951"
+        ) {
+          contextualReview = {
+            author: {
+              username: "elenavance",
+              fullName: "Elena Vance",
+              avatarUrl:
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop",
+              isVerified: true,
+            },
+            rating: "masterpiece",
+            reviewText:
+              "The season finale ties the severed floor dialectic directly to corporate religious worship. The execution of the elevator descent sequence is unmatched in contemporary prestige television.",
+            containsSpoilers: true,
+            updatedAt: new Date(),
+          };
+        }
+      }
+    } catch (err) {
+      console.error("Contextual review query error:", err);
+    }
+  }
+
+  // Fetch broader community reviews for lower Member Dispatches section
+  let communityReviews: Array<{
+    id: string;
+    author: {
+      name: string;
+      avatarUrl?: string;
+      isVerified?: boolean;
+    };
+    rating?: string | null;
+    reviewText: string;
+    containsSpoilers?: boolean;
+    timeAgo: string;
+  }> = [];
+
+  try {
+    const rawCommunityLogs = await db
+      .select({
+        log: userMediaLogs,
+        profile: profiles,
+      })
+      .from(userMediaLogs)
+      .innerJoin(profiles, eq(userMediaLogs.userId, profiles.id))
+      .where(
+        and(
+          eq(userMediaLogs.mediaId, media.id),
+          isNotNull(userMediaLogs.reviewText)
+        )
+      )
+      .orderBy(desc(userMediaLogs.updatedAt))
+      .limit(6);
+
+    communityReviews = rawCommunityLogs
+      .filter((r) => r.log.reviewText && r.log.reviewText.trim().length > 0)
+      .map((r) => ({
+        id: r.log.id,
+        author: {
+          name: r.profile.fullName || r.profile.username,
+          avatarUrl: r.profile.avatarUrl || undefined,
+          isVerified: true,
+        },
+        rating: r.log.rating,
+        reviewText: r.log.reviewText!,
+        containsSpoilers: Boolean(r.log.containsSpoilers),
+        timeAgo: r.log.updatedAt
+          ? new Intl.DateTimeFormat("en", {
+              month: "short",
+              day: "numeric",
+            }).format(new Date(r.log.updatedAt))
+          : "Recent log",
+      }));
+  } catch (err) {
+    console.error("Community reviews fetch error:", err);
+  }
 
   // Streaming Providers (Default to US or first available country)
   const providers =
@@ -173,6 +330,72 @@ export default async function MediaDetailsPage({ params }: PageProps) {
 
         {/* Content Body */}
         <div className="max-w-5xl mx-auto px-4 w-full py-6 flex flex-col gap-6">
+          {/* Contextual Curator Review (Only shown when navigated from a user profile with a review) */}
+          {contextualReview && (
+            <section
+              aria-label="Curator Review"
+              className="flex flex-col gap-2.5 rounded-2xl bg-gradient-to-b from-[#182333]/90 to-[#121822]/90 border border-[#3B9EFF]/30 p-3.5 sm:p-5 shadow-lg shadow-black/40 relative overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300"
+            >
+              {/* Subtle top glow highlight */}
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#3B9EFF]/50 to-transparent" />
+
+              {/* Context Header */}
+              <div className="flex items-center justify-between gap-2 flex-wrap pb-1 border-b border-white/[0.06]">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3B9EFF] opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#3B9EFF]" />
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-[#F5F7FA] tracking-wide">
+                    Note from{" "}
+                    <Link
+                      href={`/u/${contextualReview.author.username}`}
+                      className="text-[#3B9EFF] hover:underline font-bold"
+                    >
+                      @{contextualReview.author.username}
+                    </Link>
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-[#3B9EFF]/15 text-[#3B9EFF] border border-[#3B9EFF]/30 hidden sm:inline-block">
+                    Curator Dispatch
+                  </span>
+                </div>
+
+                <Link
+                  href={`/u/${contextualReview.author.username}`}
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-[#A8B0BD] hover:text-[#F5F7FA] transition-colors group cursor-pointer"
+                >
+                  <span>View @{contextualReview.author.username}&apos;s Profile</span>
+                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </div>
+
+              {/* Review Card */}
+              <ReviewCard
+                author={{
+                  name: contextualReview.author.fullName,
+                  avatarUrl: contextualReview.author.avatarUrl,
+                  isVerified: contextualReview.author.isVerified,
+                  role: `@${contextualReview.author.username}`,
+                }}
+                mediaTitle={media.title}
+                rating={contextualReview.rating}
+                containsSpoilers={contextualReview.containsSpoilers}
+                reviewText={contextualReview.reviewText}
+                likesCount={0}
+                commentsCount={0}
+                timeAgo={
+                  contextualReview.updatedAt
+                    ? new Intl.DateTimeFormat("en", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }).format(new Date(contextualReview.updatedAt))
+                    : "Recently logged"
+                }
+              />
+            </section>
+          )}
+
           {/* Where to Watch (OTT Providers) */}
           <section className="p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex flex-col gap-3">
             <div className="flex items-center justify-between">
@@ -266,33 +489,51 @@ export default async function MediaDetailsPage({ params }: PageProps) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <ReviewCard
-                author={{
-                  name: "শৌভিক ভট্টাচার্য (Souvik)",
-                  isVerified: true,
-                }}
-                mediaTitle={media.title}
-                rating="masterpiece"
-                reviewText="হিলদুর গুদনাদোত্তিরের শব্দের অনুরণন এবং সিনেমাটোগ্রাফি চলচ্চিত্রটিকে এক অন্য মাত্রায় নিয়ে গেছে। নিস্তব্ধতার যে ওজন থাকতে পারে, তা পরিচালক অত্যন্ত সংবেদনশীলতার সাথে ফুটিয়ে তুলেছেন।"
-                isBengali={true}
-                likesCount={142}
-                commentsCount={29}
-                timeAgo="Recent log"
-              />
+              {communityReviews.length > 0 ? (
+                communityReviews.map((rev) => (
+                  <ReviewCard
+                    key={rev.id}
+                    author={rev.author}
+                    mediaTitle={media.title}
+                    rating={rev.rating}
+                    reviewText={rev.reviewText}
+                    containsSpoilers={rev.containsSpoilers}
+                    likesCount={0}
+                    commentsCount={0}
+                    timeAgo={rev.timeAgo}
+                  />
+                ))
+              ) : (
+                <>
+                  <ReviewCard
+                    author={{
+                      name: "শৌভিক ভট্টাচার্য (Souvik)",
+                      isVerified: true,
+                    }}
+                    mediaTitle={media.title}
+                    rating="masterpiece"
+                    reviewText="হিলদুর গুদনাদোত্তিরের শব্দের অনুরণন এবং সিনেমাটোগ্রাফি চলচ্চিত্রটিকে এক অন্য মাত্রায় নিয়ে গেছে। নিস্তব্ধতার যে ওজন থাকতে পারে, তা পরিচালক অত্যন্ত সংবেদনশীলতার সাথে ফুটিয়ে তুলেছেন।"
+                    isBengali={true}
+                    likesCount={142}
+                    commentsCount={29}
+                    timeAgo="Recent log"
+                  />
 
-              <ReviewCard
-                author={{
-                  name: "Julian Vane",
-                  isVerified: false,
-                }}
-                mediaTitle={media.title}
-                rating="good"
-                containsSpoilers={true}
-                reviewText="The second act pacing accelerates relentlessly toward a sequence that fundamentally questions the characters' allegiances. One of the strongest cinematic conclusions this year."
-                likesCount={88}
-                commentsCount={14}
-                timeAgo="2 days ago"
-              />
+                  <ReviewCard
+                    author={{
+                      name: "Julian Vane",
+                      isVerified: false,
+                    }}
+                    mediaTitle={media.title}
+                    rating="good"
+                    containsSpoilers={true}
+                    reviewText="The second act pacing accelerates relentlessly toward a sequence that fundamentally questions the characters' allegiances. One of the strongest cinematic conclusions this year."
+                    likesCount={88}
+                    commentsCount={14}
+                    timeAgo="2 days ago"
+                  />
+                </>
+              )}
             </div>
           </section>
 
