@@ -412,10 +412,10 @@ export function LibraryView({
                 key={tab.id}
                 type="button"
                 onClick={() => setStatusFilter(tab.id)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer select-none focus:outline-none focus-visible:outline-none border ${
                   isActive
-                    ? "bg-[#3B9EFF] text-white shadow-sm"
-                    : "bg-[#151C27] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1D2734] border border-white/[0.04]"
+                    ? "bg-[#3B9EFF] text-white border-[#3B9EFF] shadow-sm shadow-[#3B9EFF]/20"
+                    : "bg-[#151C27] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] border-white/[0.06] hover:border-white/[0.14]"
                 }`}
               >
                 {tab.label}
@@ -459,10 +459,10 @@ export function LibraryView({
                 key={t.id}
                 type="button"
                 onClick={() => setTypeFilter(t.id)}
-                className={`h-9 px-3 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer border ${
+                className={`h-9 px-3 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer border select-none focus:outline-none focus-visible:outline-none ${
                   typeFilter === t.id
                     ? "bg-[#3B9EFF]/20 border-[#3B9EFF] text-[#3B9EFF]"
-                    : "bg-[#151C27] border-white/[0.06] text-[#A8B0BD] hover:text-white hover:bg-[#1D2734]"
+                    : "bg-[#151C27] border-white/[0.06] text-[#A8B0BD] hover:text-white hover:bg-[#1A2330] hover:border-white/[0.14]"
                 }`}
               >
                 {t.label}
@@ -500,10 +500,10 @@ export function LibraryView({
                 key={g}
                 type="button"
                 onClick={() => setSelectedGenre(g)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer border select-none focus:outline-none focus-visible:outline-none ${
                   isSelected
-                    ? "bg-white/[0.16] text-[#F5F7FA] font-bold ring-1 ring-white/30"
-                    : "bg-[#151C27] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1D2734]"
+                    ? "bg-[#3B9EFF] text-white font-semibold border-[#3B9EFF] shadow-sm shadow-[#3B9EFF]/20"
+                    : "bg-[#151C27] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] border-white/[0.06] hover:border-white/[0.14]"
                 }`}
               >
                 {g}
