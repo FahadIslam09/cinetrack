@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Home, Compass, Film, Tv, BookmarkCheck } from "lucide-react";
+import { Home, Compass, Film, Tv, BookmarkCheck, Plus } from "lucide-react";
 
 function BottomNavContent() {
   const pathname = usePathname();
@@ -22,6 +22,13 @@ function BottomNavContent() {
       href: "/discover",
       icon: Compass,
       isActive: pathname === "/discover" && !currentType,
+    },
+    {
+      label: "Add",
+      href: "/search",
+      icon: Plus,
+      isActive: pathname.startsWith("/search"),
+      isPrimary: true,
     },
     {
       label: "Library",
@@ -55,12 +62,36 @@ function BottomNavContent() {
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 pb-safe bg-[#151C27]/95 backdrop-blur-xl border-t border-white/[0.06] shadow-2xl">
       <div className="h-16 flex items-center justify-around px-2">
         {navItems.map((item) => {
+          if (item.isPrimary) {
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="flex flex-col items-center justify-center min-w-[52px] h-full py-1 gap-0.5 group focus:outline-none"
+                aria-label="Add to Library"
+              >
+                <div
+                  className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all active:scale-95 ${
+                    item.isActive
+                      ? "bg-[#5AAFFF] text-white shadow-[#3B9EFF]/40 ring-2 ring-[#3B9EFF]/50"
+                      : "bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white shadow-[#3B9EFF]/25"
+                  }`}
+                >
+                  <Plus className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <span className="text-[10px] font-semibold text-[#3B9EFF] tracking-tight">
+                  {item.label}
+                </span>
+              </Link>
+            );
+          }
+
           const Icon = item.icon;
           return (
             <Link
               key={item.label}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-14 h-full py-1 gap-1 transition-colors ${
+              className={`flex flex-col items-center justify-center min-w-[48px] h-full py-1 gap-1 transition-colors ${
                 item.isActive
                   ? "text-[#3B9EFF]"
                   : "text-[#A8B0BD] hover:text-[#F5F7FA]"
