@@ -126,14 +126,15 @@ export function QuickAddModal({
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Lock background scroll when modal is open
+  // Lock background scroll when modal is open, restore cleanly when closed
   useEffect(() => {
     if (isOpen) {
-      const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.overflow = originalOverflow;
+        document.body.style.overflow = "";
       };
+    } else {
+      document.body.style.overflow = "";
     }
   }, [isOpen]);
 
@@ -412,7 +413,7 @@ export function QuickAddModal({
         </div>
 
         {/* Modal Body Container */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col min-h-0">
+        <div className="flex-1 overflow-y-auto modal-scrollbar p-4 sm:p-5 flex flex-col min-h-0">
           {/* =========================================================================
               STEP 1: SEARCH & SELECT
              ========================================================================= */}
@@ -490,7 +491,7 @@ export function QuickAddModal({
                     </button>
                   </div>
                 ) : searchResults.length > 0 ? (
-                  <div className="space-y-2 overflow-y-auto max-h-[380px] pr-1">
+                  <div className="space-y-2 overflow-y-auto max-h-[380px] modal-scrollbar pr-1">
                     {searchResults.map((item) => (
                       <div
                         key={item.id}
