@@ -23,9 +23,10 @@ import {
   ChevronLeft,
   ArrowLeft,
   ChevronDown,
+  Trash2,
 } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
-import { upsertMediaLog } from "@/actions/tracking";
+import { upsertMediaLog, deleteMediaLog } from "@/actions/tracking";
 import { RatingCategory, RATING_CONFIG, parseRating } from "@/lib/rating";
 import { SeasonInfo } from "@/app/api/tv/[id]/seasons/route";
 import { CustomDropdown, DropdownOption } from "@/components/ui/custom-dropdown";
@@ -142,6 +143,11 @@ export function QuickAddModal({
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Delete confirmation state
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   // Lock background scroll when modal is open, restore cleanly when closed
   useEffect(() => {
     if (isOpen) {
@@ -154,23 +160,30 @@ export function QuickAddModal({
     }
   }, [isOpen]);
 
-  // Handle ESC key to close modal
+  // Handle ESC key to close modal or dismiss confirmation popup
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isSubmitting) {
-        onClose();
+      if (e.key === "Escape") {
+        if (isDeleteConfirmOpen) {
+          if (!isDeleting) setIsDeleteConfirmOpen(false);
+        } else if (!isSubmitting) {
+          onClose();
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isSubmitting, onClose]);
+  }, [isOpen, isSubmitting, isDeleting, isDeleteConfirmOpen, onClose]);
 
   // Initialize modal state on open or media change
   useEffect(() => {
     if (isOpen) {
       setErrorMessage(null);
       setSaveSuccess(false);
+      setIsDeleteConfirmOpen(false);
+      setIsDeleting(false);
+      setDeleteError(null);
 
       if (media) {
         // Pre-selected media (e.g. from card "+ Add") -> start directly at Step 2
@@ -509,6 +522,34 @@ export function QuickAddModal({
     }
   };
 
+  // Delete media from library
+  const handleDelete = async () => {
+    const targetMedia = selectedMedia || media;
+    if (!targetMedia) return;
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const res = await deleteMediaLog(targetMedia.id);
+      if (res?.error) {
+        setDeleteError(res.error);
+        setIsDeleting(false);
+      } else {
+        setIsDeleting(false);
+        setIsDeleteConfirmOpen(false);
+        onClose();
+        onSuccess?.();
+        startTransition(() => {
+          router.refresh();
+        });
+      }
+    } catch (err: any) {
+      setDeleteError(err.message || "Failed to remove item from library.");
+      setIsDeleting(false);
+    }
+  };
+
   // Helper for format badge
   const renderFormatBadge = (type: string, className = "text-[10px]") => {
     if (type === "anime") {
@@ -561,7 +602,7 @@ export function QuickAddModal({
                 </button>
               )}
               <h2 id="add-to-library-title" className="text-base sm:text-lg font-bold text-[#F5F7FA]">
-                Add to Library
+                {initialLog?.status ? "Edit Library Entry" : "Add to Library"}
               </h2>
             </div>
             <button
@@ -1203,14 +1244,28 @@ export function QuickAddModal({
             </div>
           ) : step === 2 ? (
             <div className="flex items-center justify-between w-full">
-              <button
-                type="button"
-                onClick={() => (media ? onClose() : setStep(1))}
-                className="h-10 px-4 rounded-xl text-xs font-semibold text-[#A8B0BD] hover:text-white hover:bg-white/[0.04] transition-colors inline-flex items-center gap-1.5 cursor-pointer"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>{media ? "Cancel" : "Back"}</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => (media ? onClose() : setStep(1))}
+                  className="h-10 px-4 rounded-xl text-xs font-semibold text-[#A8B0BD] hover:text-white hover:bg-white/[0.04] transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>{media ? "Cancel" : "Back"}</span>
+                </button>
+
+                {initialLog?.status && (
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleteConfirmOpen(true)}
+                    className="h-10 px-3 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 transition-all inline-flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Remove from Library</span>
+                    <span className="sm:hidden">Remove</span>
+                  </button>
+                )}
+              </div>
 
               <button
                 type="button"
@@ -1223,19 +1278,34 @@ export function QuickAddModal({
             </div>
           ) : (
             <div className="flex items-center justify-between w-full">
-              <button
-                type="button"
-                disabled={isSubmitting || saveSuccess}
-                onClick={() => setStep(2)}
-                className="h-10 px-4 rounded-xl text-xs font-semibold text-[#A8B0BD] hover:text-white hover:bg-white/[0.04] disabled:opacity-40 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Back to Edit</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={isSubmitting || saveSuccess || isDeleting}
+                  onClick={() => setStep(2)}
+                  className="h-10 px-4 rounded-xl text-xs font-semibold text-[#A8B0BD] hover:text-white hover:bg-white/[0.04] disabled:opacity-40 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Back to Edit</span>
+                </button>
+
+                {initialLog?.status && (
+                  <button
+                    type="button"
+                    disabled={isSubmitting || saveSuccess || isDeleting}
+                    onClick={() => setIsDeleteConfirmOpen(true)}
+                    className="h-10 px-3 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 transition-all inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-40 active:scale-95"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Remove from Library</span>
+                    <span className="sm:hidden">Remove</span>
+                  </button>
+                )}
+              </div>
 
               <button
                 type="button"
-                disabled={isSubmitting || saveSuccess}
+                disabled={isSubmitting || saveSuccess || isDeleting}
                 onClick={handleSave}
                 className="h-10 px-6 rounded-xl text-xs font-semibold bg-[#3B9EFF] hover:bg-[#5AAFFF] disabled:opacity-50 text-white transition-all active:scale-95 shadow-md shadow-[#3B9EFF]/20 inline-flex items-center gap-2 cursor-pointer"
               >
@@ -1252,7 +1322,7 @@ export function QuickAddModal({
                 ) : (
                   <>
                     <Plus className="w-4 h-4" />
-                    <span>Add to Library</span>
+                    <span>{initialLog?.status ? "Update Library" : "Add to Library"}</span>
                   </>
                 )}
               </button>
@@ -1260,6 +1330,119 @@ export function QuickAddModal({
           )}
         </div>
       </div>
+
+      {/* =========================================================================
+          REMOVE FROM LIBRARY CONFIRMATION POPUP (Glassmorphic, Premium, Polished)
+         ========================================================================= */}
+      {isDeleteConfirmOpen && (selectedMedia || media) && (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="delete-confirm-title"
+          aria-describedby="delete-confirm-desc"
+          className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => {
+            if (!isDeleting) setIsDeleteConfirmOpen(false);
+          }}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-2xl bg-gradient-to-b from-[#18202F] via-[#121722] to-[#0D121A] border border-rose-500/25 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95),0_0_45px_rgba(244,63,94,0.12)] p-6 overflow-hidden animate-in zoom-in-95 duration-200 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Ambient Top Glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-24 bg-rose-500/15 blur-2xl pointer-events-none rounded-full" />
+
+            {/* Illuminated Danger Badge */}
+            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500/20 to-rose-950/40 border border-rose-500/30 flex items-center justify-center text-rose-400 mx-auto mb-4 shadow-[0_0_24px_rgba(244,63,94,0.25)] ring-1 ring-rose-400/20">
+              <Trash2 className="w-6 h-6 stroke-[2.2]" />
+            </div>
+
+            {/* Heading */}
+            <h3
+              id="delete-confirm-title"
+              className="text-lg font-bold text-[#F5F7FA] tracking-tight mb-1"
+            >
+              Remove from Library?
+            </h3>
+
+            {/* Media Preview Chip */}
+            {(() => {
+              const item = selectedMedia || media;
+              if (!item) return null;
+              return (
+                <div className="my-3.5 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center gap-3 text-left">
+                  {item.posterPath ? (
+                    <img
+                      src={item.posterPath}
+                      alt={item.title}
+                      className="w-10 h-14 object-cover rounded-lg shrink-0 shadow-sm border border-white/10"
+                    />
+                  ) : (
+                    <div className="w-10 h-14 rounded-lg bg-[#151C27] shrink-0 flex items-center justify-center text-[#6F7886]">
+                      <Film className="w-5 h-5" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-semibold text-xs text-[#F5F7FA] truncate">
+                      {item.title}
+                    </h4>
+                    <div className="flex items-center gap-2 mt-1 text-[11px] text-[#A8B0BD]">
+                      {item.year && <span>{item.year}</span>}
+                      <span className="w-1 h-1 rounded-full bg-white/20" />
+                      <span className="capitalize">{item.mediaType}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Explanatory Warning */}
+            <p
+              id="delete-confirm-desc"
+              className="text-xs text-[#A8B0BD] leading-relaxed mb-5"
+            >
+              This will permanently delete this title, your watch progress, rating, and personal notes from your library.
+            </p>
+
+            {/* Error Message if Deletion Failed */}
+            {deleteError && (
+              <div className="mb-4 p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/25 text-xs text-rose-400 text-center animate-in fade-in">
+                {deleteError}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setIsDeleteConfirmOpen(false)}
+                className="flex-1 h-10 rounded-xl text-xs font-semibold text-[#A8B0BD] hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-all cursor-pointer disabled:opacity-40"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleDelete}
+                className="flex-1 h-10 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 active:scale-[0.98] border border-rose-400/40 shadow-[0_0_20px_rgba(244,63,94,0.35)] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Removing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Yes, Remove</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

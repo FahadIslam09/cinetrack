@@ -225,3 +225,34 @@ export async function getUserMediaLog(mediaId: string) {
     return null;
   }
 }
+
+export async function deleteMediaLog(mediaId: string) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { error: "Authentication required to remove items." };
+    }
+
+    await db
+      .delete(userMediaLogs)
+      .where(
+        and(
+          eq(userMediaLogs.userId, user.id),
+          eq(userMediaLogs.mediaId, mediaId)
+        )
+      );
+
+    revalidatePath("/library");
+    revalidatePath("/");
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("deleteMediaLog error:", err);
+    return { error: err.message || "Failed to remove item from library." };
+  }
+}
