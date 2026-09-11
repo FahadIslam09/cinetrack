@@ -314,21 +314,13 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
                     src={media.posterPath}
                     alt={media.title}
                     className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                      const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
-                      if (fallback) fallback.classList.remove("hidden");
-                    }}
                   />
-                ) : null}
-                <div
-                  className={`w-full h-full flex flex-col items-center justify-center text-xs text-[#6F7886] p-2 text-center bg-[#161E2C] ${
-                    media.posterPath ? "hidden" : "flex"
-                  }`}
-                >
-                  <Film className="w-8 h-8 text-white/10 mb-1" />
-                  <span>No Poster</span>
-                </div>
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-xs text-[#6F7886] p-2 text-center bg-[#161E2C]">
+                    <Film className="w-8 h-8 text-white/10 mb-1" />
+                    <span>No Poster</span>
+                  </div>
+                )}
                 <span className="absolute top-1.5 left-1.5 bg-[#0F141D]/90 backdrop-blur-sm text-[#F5C84B] px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide flex items-center gap-1 border border-white/[0.08] z-10">
                   <span className="text-[#A8B0BD] text-[9px] font-semibold">IMDb</span>
                   <Star className="w-3 h-3 fill-[#F5C84B]" />
