@@ -13,6 +13,8 @@ export interface LogMediaParams {
   status: "watching" | "completed" | "plan_to_watch" | "on_hold" | "dropped";
   rating?: RatingCategory | null;
   episodesWatched?: number;
+  currentSeason?: number;
+  currentEpisode?: number;
   reviewText?: string | null;
   containsSpoilers?: boolean;
   isFavorite?: boolean;
@@ -60,6 +62,8 @@ export async function upsertMediaLog(params: LogMediaParams) {
       status,
       rating,
       episodesWatched = 0,
+      currentSeason = 1,
+      currentEpisode = 1,
       reviewText,
       containsSpoilers = false,
       isFavorite = false,
@@ -116,6 +120,8 @@ export async function upsertMediaLog(params: LogMediaParams) {
           status,
           rating: finalRating,
           episodesWatched,
+          currentSeason,
+          currentEpisode,
           reviewText: reviewText?.trim() || null,
           containsSpoilers,
           isFavorite,
@@ -127,6 +133,8 @@ export async function upsertMediaLog(params: LogMediaParams) {
             status,
             rating: finalRating,
             episodesWatched,
+            currentSeason,
+            currentEpisode,
             reviewText: reviewText?.trim() || null,
             containsSpoilers,
             isFavorite,
@@ -169,6 +177,7 @@ export async function incrementEpisode(mediaId: string, totalEpisodes: number = 
     if (!existing) return { error: "Log not found" };
 
     const newEpisodeCount = existing.episodesWatched + 1;
+    const newCurrentEpisode = (existing.currentEpisode || 1) + 1;
     const shouldComplete =
       totalEpisodes > 1 && newEpisodeCount >= totalEpisodes;
 
@@ -176,6 +185,7 @@ export async function incrementEpisode(mediaId: string, totalEpisodes: number = 
       .update(userMediaLogs)
       .set({
         episodesWatched: newEpisodeCount,
+        currentEpisode: newCurrentEpisode,
         status: shouldComplete ? "completed" : existing.status,
         updatedAt: new Date(),
       })

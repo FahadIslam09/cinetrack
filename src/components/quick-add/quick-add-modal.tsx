@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useTransition } from "react";
+import { useState, useEffect, useRef, useTransition, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -22,10 +22,13 @@ import {
   ChevronRight,
   ChevronLeft,
   ArrowLeft,
+  ChevronDown,
 } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { upsertMediaLog } from "@/actions/tracking";
 import { RatingCategory, RATING_CONFIG, parseRating } from "@/lib/rating";
+import { SeasonInfo } from "@/app/api/tv/[id]/seasons/route";
+import { CustomDropdown, DropdownOption } from "@/components/ui/custom-dropdown";
 
 export interface QuickAddModalProps {
   media?: NormalizedMedia | null;
@@ -35,6 +38,8 @@ export interface QuickAddModalProps {
     status?: string;
     rating?: RatingCategory | string | number | null;
     episodesWatched?: number;
+    currentSeason?: number;
+    currentEpisode?: number;
     reviewText?: string | null;
     containsSpoilers?: boolean;
     isFavorite?: boolean;
@@ -124,6 +129,14 @@ export function QuickAddModal({
   const [review, setReview] = useState<string>("");
   const [containsSpoilers, setContainsSpoilers] = useState<boolean>(false);
 
+  // TV Series / Anime Season & Episode tracking state
+  const [seasonsData, setSeasonsData] = useState<SeasonInfo[]>([]);
+  const [totalSeasons, setTotalSeasons] = useState<number>(1);
+  const [totalEpisodes, setTotalEpisodes] = useState<number>(1);
+  const [selectedSeason, setSelectedSeason] = useState<number>(1);
+  const [selectedEpisode, setSelectedEpisode] = useState<number>(1);
+  const [isLoadingSeasons, setIsLoadingSeasons] = useState<boolean>(false);
+
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
@@ -169,6 +182,8 @@ export function QuickAddModal({
         );
         setRating(parseRating(initialLog?.rating));
         setEpisodes(initialLog?.episodesWatched || 0);
+        setSelectedSeason(initialLog?.currentSeason || 1);
+        setSelectedEpisode(initialLog?.currentEpisode || 1);
         setReview(initialLog?.reviewText || "");
         setContainsSpoilers(initialLog?.containsSpoilers || false);
       } else {
@@ -184,6 +199,8 @@ export function QuickAddModal({
         setStatus("watching");
         setRating(null);
         setEpisodes(0);
+        setSelectedSeason(1);
+        setSelectedEpisode(1);
         setReview("");
         setContainsSpoilers(false);
 
@@ -194,6 +211,151 @@ export function QuickAddModal({
       }
     }
   }, [isOpen, media, initialLog]);
+
+  // Fetch season breakdown when a series/anime is selected
+  useEffect(() => {
+    if (!isOpen || !selectedMedia || selectedMedia.mediaType === "movie") {
+      setSeasonsData([]);
+      setIsLoadingSeasons(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoadingSeasons(true);
+
+    const fetchSeasons = async () => {
+      try {
+        const res = await fetch(
+          `/api/tv/${selectedMedia.sourceId}/seasons?source=${selectedMedia.source}&totalEpisodes=${selectedMedia.totalEpisodes || 0}`
+        );
+        if (!res.ok) throw new Error("Failed to load seasons");
+        const data = await res.json();
+        if (!isMounted) return;
+
+        const seasons: SeasonInfo[] =
+          data.seasons && data.seasons.length > 0
+            ? data.seasons
+            : [
+                {
+                  seasonNumber: 1,
+                  name: "Season 1",
+                  episodeCount: selectedMedia.totalEpisodes || 10,
+                },
+              ];
+
+        setSeasonsData(seasons);
+        setTotalSeasons(data.totalSeasons || seasons.length);
+        const totalEps =
+          data.totalEpisodes ||
+          selectedMedia.totalEpisodes ||
+          seasons.reduce((acc: number, s: SeasonInfo) => acc + s.episodeCount, 0);
+        setTotalEpisodes(totalEps);
+
+        // Initialize Season & Episode from initialLog if available
+        if (initialLog?.currentSeason) {
+          const matchSeason = seasons.find((s) => s.seasonNumber === initialLog.currentSeason);
+          const sNum = matchSeason ? matchSeason.seasonNumber : seasons[0].seasonNumber;
+          setSelectedSeason(sNum);
+          const maxEps = matchSeason?.episodeCount || seasons[0].episodeCount;
+          setSelectedEpisode(
+            initialLog.currentEpisode ? Math.min(initialLog.currentEpisode, maxEps) : 1
+          );
+        } else if (status === "completed") {
+          const lastSeason = seasons[seasons.length - 1];
+          setSelectedSeason(lastSeason.seasonNumber);
+          setSelectedEpisode(lastSeason.episodeCount);
+        } else {
+          setSelectedSeason(seasons[0].seasonNumber);
+          setSelectedEpisode(1);
+        }
+      } catch (err) {
+        console.error("Failed to load seasons:", err);
+        if (!isMounted) return;
+        const fallbackSeasons: SeasonInfo[] = [
+          {
+            seasonNumber: 1,
+            name: "Season 1",
+            episodeCount: selectedMedia.totalEpisodes || 10,
+          },
+        ];
+        setSeasonsData(fallbackSeasons);
+        setTotalSeasons(1);
+        setTotalEpisodes(selectedMedia.totalEpisodes || 10);
+        setSelectedSeason(1);
+        setSelectedEpisode(1);
+      } finally {
+        if (isMounted) {
+          setIsLoadingSeasons(false);
+        }
+      }
+    };
+
+    fetchSeasons();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, selectedMedia, initialLog]);
+
+  // Handle status changes with automatic completion logic
+  const handleStatusChange = (newStatus: WatchStatus) => {
+    setStatus(newStatus);
+    if (newStatus === "completed" && selectedMedia?.mediaType !== "movie" && seasonsData.length > 0) {
+      const lastSeason = seasonsData[seasonsData.length - 1];
+      setSelectedSeason(lastSeason.seasonNumber);
+      setSelectedEpisode(lastSeason.episodeCount);
+    }
+  };
+
+  // Handle Season selection (adjusting available episodes)
+  const handleSeasonChange = (newSeasonNum: number) => {
+    setSelectedSeason(newSeasonNum);
+    const targetSeason = seasonsData.find((s) => s.seasonNumber === newSeasonNum);
+    const maxEps = targetSeason?.episodeCount || 1;
+    setSelectedEpisode((prev) => Math.min(Math.max(1, prev), maxEps));
+  };
+
+  // Handle Episode selection
+  const handleEpisodeChange = (newEpNum: number) => {
+    const targetSeason = seasonsData.find((s) => s.seasonNumber === selectedSeason);
+    const maxEps = targetSeason?.episodeCount || 1;
+    setSelectedEpisode(Math.min(Math.max(1, newEpNum), maxEps));
+  };
+
+  // Calculate cumulative episodes watched for database storage and progress bar
+  const calculateCumulativeEpisodes = (seasonNum: number, episodeNum: number): number => {
+    if (status === "completed") {
+      return totalEpisodes || seasonsData.reduce((acc, s) => acc + s.episodeCount, 0);
+    }
+    let total = 0;
+    for (const s of seasonsData) {
+      if (s.seasonNumber < seasonNum) {
+        total += s.episodeCount;
+      } else if (s.seasonNumber === seasonNum) {
+        total += Math.min(episodeNum, s.episodeCount);
+        break;
+      }
+    }
+    return total > 0 ? total : episodeNum;
+  };
+
+  // Memoized options for CustomDropdown in Watch Progress
+  const seasonOptions = useMemo<DropdownOption[]>(() => {
+    return seasonsData.map((s) => ({
+      id: String(s.seasonNumber),
+      label: s.name || `Season ${s.seasonNumber}`,
+      count: s.episodeCount,
+    }));
+  }, [seasonsData]);
+
+  const episodeOptions = useMemo<DropdownOption[]>(() => {
+    const targetSeason = seasonsData.find((s) => s.seasonNumber === selectedSeason);
+    const count = targetSeason?.episodeCount || 1;
+    return Array.from({ length: count }, (_, i) => ({
+      id: String(i + 1),
+      label: `Episode ${i + 1}`,
+    }));
+  }, [seasonsData, selectedSeason]);
 
   // Keep searchTypeRef in sync
   useEffect(() => {
@@ -290,6 +452,8 @@ export function QuickAddModal({
   const handleSelectMedia = (selected: NormalizedMedia) => {
     setSelectedMedia(selected);
     setStatus(selected.mediaType === "movie" ? "completed" : "watching");
+    setSelectedSeason(1);
+    setSelectedEpisode(1);
     setEpisodes(0);
     setRating(null);
     setReview("");
@@ -305,12 +469,19 @@ export function QuickAddModal({
     setIsSubmitting(true);
     setErrorMessage(null);
 
+    const isSeries = selectedMedia.mediaType !== "movie";
+    const cumulativeEps = isSeries
+      ? calculateCumulativeEpisodes(selectedSeason, selectedEpisode)
+      : 1;
+
     try {
       const res = await upsertMediaLog({
         media: selectedMedia,
         status,
         rating,
-        episodesWatched: episodes,
+        episodesWatched: cumulativeEps,
+        currentSeason: isSeries ? selectedSeason : 1,
+        currentEpisode: isSeries ? selectedEpisode : 1,
         reviewText: review,
         containsSpoilers,
       });
@@ -710,7 +881,7 @@ export function QuickAddModal({
                       <button
                         key={st}
                         type="button"
-                        onClick={() => setStatus(st)}
+                        onClick={() => handleStatusChange(st)}
                         className={`h-10 px-3 rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center gap-2 min-w-0 cursor-pointer active:scale-95 select-none outline-none focus:outline-none focus-visible:outline-none ${
                           isActive
                             ? `${cfg.bg} ${cfg.border} ${cfg.text} shadow-sm`
@@ -726,42 +897,65 @@ export function QuickAddModal({
                 </div>
               </div>
 
-              {/* Episode Tracker (TV & Anime) */}
-              {selectedMedia.mediaType !== "movie" && (
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#A8B0BD] mb-2">
-                    Episode Progress
-                  </label>
-                  <div className="flex items-center justify-between bg-[#1D2734] p-3 rounded-xl border border-white/[0.06]">
-                    <span className="text-sm text-[#F5F7FA] font-medium">
-                      {episodes} / {selectedMedia.totalEpisodes || "∞"} episodes watched
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setEpisodes(Math.max(0, episodes - 1))}
-                        disabled={episodes <= 0}
-                        className="w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] disabled:opacity-30 flex items-center justify-center text-white transition-colors cursor-pointer"
-                        aria-label="Decrease episode count"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setEpisodes(
-                            selectedMedia.totalEpisodes
-                              ? Math.min(selectedMedia.totalEpisodes, episodes + 1)
-                              : episodes + 1
-                          )
-                        }
-                        className="w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] flex items-center justify-center text-white transition-colors cursor-pointer"
-                        aria-label="Increase episode count"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
+              {/* Watch Progress (TV & Anime) - Clean, compact, only for Watching status */}
+              {selectedMedia.mediaType !== "movie" && status === "watching" && (
+                <div className="flex flex-col gap-2 rounded-xl bg-[#1D2734]/50 border border-white/[0.06] p-3 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-[#A8B0BD]">
+                      Watch Progress
+                    </label>
+                    {!isLoadingSeasons && (
+                      <span className="text-[11px] font-semibold text-[#3B9EFF] bg-[#3B9EFF]/10 px-2 py-0.5 rounded-md border border-[#3B9EFF]/20">
+                        {`S${String(selectedSeason).padStart(2, "0")} E${String(selectedEpisode).padStart(2, "0")}`}
+                        {totalEpisodes > 0 && ` · ${calculateCumulativeEpisodes(selectedSeason, selectedEpisode)}/${totalEpisodes} eps`}
+                      </span>
+                    )}
                   </div>
+
+                  {isLoadingSeasons ? (
+                    <div className="h-12 rounded-lg bg-[#151C27] border border-white/[0.04] flex items-center justify-center gap-2 text-xs text-[#A8B0BD]">
+                      <Loader2 className="w-4 h-4 text-[#3B9EFF] animate-spin" />
+                      <span>Loading seasons &amp; episodes...</span>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 pt-1">
+                      {/* Season Selector */}
+                      <div className="min-w-0">
+                        <label className="block text-[11px] font-medium text-[#6F7886] mb-1">
+                          Season
+                        </label>
+                        <CustomDropdown
+                          value={String(selectedSeason)}
+                          onChange={(val) => handleSeasonChange(Number(val))}
+                          options={seasonOptions}
+                          className="w-full"
+                          menuWidth="w-full min-w-[150px]"
+                          buttonClassName="h-10 rounded-xl"
+                          highlightActive={false}
+                          dropDirection="up"
+                          ariaLabel="Select Season"
+                        />
+                      </div>
+
+                      {/* Episode Selector - Only shows episodes for selected season */}
+                      <div className="min-w-0">
+                        <label className="block text-[11px] font-medium text-[#6F7886] mb-1">
+                          Episode
+                        </label>
+                        <CustomDropdown
+                          value={String(selectedEpisode)}
+                          onChange={(val) => handleEpisodeChange(Number(val))}
+                          options={episodeOptions}
+                          className="w-full"
+                          menuWidth="w-full min-w-[150px]"
+                          buttonClassName="h-10 rounded-xl"
+                          highlightActive={false}
+                          dropDirection="up"
+                          ariaLabel="Select Episode"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -940,10 +1134,14 @@ export function QuickAddModal({
                     {selectedMedia.mediaType !== "movie" && (
                       <div className="p-3 rounded-xl bg-[#1D2734]/70 border border-white/[0.04] col-span-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[#6F7886] block">
-                          Episodes Watched
+                          Watch Progress
                         </span>
                         <span className="text-xs font-semibold text-[#F5F7FA] mt-1 block">
-                          {episodes} of {selectedMedia.totalEpisodes || "∞"} episodes
+                          {status === "completed"
+                            ? `Completed · All ${totalEpisodes || selectedMedia.totalEpisodes || "∞"} episodes`
+                            : status === "watching"
+                            ? `Season ${selectedSeason}, Episode ${selectedEpisode} (S${String(selectedSeason).padStart(2, "0")} E${String(selectedEpisode).padStart(2, "0")}) · ${calculateCumulativeEpisodes(selectedSeason, selectedEpisode)} of ${totalEpisodes || selectedMedia.totalEpisodes || "∞"} eps`
+                            : `${STATUS_CONFIG[status].label}`}
                         </span>
                       </div>
                     )}

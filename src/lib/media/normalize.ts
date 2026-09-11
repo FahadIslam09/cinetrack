@@ -11,6 +11,8 @@ export interface NormalizedMedia {
   backdropPath: string | null;
   releaseDate?: string;
   year?: string;
+  endYear?: string;
+  status?: string;
   rating: number; // 0.0 - 10.0 scale
   totalEpisodes: number;
   runtime?: number; // in minutes
@@ -50,6 +52,7 @@ export function normalizeTmdbMovie(item: any): NormalizedMedia {
 export function normalizeTmdbTV(item: any): NormalizedMedia {
   const releaseDate = item.first_air_date || "";
   const year = releaseDate ? releaseDate.slice(0, 4) : undefined;
+  const endYear = item.last_air_date ? item.last_air_date.slice(0, 4) : undefined;
   const rating = item.vote_average ? Number(item.vote_average.toFixed(1)) : 0;
 
   return {
@@ -63,6 +66,8 @@ export function normalizeTmdbTV(item: any): NormalizedMedia {
     backdropPath: item.backdrop_path ? getTmdbImageUrl(item.backdrop_path, "w1280") : null,
     releaseDate,
     year,
+    endYear,
+    status: item.status,
     rating,
     totalEpisodes: item.number_of_episodes || 1,
     runtime: item.episode_run_time?.[0] || undefined,

@@ -75,6 +75,8 @@ export const userMediaLogs = pgTable(
     status: text("status").notNull(), // 'watching' | 'completed' | 'plan_to_watch' | 'on_hold' | 'dropped'
     rating: text("rating"), // 'poor' | 'average' | 'good' | 'masterpiece' | null
     episodesWatched: integer("episodes_watched").default(0).notNull(),
+    currentSeason: integer("current_season").default(1),
+    currentEpisode: integer("current_episode").default(1),
     reviewText: text("review_text"),
     containsSpoilers: boolean("contains_spoilers").default(false).notNull(),
     isFavorite: boolean("is_favorite").default(false).notNull(),

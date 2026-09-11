@@ -1,13 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Star, Plus, Check, Film } from "lucide-react";
+import { Star, Plus, Check, Film, Loader2 } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { QuickAddModal } from "../quick-add/quick-add-modal";
 import { RatingCategory, getRatingConfig } from "@/lib/rating";
 import { upsertMediaLog } from "@/actions/tracking";
+import { SeasonInfo } from "@/app/api/tv/[id]/seasons/route";
+import {
+  calculateSeriesProgress,
+  getNextEpisodePosition,
+  getSeasonsData,
+  getSeriesMetadata,
+} from "@/lib/media/series-progress";
 
 export interface MediaCardProps {
   media: NormalizedMedia;
@@ -15,6 +22,9 @@ export interface MediaCardProps {
   userRating?: RatingCategory | string | number | null;
   userEpisodes?: number;
   seasonNumber?: number;
+  currentSeason?: number;
+  currentEpisode?: number;
+  seasons?: SeasonInfo[];
   badgeLabel?: string;
   tagLabel?: string;
   subMeta?: string;
@@ -28,6 +38,9 @@ export function MediaCard({
   userRating,
   userEpisodes,
   seasonNumber,
+  currentSeason,
+  currentEpisode,
+  seasons,
   badgeLabel,
   tagLabel,
   subMeta,
@@ -37,15 +50,93 @@ export function MediaCard({
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
-  const [isUpdatingEp, setIsUpdatingEp] = useState(false);
+  const [isAdvancing, setIsAdvancing] = useState(false);
 
-  const detailUrl = `/${media.mediaType}/${media.source === "anilist" ? media.sourceId : media.sourceId}`;
+  // Local state for optimistic instant card updates
+  const [localStatus, setLocalStatus] = useState<string | undefined>(status);
+  const [localSeason, setLocalSeason] = useState<number>(
+    currentSeason ?? seasonNumber ?? 1
+  );
+  const [localEpisode, setLocalEpisode] = useState<number>(
+    currentEpisode ?? userEpisodes ?? 1
+  );
+  const [seasonsData, setSeasonsData] = useState<SeasonInfo[]>(seasons || []);
 
-  // Episode progress calculation
-  const totalEps = media.totalEpisodes || (media.mediaType === "movie" ? 1 : 10);
-  const currentEps = userEpisodes || 0;
-  const progressPct =
-    totalEps > 0 ? Math.min(100, Math.round((currentEps / totalEps) * 100)) : 0;
+  // Sync state if props change from server or parent
+  useEffect(() => {
+    setLocalStatus(status);
+  }, [status]);
+
+  useEffect(() => {
+    if (currentSeason !== undefined) setLocalSeason(currentSeason);
+    else if (seasonNumber !== undefined) setLocalSeason(seasonNumber);
+  }, [currentSeason, seasonNumber]);
+
+  useEffect(() => {
+    if (currentEpisode !== undefined) setLocalEpisode(currentEpisode);
+    else if (userEpisodes !== undefined) setLocalEpisode(userEpisodes);
+  }, [currentEpisode, userEpisodes]);
+
+  useEffect(() => {
+    if (seasons && seasons.length > 0) {
+      setSeasonsData(seasons);
+    }
+  }, [seasons]);
+
+  // Extra metadata for series (e.g. end year and ongoing/ended status)
+  const [seriesEndYear, setSeriesEndYear] = useState<string | undefined>(
+    media.endYear
+  );
+  const [seriesStatus, setSeriesStatus] = useState<string | undefined>(
+    media.status
+  );
+
+  // Dynamically fetch season breakdown and series metadata (years/status)
+  useEffect(() => {
+    if (media.mediaType === "series" || media.mediaType === "anime") {
+      let cancelled = false;
+      getSeriesMetadata(media.sourceId, media.source, media.totalEpisodes).then(
+        (details) => {
+          if (!cancelled && details) {
+            if (
+              details.seasons &&
+              details.seasons.length > 0 &&
+              seasonsData.length === 0
+            ) {
+              setSeasonsData(details.seasons);
+            }
+            if (details.endYear) setSeriesEndYear(details.endYear);
+            if (details.status) setSeriesStatus(details.status);
+          }
+        }
+      );
+      return () => {
+        cancelled = true;
+      };
+    }
+  }, [
+    media.sourceId,
+    media.source,
+    media.totalEpisodes,
+    media.mediaType,
+    seasonsData.length,
+  ]);
+
+  const detailUrl = `/${media.mediaType}/${
+    media.source === "anilist" ? media.sourceId : media.sourceId
+  }`;
+
+  // Whether this card represents an active watching series/anime
+  const isWatchingSeries =
+    localStatus === "watching" && media.mediaType !== "movie";
+
+  // Overall series completion progress across all seasons
+  const progressInfo = calculateSeriesProgress(
+    seasonsData,
+    localSeason,
+    localEpisode,
+    localStatus === "completed"
+  );
 
   // Format label
   const formatText =
@@ -55,12 +146,39 @@ export function MediaCard({
       ? "Anime"
       : "TV Series";
 
-  // Year display (e.g. 2022– for ongoing series)
-  const yearDisplay = media.year
-    ? media.mediaType === "series"
-      ? `${media.year}–`
-      : media.year
-    : "2024";
+  // Year display: "2008–2013" if series has ended with end year, "2022–" if ongoing, "2024" if single-year or film
+  const getYearDisplay = () => {
+    if (media.mediaType === "movie") {
+      return media.year || "2024";
+    }
+
+    const start = media.year;
+    if (!start) return "2024";
+
+    const end = seriesEndYear || media.endYear;
+    const isEnded =
+      seriesStatus === "Ended" ||
+      seriesStatus === "Canceled" ||
+      (!seriesStatus && end && end !== start);
+
+    // If both start and end year exist and are different (e.g. Breaking Bad 2008–2013)
+    if (end && start !== end) {
+      return `${start}–${end}`;
+    }
+
+    // If it's a finished single-year series (e.g. Shōgun 2024)
+    if (isEnded && end && start === end) {
+      return start;
+    }
+
+    // If ongoing series (e.g. FROM 2022– or Severance 2022–)
+    if (seriesStatus === "Returning Series" || !isEnded) {
+      return `${start}–`;
+    }
+
+    return start;
+  };
+  const yearDisplay = getYearDisplay();
 
   // Extra metadata (Creator / Studio / Network / Genre)
   const getExtraMeta = () => {
@@ -100,7 +218,7 @@ export function MediaCard({
       if (rConfig.id === "masterpiece") {
         return {
           label: "MASTERPIECE",
-          className: "bg-[#3B9EFF]/10 border border-[#3B9EFF]/30 text-[#60A5FA]",
+          className: "bg-[#F5C84B]/10 border border-[#F5C84B]/30 text-[#F5C84B]",
           isStar: true,
         };
       }
@@ -143,7 +261,7 @@ export function MediaCard({
     if (titleLower.includes("oppenheimer")) {
       return {
         label: "MASTERPIECE",
-        className: "bg-[#3B9EFF]/10 border border-[#3B9EFF]/30 text-[#60A5FA]",
+        className: "bg-[#F5C84B]/10 border border-[#F5C84B]/30 text-[#F5C84B]",
         isStar: true,
       };
     }
@@ -198,84 +316,112 @@ export function MediaCard({
   };
   const bottomRightText = getBottomRightText();
 
-  // Quick episode increment (+1 Ep Log)
-  const handleQuickEpisodeLog = async (e: React.MouseEvent) => {
+  // Fast episode progression (+1 EP) with season detection & double-click protection
+  const handleAdvanceEpisode = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isUpdatingEp) return;
-    setIsUpdatingEp(true);
+    if (isAdvancing) return;
+
+    setIsAdvancing(true);
+
+    // Compute next season, episode, and series completion status
+    const nextPos = getNextEpisodePosition(
+      seasonsData,
+      localSeason,
+      localEpisode
+    );
+    const newStatus = nextPos.isCompleted ? "completed" : "watching";
+
+    // Optimistic UI updates
+    const prevSeason = localSeason;
+    const prevEpisode = localEpisode;
+    const prevStatus = localStatus;
+
+    setLocalSeason(nextPos.nextSeason);
+    setLocalEpisode(nextPos.nextEpisode);
+    setLocalStatus(newStatus);
+
     try {
-      const nextEp = currentEps + 1;
-      const isComplete = totalEps > 0 && nextEp >= totalEps;
-      await upsertMediaLog({
+      const nextProgress = calculateSeriesProgress(
+        seasonsData,
+        nextPos.nextSeason,
+        nextPos.nextEpisode,
+        nextPos.isCompleted
+      );
+
+      const res = await upsertMediaLog({
         media,
-        status: isComplete ? "completed" : "watching",
-        episodesWatched: nextEp,
+        status: newStatus,
+        episodesWatched: nextProgress.watched,
+        currentSeason: nextPos.nextSeason,
+        currentEpisode: nextPos.nextEpisode,
         rating: userRating as any,
       });
+
+      if (res && "error" in res && res.error) {
+        throw new Error(res.error);
+      }
+
       startTransition(() => {
         router.refresh();
       });
       onUpdate?.();
     } catch (err) {
-      console.error("Failed to log episode:", err);
+      console.error("Failed to advance episode:", err);
+      // Rollback optimistic update on error
+      setLocalSeason(prevSeason);
+      setLocalEpisode(prevEpisode);
+      setLocalStatus(prevStatus);
     } finally {
-      setIsUpdatingEp(false);
+      setIsAdvancing(false);
     }
   };
 
   // Top-left status badge (Frosted Glass Capsule)
   const renderTopLeftBadge = () => {
-    if (status === "completed") {
+    if (localStatus === "completed") {
       const label =
         badgeLabel ||
         (media.title.toLowerCase().includes("spider") ? "WATCHED" : "COMPLETED");
       return (
-        <div className="px-2.5 py-1 rounded-full bg-emerald-950/70 backdrop-blur-md border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34D399]" />
+        <div className="px-2.5 py-1 rounded-full bg-emerald-950/70 backdrop-blur-md border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34D399] shrink-0" />
           <span>{label}</span>
         </div>
       );
     }
 
-    if (status === "watching") {
-      const sNum =
-        seasonNumber || (media.title.toLowerCase().includes("severance") ? 2 : undefined);
-      const epText =
-        userEpisodes !== undefined
-          ? `${sNum ? `S${sNum} ` : ""}EP ${userEpisodes}/${media.totalEpisodes || "10"}`
-          : "WATCHING";
-
+    if (localStatus === "watching") {
       return (
-        <div className="px-2.5 py-1 rounded-full bg-blue-950/70 backdrop-blur-md border border-blue-500/35 text-blue-400 text-[10px] font-bold uppercase tracking-wide shadow-lg flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_6px_#60A5FA] animate-pulse" />
-          <span>{badgeLabel || epText}</span>
+        <div className="px-2.5 py-1 rounded-full bg-blue-950/70 backdrop-blur-md border border-blue-500/35 text-blue-400 text-[10px] font-bold uppercase tracking-wide shadow-lg flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_6px_#60A5FA] animate-pulse shrink-0" />
+          <span>{badgeLabel || "WATCHING"}</span>
         </div>
       );
     }
 
-    if (status === "plan_to_watch") {
+    if (localStatus === "plan_to_watch") {
       return (
-        <div className="px-2.5 py-1 rounded-full bg-purple-950/70 backdrop-blur-md border border-purple-500/30 text-purple-300 text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+        <div className="px-2.5 py-1 rounded-full bg-purple-950/70 backdrop-blur-md border border-purple-500/30 text-purple-300 text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
           <span>{badgeLabel || "WANT TO WATCH"}</span>
         </div>
       );
     }
 
-    if (status === "on_hold") {
+    if (localStatus === "on_hold") {
       return (
-        <div className="px-2.5 py-1 rounded-full bg-amber-950/70 backdrop-blur-md border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+        <div className="px-2.5 py-1 rounded-full bg-amber-950/70 backdrop-blur-md border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
           <span>{badgeLabel || "ON HOLD"}</span>
         </div>
       );
     }
 
-    if (status === "dropped") {
+    if (localStatus === "dropped") {
       return (
-        <div className="px-2.5 py-1 rounded-full bg-rose-950/70 backdrop-blur-md border border-rose-500/30 text-rose-300 text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+        <div className="px-2.5 py-1 rounded-full bg-rose-950/70 backdrop-blur-md border border-rose-500/30 text-rose-300 text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
           <span>{badgeLabel || "DROPPED"}</span>
         </div>
       );
@@ -313,17 +459,28 @@ export function MediaCard({
           <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#121824] via-[#121824]/40 to-transparent pointer-events-none" />
 
           {/* Top-Left Status Pill Badge */}
-          {status && (
+          {localStatus && (
             <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
               {renderTopLeftBadge()}
             </div>
           )}
 
-          {/* Top-Right Star Rating Badge (Frosted Pill) */}
-          <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-[#0B0F17]/80 backdrop-blur-md border border-white/10 text-[11px] font-bold text-[#F5F7FA] flex items-center gap-1 shadow-lg pointer-events-none z-10">
-            <Star className="w-3 h-3 fill-[#F5C84B] text-[#F5C84B]" />
-            <span>{media.rating ? media.rating.toFixed(1) : "—"}</span>
-          </div>
+          {/* Top-Right Pill: For Watching Series, display Current Watch Position (S03 · E09); otherwise Star Rating Badge */}
+          {isWatchingSeries ? (
+            <div
+              className="absolute top-2.5 right-2.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#0B0F17]/85 backdrop-blur-md border border-white/10 text-[10px] sm:text-[11px] font-semibold text-[#E2E8F0] tracking-wider shadow-lg pointer-events-none flex items-center gap-1 font-mono z-10 select-none"
+              title={`Current Position: Season ${localSeason}, Episode ${localEpisode}`}
+            >
+              <span>{`S${String(localSeason).padStart(2, "0")} · E${String(
+                localEpisode
+              ).padStart(2, "0")}`}</span>
+            </div>
+          ) : (
+            <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-[#0B0F17]/80 backdrop-blur-md border border-white/10 text-[11px] font-bold text-[#F5F7FA] flex items-center gap-1 shadow-lg pointer-events-none z-10">
+              <Star className="w-3 h-3 fill-[#F5C84B] text-[#F5C84B]" />
+              <span>{media.rating ? media.rating.toFixed(1) : "—"}</span>
+            </div>
+          )}
 
           {/* Hover Quick Action Pill Overlay */}
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none flex items-center justify-center p-3 z-10">
@@ -336,7 +493,7 @@ export function MediaCard({
               }}
               className="pointer-events-auto px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs font-semibold hover:bg-[#3B9EFF] hover:border-[#3B9EFF] shadow-2xl transition-all duration-200 active:scale-95 flex items-center gap-2 cursor-pointer"
             >
-              {status ? (
+              {localStatus ? (
                 <>
                   <Check className="w-3.5 h-3.5 text-[#22C55E]" />
                   <span>Edit Log</span>
@@ -350,50 +507,82 @@ export function MediaCard({
             </button>
           </div>
 
-          {/* Mobile Quick Action Button */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsQuickAddOpen(true);
-            }}
-            className="md:hidden absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#121824]/90 backdrop-blur-md border border-white/15 text-white flex items-center justify-center shadow-lg active:scale-95 z-20 cursor-pointer"
-            title={status ? "Edit Log" : "Add to Library"}
-            aria-label={status ? "Edit Log" : "Add to Library"}
-          >
-            {status === "completed" ? (
-              <Check className="w-3.5 h-3.5 text-[#22C55E]" />
-            ) : (
-              <Plus className="w-3.5 h-3.5 text-[#3B9EFF]" />
-            )}
-          </button>
+          {/* Quick Action Button in bottom-right corner of poster */}
+          {isWatchingSeries ? (
+            <button
+              type="button"
+              onClick={handleAdvanceEpisode}
+              disabled={isAdvancing}
+              className="group/plus absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#121824]/90 hover:bg-[#3B9EFF] border border-white/20 hover:border-[#3B9EFF] text-[#3B9EFF] hover:text-white flex items-center justify-center shadow-lg hover:shadow-[0_0_16px_rgba(59,158,255,0.55)] hover:scale-110 active:scale-95 z-20 cursor-pointer transition-all duration-200 ease-out backdrop-blur-md disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-[#121824]/90 disabled:hover:text-[#3B9EFF]"
+              title={`Advance to ${
+                getNextEpisodePosition(seasonsData, localSeason, localEpisode).isCompleted
+                  ? "Completed"
+                  : `S${String(
+                      getNextEpisodePosition(seasonsData, localSeason, localEpisode).nextSeason
+                    ).padStart(2, "0")} · E${String(
+                      getNextEpisodePosition(seasonsData, localSeason, localEpisode).nextEpisode
+                    ).padStart(2, "0")}`
+              }`}
+              aria-label="Advance watch progress by 1 episode"
+            >
+              {isAdvancing ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-current" />
+              ) : (
+                <Plus className="w-3.5 h-3.5 stroke-[2.5] transition-transform duration-200 group-hover/plus:rotate-90" />
+              )}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsQuickAddOpen(true);
+              }}
+              className="md:hidden absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#121824]/90 backdrop-blur-md border border-white/15 text-white flex items-center justify-center shadow-lg active:scale-95 z-20 cursor-pointer"
+              title={localStatus ? "Edit Log" : "Add to Library"}
+              aria-label={localStatus ? "Edit Log" : "Add to Library"}
+            >
+              {localStatus === "completed" ? (
+                <Check className="w-3.5 h-3.5 text-[#22C55E]" />
+              ) : (
+                <Plus className="w-3.5 h-3.5 text-[#3B9EFF]" />
+              )}
+            </button>
+          )}
         </div>
 
-        {/* Progress Bar under poster for active watching items */}
-        {status === "watching" && media.mediaType !== "movie" && (
-          <div className="w-full h-1 bg-black/50 relative overflow-hidden shrink-0">
+        {/* Overall Series Progress Bar underneath poster for active Watching items */}
+        {isWatchingSeries && (
+          <div
+            className="w-full h-[3px] bg-white/[0.06] relative overflow-hidden shrink-0"
+            role="progressbar"
+            aria-valuenow={Math.round(progressInfo.percentage)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            title={`Overall Progress: ${progressInfo.watched}/${progressInfo.total} episodes watched (${Math.round(progressInfo.percentage)}%)`}
+          >
             <div
-              className="h-full bg-gradient-to-r from-[#2563EB] to-[#38BDF8] shadow-[0_0_8px_rgba(56,189,248,0.5)] transition-all duration-300"
-              style={{ width: `${progressPct}%` }}
+              className="h-full bg-gradient-to-r from-[#2563EB] to-[#38BDF8] shadow-[0_0_6px_rgba(56,189,248,0.4)] transition-all duration-300 ease-out"
+              style={{ width: `${progressInfo.percentage}%` }}
             />
           </div>
         )}
 
         {/* Card Content Section */}
-        <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-1 relative z-10 bg-[#121824]">
+        <div className="p-3 sm:p-3.5 flex flex-col justify-between flex-1 relative z-10 bg-[#121824]">
           <div>
             {/* Title */}
             <Link
               href={detailUrl}
-              className="font-bold text-sm sm:text-[15px] text-[#F5F7FA] group-hover:text-[#3B9EFF] transition-colors line-clamp-2 block leading-snug tracking-tight min-h-[2.5rem]"
+              className="font-bold text-sm sm:text-[15px] text-[#F5F7FA] group-hover:text-[#3B9EFF] transition-colors line-clamp-2 block leading-snug tracking-tight"
               title={media.title}
             >
               {media.title}
             </Link>
 
             {/* Subtitle / Metadata */}
-            <div className="flex items-center gap-1.5 text-xs text-[#8B95A5] mt-1.5 font-medium">
+            <div className="flex items-center gap-1.5 text-xs text-[#8B95A5] mt-1 font-medium">
               <span className="text-[#A8B0BD]">{yearDisplay}</span>
               <span className="text-white/20">•</span>
               <span>{formatText}</span>
@@ -407,7 +596,7 @@ export function MediaCard({
           </div>
 
           {/* Bottom Row: Tag Badge & Right Action/Genre */}
-          <div className="mt-3.5 pt-2.5 border-t border-white/[0.04] flex items-center justify-between gap-2 text-xs">
+          <div className="mt-2.5 pt-2 border-t border-white/[0.04] flex items-center justify-between gap-2 text-xs">
             {bottomTag ? (
               <button
                 type="button"
@@ -416,12 +605,12 @@ export function MediaCard({
                   e.stopPropagation();
                   setIsQuickAddOpen(true);
                 }}
-                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-80 active:scale-95 cursor-pointer ${bottomTag.className}`}
+                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-80 active:scale-95 cursor-pointer shrink-0 whitespace-nowrap ${bottomTag.className}`}
                 title="Click to rate or edit"
               >
-                {bottomTag.isStar && <Star className="w-2.5 h-2.5 fill-current" />}
+                {bottomTag.isStar && <Star className="w-2.5 h-2.5 fill-current shrink-0" />}
                 {bottomTag.dotColor && (
-                  <span className={`w-1.5 h-1.5 rounded-full ${bottomTag.dotColor}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${bottomTag.dotColor}`} />
                 )}
                 <span>{bottomTag.label}</span>
               </button>
@@ -429,21 +618,9 @@ export function MediaCard({
               <span />
             )}
 
-            {status === "watching" && media.mediaType !== "movie" ? (
-              <button
-                type="button"
-                onClick={handleQuickEpisodeLog}
-                disabled={isUpdatingEp}
-                className="px-2 py-0.5 rounded-md bg-[#3B9EFF]/10 hover:bg-[#3B9EFF]/20 border border-[#3B9EFF]/25 text-[#3B9EFF] hover:text-[#5AAFFF] text-xs font-semibold transition-all active:scale-95 cursor-pointer disabled:opacity-50 shrink-0 select-none"
-                title="Log next episode"
-              >
-                {isUpdatingEp ? "Logging..." : "+1 Ep Log"}
-              </button>
-            ) : (
-              <span className="text-[11px] text-[#6F7886] font-medium tracking-wide truncate max-w-[55%] text-right">
-                {bottomRightText}
-              </span>
-            )}
+            <span className="text-[11px] text-[#6F7886] font-medium tracking-wide truncate max-w-[55%] text-right">
+              {bottomRightText}
+            </span>
           </div>
         </div>
       </div>
@@ -454,9 +631,11 @@ export function MediaCard({
         isOpen={isQuickAddOpen}
         onClose={() => setIsQuickAddOpen(false)}
         initialLog={{
-          status,
+          status: localStatus as any,
           rating: userRating,
-          episodesWatched: userEpisodes,
+          episodesWatched: progressInfo.watched,
+          currentSeason: localSeason,
+          currentEpisode: localEpisode,
         }}
         onSuccess={onUpdate}
       />
