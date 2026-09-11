@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -44,6 +44,13 @@ function LoginForm() {
   );
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  useEffect(() => {
+    const qMode = searchParams.get("mode");
+    if (qMode === "signup" || qMode === "signin") {
+      setMode(qMode);
+    }
+  }, [searchParams]);
+
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     setError(null);
@@ -51,7 +58,7 @@ function LoginForm() {
     const supabase = createClient();
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
@@ -61,9 +68,14 @@ function LoginForm() {
       if (error) {
         setError(error.message);
         setGoogleLoading(false);
+        return;
+      }
+
+      if (data?.url) {
+        window.location.href = data.url;
       }
     } catch (err: any) {
-      setError(err.message || "Failed to initiate Google sign in.");
+      setError(err?.message || "Failed to initiate Google sign in.");
       setGoogleLoading(false);
     }
   };
@@ -199,39 +211,41 @@ function LoginForm() {
         </div>
 
         {/* Dual Mode Tab Selector */}
-        <div className="grid grid-cols-2 p-1 rounded-xl bg-[#0F141D]/80 border border-white/[0.06] mb-6">
-          <button
-            type="button"
-            onClick={() => {
+        <div className="grid grid-cols-2 p-1 rounded-xl bg-[#0F141D]/80 border border-white/[0.06] mb-6 select-none">
+          <Link
+            href={`/login?mode=signin${next !== "/library" ? `&next=${encodeURIComponent(next)}` : ""}`}
+            onClick={(e) => {
+              e.preventDefault();
               setMode("signin");
               setError(null);
               setSuccessMsg(null);
               setShowForgot(false);
             }}
-            className={`py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+            className={`py-2 text-xs sm:text-sm font-semibold rounded-lg text-center transition-all cursor-pointer ${
               mode === "signin"
                 ? "bg-[#3B9EFF] text-white shadow-md shadow-[#3B9EFF]/20"
                 : "text-[#A8B0BD] hover:text-[#F5F7FA]"
             }`}
           >
             Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => {
+          </Link>
+          <Link
+            href={`/login?mode=signup${next !== "/library" ? `&next=${encodeURIComponent(next)}` : ""}`}
+            onClick={(e) => {
+              e.preventDefault();
               setMode("signup");
               setError(null);
               setSuccessMsg(null);
               setShowForgot(false);
             }}
-            className={`py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+            className={`py-2 text-xs sm:text-sm font-semibold rounded-lg text-center transition-all cursor-pointer ${
               mode === "signup"
                 ? "bg-[#3B9EFF] text-white shadow-md shadow-[#3B9EFF]/20"
                 : "text-[#A8B0BD] hover:text-[#F5F7FA]"
             }`}
           >
             Create Account
-          </button>
+          </Link>
         </div>
 
         {/* Status Alerts */}
@@ -444,6 +458,26 @@ function LoginForm() {
                 </>
               )}
             </button>
+
+            {/* Quick Switch Text Link */}
+            <div className="text-center mt-3">
+              <span className="text-xs text-[#A8B0BD]">
+                {mode === "signin" ? "Don't have an account? " : "Already have an account? "}
+              </span>
+              <Link
+                href={`/login?mode=${mode === "signin" ? "signup" : "signin"}${next !== "/library" ? `&next=${encodeURIComponent(next)}` : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMode(mode === "signin" ? "signup" : "signin");
+                  setError(null);
+                  setSuccessMsg(null);
+                  setShowForgot(false);
+                }}
+                className="text-xs font-semibold text-[#3B9EFF] hover:text-[#5AAFFF] transition-colors"
+              >
+                {mode === "signin" ? "Create Account" : "Sign In"}
+              </Link>
+            </div>
           </form>
         )}
 
