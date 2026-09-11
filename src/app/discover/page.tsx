@@ -145,7 +145,7 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
         {/* Results Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4 mt-2">
           {items.map((item) => (
-            <MediaCard key={item.id} media={item} />
+            <MediaCard key={item.id} media={item} className="w-full" />
           ))}
         </div>
       </main>

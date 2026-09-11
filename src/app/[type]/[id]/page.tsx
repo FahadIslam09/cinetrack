@@ -304,7 +304,7 @@ export default async function MediaDetailsPage({ params }: PageProps) {
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {similarItems.map((item) => (
-                  <MediaCard key={item.id} media={item} />
+                  <MediaCard key={item.id} media={item} className="w-full" />
                 ))}
               </div>
             </section>
