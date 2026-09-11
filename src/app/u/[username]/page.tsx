@@ -16,6 +16,7 @@ import {
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { ReviewCard } from "@/components/reviews/review-card";
+import { ShareProfileButton } from "@/components/profile/share-profile-button";
 import { db } from "@/lib/db";
 import { profiles, userMediaLogs, mediaItems } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -153,17 +154,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="px-3.5 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-xs font-semibold text-white flex items-center gap-1.5 transition-colors"
+                className="px-3.5 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-xs font-semibold text-white flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <span>Edit Profile</span>
               </button>
-              <button
-                type="button"
-                className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-white transition-colors"
-                title="Share Profile"
-              >
-                <Share2 className="w-4 h-4" />
-              </button>
+              <ShareProfileButton username={user.username} />
             </div>
           </div>
 
