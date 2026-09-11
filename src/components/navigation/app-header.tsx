@@ -24,7 +24,7 @@ export function AppHeader({ user }: AppHeaderProps) {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/discover?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
@@ -169,14 +169,15 @@ export function AppHeader({ user }: AppHeaderProps) {
               </kbd>
             </form>
 
-            {/* Quick Log Button - Hidden on mobile */}
+            {/* Quick Add Button - Hidden on mobile */}
             <button
               type="button"
               onClick={() => setIsQuickAddOpen(true)}
               className="hidden sm:inline-flex h-9 px-3 sm:px-3.5 rounded-lg bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs sm:text-[13px] items-center gap-1.5 transition-colors shadow-sm shrink-0 cursor-pointer"
+              title="Add to Library"
             >
               <Plus className="w-4 h-4" />
-              <span className="whitespace-nowrap">Log</span>
+              <span className="whitespace-nowrap">Add</span>
             </button>
 
             {/* Notification Bell */}

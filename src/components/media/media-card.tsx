@@ -105,7 +105,7 @@ export function MediaCard({
                   setIsQuickAddOpen(true);
                 }}
                 className="w-8 h-8 rounded-full bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-md"
-                title="Quick Log"
+                title={status ? "Update in Library" : "Add to Library"}
               >
                 {status === "completed" ? (
                   <Check className="w-4 h-4" />
@@ -117,7 +117,7 @@ export function MediaCard({
 
             {/* Bottom Status Text */}
             <span className="text-center text-[10px] text-[#A8B0BD] truncate">
-              {status === "completed" ? "Logged" : "+ Quick Log"}
+              {status ? "Added" : "+ Add"}
             </span>
           </div>
 

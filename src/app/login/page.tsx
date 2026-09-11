@@ -1,71 +1,265 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Mail,
+  Lock,
+  User,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LogoIcon } from "@/components/ui/logo-icon";
 
-export default function LoginPage() {
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const initialMode = searchParams.get("mode") === "signup" ? "signup" : "signin";
+  const initialEmail = searchParams.get("email") || "";
+  const initialUsername = searchParams.get("username") || "";
+  const next = searchParams.get("next") || "/library";
+
+  const [mode, setMode] = useState<"signin" | "signup">(initialMode);
+  const [email, setEmail] = useState(initialEmail);
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState(initialUsername);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [error, setError] = useState<string | null>(
+    searchParams.get("error") === "auth_failed"
+      ? "Authentication failed. Please try again."
+      : null
+  );
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
+    setGoogleLoading(true);
     setError(null);
+    setSuccessMsg(null);
     const supabase = createClient();
 
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
         },
       });
 
       if (error) {
         setError(error.message);
-        setLoading(false);
+        setGoogleLoading(false);
       }
     } catch (err: any) {
-      setError(err.message || "Failed to initiate sign in.");
+      setError(err.message || "Failed to initiate Google sign in.");
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+    const supabase = createClient();
+
+    try {
+      if (mode === "signin") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+
+        if (error) {
+          setError(error.message);
+          setLoading(false);
+          return;
+        }
+
+        router.push(next);
+        router.refresh();
+      } else {
+        // Sign Up
+        const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            data: {
+              full_name: fullName.trim() || undefined,
+              user_name: cleanUsername || undefined,
+            },
+          },
+        });
+
+        if (error) {
+          setError(error.message);
+          setLoading(false);
+          return;
+        }
+
+        if (data.session) {
+          // Instant sign in (email confirmation disabled in Supabase)
+          router.push(next);
+          router.refresh();
+        } else {
+          // Email confirmation required
+          setSuccessMsg(
+            "Account created! Please check your email inbox to confirm your account, then sign in."
+          );
+          setMode("signin");
+          setLoading(false);
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || "Authentication failed.");
       setLoading(false);
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      setError("Please enter your email address to receive reset instructions.");
+      return;
+    }
+
+    setResetLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+    const supabase = createClient();
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/auth/callback?next=/library`,
+      });
+
+      if (error) {
+        setError(error.message);
+      } else {
+        setSuccessMsg("Password reset link sent! Check your inbox.");
+        setShowForgot(false);
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to send reset email.");
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen w-full bg-[#0F141D] flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Cinematic Background Glow */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0F141D] via-[#0F141D]/90 to-[#151C27]" />
+    <div className="min-h-screen w-full bg-[#0F141D] flex flex-col items-center justify-center p-4 relative overflow-hidden selection:bg-[#3B9EFF]/30 selection:text-white">
+      {/* Background Poster Wall with Ambient Scrim */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <img
+          src="/hero-background.jpeg"
+          alt="Cinematic Backdrop"
+          className="w-full h-full object-cover object-center opacity-15 blur-sm scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0F141D] via-[#0F141D]/90 to-[#0F141D]" />
+        <div className="absolute -top-40 right-1/4 w-[500px] h-[500px] rounded-full bg-[#3B9EFF]/10 blur-[140px]" />
+      </div>
 
-      <div className="relative z-10 w-full max-w-md p-6 sm:p-8 rounded-2xl bg-[#151C27] border border-white/[0.08] shadow-2xl flex flex-col items-center text-center">
-        {/* Brand Logo */}
-        <LogoIcon className="w-14 h-14 mb-4" size={56} priority />
+      <div className="relative z-10 w-full max-w-[440px] p-6 sm:p-8 rounded-2xl bg-[#151C27]/95 backdrop-blur-xl border border-white/[0.08] shadow-2xl flex flex-col">
+        {/* Brand Header */}
+        <div className="flex flex-col items-center text-center mb-6">
+          <Link href="/" className="group flex flex-col items-center mb-3">
+            <LogoIcon className="w-12 h-12 mb-2" size={48} priority />
+            <h1 className="font-extrabold text-2xl text-[#F5F7FA] tracking-tight group-hover:text-[#3B9EFF] transition-colors">
+              Cine<span className="text-[#3B9EFF]">Track</span>
+            </h1>
+          </Link>
+          <p className="text-xs text-[#A8B0BD] max-w-xs leading-relaxed">
+            {mode === "signin"
+              ? "Sign in to track movies, TV shows, and anime."
+              : "Create an account to start your personal watch library."}
+          </p>
+        </div>
 
-        <h1 className="font-extrabold text-2xl text-[#F5F7FA] tracking-tight">
-          Welcome to Cine<span className="text-[#3B9EFF]">Track</span>
-        </h1>
-        <p className="text-xs sm:text-sm text-[#A8B0BD] mt-1.5 leading-relaxed">
-          Everything you watch, in one place. Movies, TV series, and anime unified.
-        </p>
+        {/* Dual Mode Tab Selector */}
+        <div className="grid grid-cols-2 p-1 rounded-xl bg-[#0F141D]/80 border border-white/[0.06] mb-6">
+          <button
+            type="button"
+            onClick={() => {
+              setMode("signin");
+              setError(null);
+              setSuccessMsg(null);
+              setShowForgot(false);
+            }}
+            className={`py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+              mode === "signin"
+                ? "bg-[#3B9EFF] text-white shadow-md shadow-[#3B9EFF]/20"
+                : "text-[#A8B0BD] hover:text-[#F5F7FA]"
+            }`}
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode("signup");
+              setError(null);
+              setSuccessMsg(null);
+              setShowForgot(false);
+            }}
+            className={`py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+              mode === "signup"
+                ? "bg-[#3B9EFF] text-white shadow-md shadow-[#3B9EFF]/20"
+                : "text-[#A8B0BD] hover:text-[#F5F7FA]"
+            }`}
+          >
+            Create Account
+          </button>
+        </div>
 
+        {/* Status Alerts */}
         {error && (
-          <div className="w-full mt-4 p-3 rounded-lg bg-[#F43F5E]/15 border border-[#F43F5E]/30 text-xs text-[#F43F5E]">
-            {error}
+          <div className="w-full mb-4 p-3 rounded-xl bg-[#F43F5E]/10 border border-[#F43F5E]/20 text-xs text-[#F43F5E] flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span className="leading-snug">{error}</span>
           </div>
         )}
 
-        {/* 1-Click Google Sign In */}
+        {successMsg && (
+          <div className="w-full mb-4 p-3 rounded-xl bg-[#22C55E]/10 border border-[#22C55E]/20 text-xs text-[#22C55E] flex items-start gap-2.5">
+            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+            <span className="leading-snug">{successMsg}</span>
+          </div>
+        )}
+
+        {/* Google OAuth Button */}
         <button
           type="button"
           onClick={handleGoogleLogin}
-          disabled={loading}
-          className="w-full mt-6 h-12 rounded-xl bg-white text-gray-900 font-semibold text-sm flex items-center justify-center gap-3 shadow-md hover:bg-gray-100 active:scale-95 transition-all disabled:opacity-50"
+          disabled={googleLoading || loading}
+          className="w-full h-11 sm:h-12 rounded-xl bg-white hover:bg-gray-100 text-gray-900 font-semibold text-xs sm:text-sm flex items-center justify-center gap-3 shadow-md active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
         >
-          {loading ? (
-            <Loader2 className="w-5 h-5 animate-spin text-gray-900" />
+          {googleLoading ? (
+            <Loader2 className="w-4 h-4 animate-spin text-gray-900" />
           ) : (
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -87,17 +281,198 @@ export default function LoginPage() {
           <span>Continue with Google</span>
         </button>
 
-        <p className="text-[11px] text-[#6F7886] mt-6">
-          By signing in, you agree to CineTrack terms and privacy guidelines.
+        {/* Divider */}
+        <div className="flex items-center gap-3 my-5">
+          <div className="h-[1px] flex-1 bg-white/[0.08]" />
+          <span className="text-[11px] uppercase tracking-wider text-[#6F7886] font-medium">
+            or with email
+          </span>
+          <div className="h-[1px] flex-1 bg-white/[0.08]" />
+        </div>
+
+        {/* Forgot Password Sub-flow */}
+        {showForgot ? (
+          <form onSubmit={handleResetPassword} className="flex flex-col gap-3.5">
+            <div className="text-left">
+              <label className="block text-xs font-semibold text-[#CBD5E1] mb-1.5">
+                Account Email
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-[#6F7886] absolute left-3.5 top-3.5" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your.email@gmail.com"
+                  className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-[#0F141D] text-xs sm:text-sm text-[#F5F7FA] placeholder-[#4B5563] border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] focus:ring-1 focus:ring-[#3B9EFF] transition-all"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={resetLoading}
+              className="w-full h-11 mt-1 rounded-xl bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-[#3B9EFF]/25 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+            >
+              {resetLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
+              ) : (
+                <span>Send Password Reset Link</span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowForgot(false)}
+              className="text-xs text-[#A8B0BD] hover:text-white transition-colors mt-1"
+            >
+              ← Back to Sign In
+            </button>
+          </form>
+        ) : (
+          /* Email / Password Main Form */
+          <form onSubmit={handleEmailAuth} className="flex flex-col gap-3.5">
+            {mode === "signup" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#CBD5E1] mb-1">
+                    Display Name
+                  </label>
+                  <div className="relative">
+                    <User className="w-3.5 h-3.5 text-[#6F7886] absolute left-3 top-3.5" />
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Alex"
+                      className="w-full h-10 pl-8 pr-3 rounded-lg bg-[#0F141D] text-xs text-[#F5F7FA] placeholder-[#4B5563] border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#CBD5E1] mb-1">
+                    Username
+                  </label>
+                  <div className="relative">
+                    <span className="text-[11px] text-[#6F7886] absolute left-3 top-3">@</span>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="alex_cine"
+                      className="w-full h-10 pl-7 pr-3 rounded-lg bg-[#0F141D] text-xs text-[#F5F7FA] placeholder-[#4B5563] border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="text-left">
+              <label className="block text-xs font-semibold text-[#CBD5E1] mb-1.5">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-[#6F7886] absolute left-3.5 top-3.5" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your.email@gmail.com"
+                  className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-[#0F141D] text-xs sm:text-sm text-[#F5F7FA] placeholder-[#4B5563] border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] focus:ring-1 focus:ring-[#3B9EFF] transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="text-left">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-semibold text-[#CBD5E1]">
+                  Password
+                </label>
+                {mode === "signin" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForgot(true);
+                      setError(null);
+                      setSuccessMsg(null);
+                    }}
+                    className="text-[11px] text-[#3B9EFF] hover:text-[#5AAFFF] transition-colors cursor-pointer"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-[#6F7886] absolute left-3.5 top-3.5" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={mode === "signup" ? "At least 6 characters" : "••••••••"}
+                  className="w-full h-11 pl-10 pr-10 rounded-xl bg-[#0F141D] text-xs sm:text-sm text-[#F5F7FA] placeholder-[#4B5563] border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] focus:ring-1 focus:ring-[#3B9EFF] transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3.5 text-[#6F7886] hover:text-[#A8B0BD] transition-colors cursor-pointer"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || googleLoading}
+              className="w-full h-11 sm:h-12 mt-2 rounded-xl bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#3B9EFF]/25 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+            >
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
+              ) : (
+                <>
+                  <span>{mode === "signin" ? "Sign In" : "Create CineTrack Account"}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+        )}
+
+        {/* Footer info */}
+        <p className="text-[11px] text-[#6F7886] mt-6 text-center leading-relaxed">
+          By signing in, you agree to CineTrack terms and community guidelines.
         </p>
 
         <Link
           href="/"
-          className="text-xs text-[#A8B0BD] hover:text-white mt-4 transition-colors"
+          className="text-xs text-[#A8B0BD] hover:text-white mt-4 text-center transition-colors"
         >
           ← Continue as Guest
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen w-full bg-[#0F141D] flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-[#3B9EFF]" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

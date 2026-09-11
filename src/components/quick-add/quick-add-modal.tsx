@@ -107,7 +107,7 @@ export function QuickAddModal({
             )}
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[#3B9EFF]">
-                CineTrack Quick-Log • {media.year || "Release"}
+                Add to Library • {media.year || "Release"}
               </span>
               <h3 className="font-bold text-base text-[#F5F7FA] truncate mt-0.5">
                 {media.title}

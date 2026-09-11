@@ -233,7 +233,7 @@ export function LibraryView({
               </span>
             </div>
             <p className="text-xs text-[#A8B0BD] mt-1 flex items-center gap-1.5 sm:gap-2 flex-wrap">
-              <span>{stats.total} Total Titles Logged</span>
+              <span>{stats.total} Total Titles Tracked</span>
               <span className="w-1 h-1 rounded-full bg-white/20 hidden xs:inline-block" />
               <span>{stats.completed} Completed</span>
               <span className="w-1 h-1 rounded-full bg-white/20 hidden xs:inline-block" />
@@ -242,7 +242,7 @@ export function LibraryView({
           </div>
         </div>
 
-        {/* Action Buttons: Share Profile & Log Title */}
+        {/* Action Buttons: Share Profile & Add Title */}
         <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap relative z-10 self-start md:self-auto">
           <button
             type="button"
@@ -272,7 +272,7 @@ export function LibraryView({
             className="h-10 px-4 rounded-xl bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-md shadow-[#3B9EFF]/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Quick Log</span>
+            <span>Add</span>
           </button>
         </div>
       </div>
