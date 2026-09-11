@@ -89,6 +89,7 @@ export function MediaCard({
             <div className="flex items-center justify-center gap-2">
               <button
                 type="button"
+                suppressHydrationWarning
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -101,6 +102,7 @@ export function MediaCard({
               </button>
               <button
                 type="button"
+                suppressHydrationWarning
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -141,6 +143,7 @@ export function MediaCard({
           {/* Mobile Always-Visible Quick Action Button */}
           <button
             type="button"
+            suppressHydrationWarning
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();

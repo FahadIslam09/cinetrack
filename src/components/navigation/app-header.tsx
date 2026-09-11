@@ -172,6 +172,7 @@ export function AppHeader({ user }: AppHeaderProps) {
             {/* Quick Add Button - Hidden on mobile */}
             <button
               type="button"
+              suppressHydrationWarning
               onClick={() => setIsQuickAddOpen(true)}
               className="hidden sm:inline-flex h-9 px-3 sm:px-3.5 rounded-lg bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs sm:text-[13px] items-center gap-1.5 transition-colors shadow-sm shrink-0 cursor-pointer"
               title="Add to Library"
@@ -183,6 +184,7 @@ export function AppHeader({ user }: AppHeaderProps) {
             {/* Notification Bell */}
             <button
               type="button"
+              suppressHydrationWarning
               aria-label="Notifications"
               className="relative p-2 text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] rounded-lg transition-colors shrink-0 cursor-pointer"
             >
@@ -221,27 +223,11 @@ export function AppHeader({ user }: AppHeaderProps) {
         </div>
       </header>
 
-      {/* Quick Add Modal */}
+      {/* Add to Library Modal */}
       <QuickAddModal
         isOpen={isQuickAddOpen}
         onClose={() => setIsQuickAddOpen(false)}
-        media={{
-          id: "tmdb:movie:693134",
-          source: "tmdb",
-          sourceId: "693134",
-          mediaType: "movie",
-          title: "Dune: Part Two",
-          year: "2024",
-          rating: 8.8,
-          totalEpisodes: 1,
-          posterPath:
-            "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
-          backdropPath:
-            "https://image.tmdb.org/t/p/w1280/eZ239CUp1d6OryZEBPnO2n87gMG.jpg",
-          genres: ["Sci-Fi", "Adventure"],
-          synopsis:
-            "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
-        }}
+        media={null}
       />
     </>
   );

@@ -512,6 +512,7 @@ export function LibraryView({
         <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap relative z-10 self-start md:self-auto">
           <button
             type="button"
+            suppressHydrationWarning
             onClick={handleShareProfile}
             className={`h-10 px-4 rounded-xl text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 cursor-pointer border ${
               isCopied
@@ -534,6 +535,7 @@ export function LibraryView({
 
           <button
             type="button"
+            suppressHydrationWarning
             onClick={() => setIsQuickAddOpen(true)}
             className="h-10 px-4 rounded-xl bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-md shadow-[#3B9EFF]/20 cursor-pointer"
           >
@@ -746,23 +748,11 @@ export function LibraryView({
         </div>
       )}
 
-      {/* Quick Add Modal */}
+      {/* Add to Library Modal */}
       <QuickAddModal
         isOpen={isQuickAddOpen}
         onClose={() => setIsQuickAddOpen(false)}
-        media={{
-          id: "tmdb:movie:872585",
-          source: "tmdb",
-          sourceId: "872585",
-          mediaType: "movie",
-          title: "Oppenheimer",
-          year: "2023",
-          rating: 8.9,
-          totalEpisodes: 1,
-          posterPath: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
-          backdropPath: null,
-          genres: ["Drama", "History"],
-        }}
+        media={null}
       />
     </div>
   );
