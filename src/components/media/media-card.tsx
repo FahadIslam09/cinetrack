@@ -27,6 +27,7 @@ export interface MediaCardProps {
   seasons?: SeasonInfo[];
   reviewText?: string | null;
   containsSpoilers?: boolean;
+  fromUsername?: string;
   badgeLabel?: string;
   tagLabel?: string;
   subMeta?: string;
@@ -45,6 +46,7 @@ export function MediaCard({
   seasons,
   reviewText,
   containsSpoilers,
+  fromUsername,
   badgeLabel,
   tagLabel,
   subMeta,
@@ -128,7 +130,7 @@ export function MediaCard({
 
   const detailUrl = `/${media.mediaType}/${
     media.source === "anilist" ? media.sourceId : media.sourceId
-  }`;
+  }${fromUsername ? `?from=${fromUsername}` : ""}`;
 
   // Whether this card represents an active watching series/anime
   const isWatchingSeries =
@@ -486,8 +488,8 @@ export function MediaCard({
             </div>
           )}
 
-          {/* Hover Quick Action Pill Overlay */}
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none flex items-center justify-center p-3 z-10">
+          {/* Hover Quick Action Pill Overlay - Desktop only (hidden on mobile/tablet so clicking poster opens movie details) */}
+          <div className="hidden lg:flex absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none items-center justify-center p-3 z-10">
             <button
               type="button"
               onClick={(e) => {

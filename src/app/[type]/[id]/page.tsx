@@ -77,38 +77,63 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
   if (fromUsername) {
     const cleanUsername = fromUsername.replace(/^@/, "").toLowerCase().trim();
     try {
-      const [refProfile] = await db
-        .select()
-        .from(profiles)
-        .where(eq(profiles.username, cleanUsername))
-        .limit(1);
+      let refProfile: any = null;
+      let refLog: any = null;
 
-      if (refProfile) {
-        const [refLog] = await db
+      if (cleanUsername === "library" || cleanUsername === "me") {
+        const supabase = await createClient();
+        const {
+          data: { user: authUser },
+        } = await supabase.auth.getUser();
+
+        if (authUser) {
+          const [myProfile] = await db
+            .select()
+            .from(profiles)
+            .where(eq(profiles.id, authUser.id))
+            .limit(1);
+
+          refProfile = myProfile;
+          refLog = userLog;
+        }
+      } else {
+        const [foundProfile] = await db
           .select()
-          .from(userMediaLogs)
-          .where(
-            and(
-              eq(userMediaLogs.userId, refProfile.id),
-              eq(userMediaLogs.mediaId, media.id)
-            )
-          )
+          .from(profiles)
+          .where(eq(profiles.username, cleanUsername))
           .limit(1);
 
-        if (refLog && refLog.reviewText && refLog.reviewText.trim().length > 0) {
-          contextualReview = {
-            author: {
-              username: refProfile.username,
-              fullName: refProfile.fullName || refProfile.username,
-              avatarUrl: refProfile.avatarUrl || undefined,
-              isVerified: true,
-            },
-            rating: refLog.rating,
-            reviewText: refLog.reviewText.trim(),
-            containsSpoilers: Boolean(refLog.containsSpoilers),
-            updatedAt: refLog.updatedAt,
-          };
+        refProfile = foundProfile;
+
+        if (refProfile) {
+          const [foundLog] = await db
+            .select()
+            .from(userMediaLogs)
+            .where(
+              and(
+                eq(userMediaLogs.userId, refProfile.id),
+                eq(userMediaLogs.mediaId, media.id)
+              )
+            )
+            .limit(1);
+
+          refLog = foundLog;
         }
+      }
+
+      if (refProfile && refLog && refLog.reviewText && refLog.reviewText.trim().length > 0) {
+        contextualReview = {
+          author: {
+            username: refProfile.username,
+            fullName: refProfile.fullName || refProfile.username,
+            avatarUrl: refProfile.avatarUrl || undefined,
+            isVerified: true,
+          },
+          rating: refLog.rating,
+          reviewText: refLog.reviewText.trim(),
+          containsSpoilers: Boolean(refLog.containsSpoilers),
+          updatedAt: refLog.updatedAt,
+        };
       } else if (cleanUsername === "elenavance") {
         // Fallback demo curator review if testing demo profile Elena Vance
         if (

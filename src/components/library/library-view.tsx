@@ -588,6 +588,7 @@ export function LibraryView({
               seasons={item.seasons}
               reviewText={item.reviewText}
               containsSpoilers={item.containsSpoilers}
+              fromUsername={user?.username || undefined}
               className="w-full"
             />
           ))}
