@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Star, Plus, Check, Film, Loader2 } from "lucide-react";
+import { Star, Plus, Check, Film, Loader2, Pencil } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { QuickAddModal } from "../quick-add/quick-add-modal";
 import { RatingCategory, getRatingConfig } from "@/lib/rating";
@@ -511,6 +511,23 @@ export function MediaCard({
             </button>
           </div>
 
+          {/* Mobile & Tablet Quick Edit Button at Bottom-Left of Poster */}
+          {localStatus && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsQuickAddOpen(true);
+              }}
+              className="lg:hidden absolute bottom-2 left-2 w-8 h-8 rounded-full bg-[#121824]/90 hover:bg-[#1A2434] active:scale-90 backdrop-blur-md border border-white/20 text-[#A8B0BD] hover:text-white flex items-center justify-center shadow-lg z-20 cursor-pointer transition-all duration-150"
+              title="Edit Log"
+              aria-label="Edit Log"
+            >
+              <Pencil className="w-3.5 h-3.5 stroke-[2.2]" />
+            </button>
+          )}
+
           {/* Quick Action Button in bottom-right corner of poster */}
           {isWatchingSeries ? (
             <button
@@ -535,7 +552,7 @@ export function MediaCard({
                 <Plus className="w-3.5 h-3.5 stroke-[2.5] transition-transform duration-200 group-hover/plus:rotate-90" />
               )}
             </button>
-          ) : (
+          ) : !localStatus ? (
             <button
               type="button"
               onClick={(e) => {
@@ -543,17 +560,13 @@ export function MediaCard({
                 e.stopPropagation();
                 setIsQuickAddOpen(true);
               }}
-              className="md:hidden absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#121824]/90 backdrop-blur-md border border-white/15 text-white flex items-center justify-center shadow-lg active:scale-95 z-20 cursor-pointer"
-              title={localStatus ? "Edit Log" : "Add to Library"}
-              aria-label={localStatus ? "Edit Log" : "Add to Library"}
+              className="lg:hidden absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#121824]/90 hover:bg-[#3B9EFF] active:scale-90 backdrop-blur-md border border-white/15 text-[#3B9EFF] hover:text-white flex items-center justify-center shadow-lg z-20 cursor-pointer transition-all duration-150"
+              title="Add to Library"
+              aria-label="Add to Library"
             >
-              {localStatus === "completed" ? (
-                <Check className="w-3.5 h-3.5 text-[#22C55E]" />
-              ) : (
-                <Plus className="w-3.5 h-3.5 text-[#3B9EFF]" />
-              )}
+              <Plus className="w-3.5 h-3.5 text-[#3B9EFF]" />
             </button>
-          )}
+          ) : null}
         </div>
 
         {/* Overall Series Progress Bar underneath poster for active Watching items */}
