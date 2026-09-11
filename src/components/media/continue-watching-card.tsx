@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, Plus, Loader2 } from "lucide-react";
+import { Check, Plus, Loader2, Film } from "lucide-react";
 import { incrementEpisode } from "@/actions/tracking";
 
 interface ContinueWatchingCardProps {
@@ -93,7 +93,15 @@ export function ContinueWatchingCard({
           src={imageSrc}
           alt={title}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+            const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+            if (fallback) fallback.classList.remove("hidden");
+          }}
         />
+        <div className="w-full h-full bg-[#151C27] hidden items-center justify-center text-[#6F7886]">
+          <Film className="w-6 h-6 text-white/10" />
+        </div>
         <span className="absolute bottom-1 right-1 px-1 py-0.5 rounded bg-[#090E17]/85 backdrop-blur text-[9px] font-bold text-white uppercase tracking-wider">
           {badgeText}
         </span>

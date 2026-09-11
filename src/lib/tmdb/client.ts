@@ -4,10 +4,12 @@ const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
 export function getTmdbImageUrl(
   path: string | null | undefined,
   size: "w300" | "w500" | "w780" | "w1280" | "original" = "w500"
-): string {
-  if (!path) return "/placeholder-poster.png";
+): string | null {
+  if (!path || path === "null" || path === "undefined" || path.trim() === "" || path.includes("placeholder-")) {
+    return null;
+  }
   if (path.startsWith("http")) return path;
-  return `${TMDB_IMAGE_BASE}/${size}${path}`;
+  return `${TMDB_IMAGE_BASE}/${size}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 async function fetchTmdb<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {

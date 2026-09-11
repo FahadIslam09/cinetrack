@@ -445,20 +445,28 @@ export function MediaCard({
       >
         {/* Poster Container (2:3 Aspect Ratio) */}
         <div className="relative w-full aspect-[2/3] overflow-hidden bg-[#161E2C]">
-          <Link href={detailUrl} className="block w-full h-full">
+          <Link href={detailUrl} className="block w-full h-full relative">
             {media.posterPath ? (
               <img
                 src={media.posterPath}
                 alt={media.title}
                 loading="lazy"
                 className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                  if (fallback) fallback.classList.remove("hidden");
+                }}
               />
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-xs text-[#6F7886] p-2 text-center bg-[#161E2C]">
-                <Film className="w-8 h-8 text-white/10 mb-2" />
-                <span>No Poster</span>
-              </div>
-            )}
+            ) : null}
+            <div
+              className={`w-full h-full flex flex-col items-center justify-center text-xs text-[#6F7886] p-2 text-center bg-[#161E2C] ${
+                media.posterPath ? "hidden" : "flex"
+              }`}
+            >
+              <Film className="w-8 h-8 text-white/10 mb-2" />
+              <span>No Poster</span>
+            </div>
           </Link>
 
           {/* Smooth Bottom Vignette transitioning poster into info area */}

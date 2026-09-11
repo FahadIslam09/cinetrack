@@ -189,11 +189,11 @@ function mapTmdbToAnimeMedia(item: any): AniListMedia {
       native: origTitle,
     },
     coverImage: {
-      extraLarge: getTmdbImageUrl(item.poster_path, "w500"),
-      large: getTmdbImageUrl(item.poster_path, "w500"),
-      medium: getTmdbImageUrl(item.poster_path, "w300"),
+      extraLarge: getTmdbImageUrl(item.poster_path, "w500") || undefined,
+      large: getTmdbImageUrl(item.poster_path, "w500") || undefined,
+      medium: getTmdbImageUrl(item.poster_path, "w300") || undefined,
     },
-    bannerImage: getTmdbImageUrl(item.backdrop_path, "w1280"),
+    bannerImage: getTmdbImageUrl(item.backdrop_path, "w1280") || undefined,
     startDate: {
       year: year ? parseInt(year.slice(0, 4)) : undefined,
     },
@@ -208,7 +208,7 @@ function mapTmdbToAnimeMedia(item: any): AniListMedia {
           edges: item.credits.cast.slice(0, 8).map((c: any) => ({
             node: {
               name: { full: c.name },
-              image: { medium: getTmdbImageUrl(c.profile_path, "w300") },
+              image: { medium: getTmdbImageUrl(c.profile_path, "w300") || undefined },
             },
             role: c.character || "Voice",
           })),
@@ -220,7 +220,7 @@ function mapTmdbToAnimeMedia(item: any): AniListMedia {
             mediaRecommendation: {
               id: s.id,
               title: { english: s.name || s.title, romaji: s.original_name || s.original_title },
-              coverImage: { large: getTmdbImageUrl(s.poster_path, "w500") },
+              coverImage: { large: getTmdbImageUrl(s.poster_path, "w500") || undefined },
               averageScore: Math.round((s.vote_average || 7.5) * 10),
               startDate: { year: parseInt((s.first_air_date || s.release_date || "2024").slice(0, 4)) },
             },

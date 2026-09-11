@@ -775,18 +775,26 @@ export function QuickAddModal({
                                 alt={item.title}
                                 className="w-11 h-16 rounded-lg object-cover bg-[#151C27] shrink-0 shadow-md"
                                 loading="lazy"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                  const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                                  if (fallback) fallback.classList.remove("hidden");
+                                }}
                               />
-                            ) : (
-                              <div className="w-11 h-16 rounded-lg bg-[#151C27] shrink-0 flex items-center justify-center text-[#6F7886] border border-white/[0.04]">
-                                {item.mediaType === "movie" ? (
-                                  <Film className="w-5 h-5" />
-                                ) : item.mediaType === "anime" ? (
-                                  <Flame className="w-5 h-5" />
-                                ) : (
-                                  <Tv className="w-5 h-5" />
-                                )}
-                              </div>
-                            )}
+                            ) : null}
+                            <div
+                              className={`w-11 h-16 rounded-lg bg-[#151C27] shrink-0 ${
+                                item.posterPath ? "hidden" : "flex"
+                              } items-center justify-center text-[#6F7886] border border-white/[0.04]`}
+                            >
+                              {item.mediaType === "movie" ? (
+                                <Film className="w-5 h-5" />
+                              ) : item.mediaType === "anime" ? (
+                                <Flame className="w-5 h-5" />
+                              ) : (
+                                <Tv className="w-5 h-5" />
+                              )}
+                            </div>
                             <div className="min-w-0">
                               <h4 className="font-bold text-sm text-[#F5F7FA] group-hover:text-[#3B9EFF] transition-colors truncate">
                                 {item.title}
@@ -875,12 +883,20 @@ export function QuickAddModal({
                       src={selectedMedia.posterPath}
                       alt={selectedMedia.title}
                       className="w-10 h-14 rounded-lg object-cover bg-[#151C27] shrink-0 shadow-sm"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                        if (fallback) fallback.classList.remove("hidden");
+                      }}
                     />
-                  ) : (
-                    <div className="w-10 h-14 rounded-lg bg-[#151C27] shrink-0 flex items-center justify-center text-[#6F7886]">
-                      <Film className="w-5 h-5" />
-                    </div>
-                  )}
+                  ) : null}
+                  <div
+                    className={`w-10 h-14 rounded-lg bg-[#151C27] shrink-0 ${
+                      selectedMedia.posterPath ? "hidden" : "flex"
+                    } items-center justify-center text-[#6F7886]`}
+                  >
+                    <Film className="w-5 h-5" />
+                  </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       {renderFormatBadge(selectedMedia.mediaType, "text-[9px]")}
@@ -1107,12 +1123,20 @@ export function QuickAddModal({
                         src={selectedMedia.posterPath}
                         alt={selectedMedia.title}
                         className="w-16 h-24 rounded-lg object-cover bg-[#151C27] shrink-0 shadow-md"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                          if (fallback) fallback.classList.remove("hidden");
+                        }}
                       />
-                    ) : (
-                      <div className="w-16 h-24 rounded-lg bg-[#151C27] shrink-0 flex items-center justify-center text-[#6F7886]">
-                        <Film className="w-6 h-6" />
-                      </div>
-                    )}
+                    ) : null}
+                    <div
+                      className={`w-16 h-24 rounded-lg bg-[#151C27] shrink-0 ${
+                        selectedMedia.posterPath ? "hidden" : "flex"
+                      } items-center justify-center text-[#6F7886]`}
+                    >
+                      <Film className="w-6 h-6" />
+                    </div>
                     <div className="min-w-0 flex flex-col justify-between py-0.5">
                       <div>
                         <div className="flex items-center gap-1.5">
@@ -1377,12 +1401,20 @@ export function QuickAddModal({
                       src={item.posterPath}
                       alt={item.title}
                       className="w-10 h-14 object-cover rounded-lg shrink-0 shadow-sm border border-white/10"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                        if (fallback) fallback.classList.remove("hidden");
+                      }}
                     />
-                  ) : (
-                    <div className="w-10 h-14 rounded-lg bg-[#151C27] shrink-0 flex items-center justify-center text-[#6F7886]">
-                      <Film className="w-5 h-5" />
-                    </div>
-                  )}
+                  ) : null}
+                  <div
+                    className={`w-10 h-14 rounded-lg bg-[#151C27] shrink-0 ${
+                      item.posterPath ? "hidden" : "flex"
+                    } items-center justify-center text-[#6F7886]`}
+                  >
+                    <Film className="w-5 h-5" />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <h4 className="font-semibold text-xs text-[#F5F7FA] truncate">
                       {item.title}

@@ -290,11 +290,15 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
           {/* Backdrop Image */}
           <div
             className="w-full h-80 sm:h-96 bg-cover bg-center relative"
-            style={{
-              backgroundImage: `url('${
-                media.backdropPath || media.posterPath || "/placeholder-backdrop.png"
-              }')`,
-            }}
+            style={
+              media.backdropPath || media.posterPath
+                ? {
+                    backgroundImage: `url('${
+                      media.backdropPath || media.posterPath
+                    }')`,
+                  }
+                : undefined
+            }
           >
             <div className="absolute inset-0 bg-gradient-to-t from-[#0F141D] via-[#0F141D]/70 to-black/40" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#0F141D]/90 via-transparent to-[#0F141D]/40" />
@@ -310,9 +314,22 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
                     src={media.posterPath}
                     alt={media.title}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                      if (fallback) fallback.classList.remove("hidden");
+                    }}
                   />
                 ) : null}
-                <span className="absolute top-1.5 left-1.5 bg-[#0F141D]/90 backdrop-blur-sm text-[#F5C84B] px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide flex items-center gap-1 border border-white/[0.08]">
+                <div
+                  className={`w-full h-full flex flex-col items-center justify-center text-xs text-[#6F7886] p-2 text-center bg-[#161E2C] ${
+                    media.posterPath ? "hidden" : "flex"
+                  }`}
+                >
+                  <Film className="w-8 h-8 text-white/10 mb-1" />
+                  <span>No Poster</span>
+                </div>
+                <span className="absolute top-1.5 left-1.5 bg-[#0F141D]/90 backdrop-blur-sm text-[#F5C84B] px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide flex items-center gap-1 border border-white/[0.08] z-10">
                   <span className="text-[#A8B0BD] text-[9px] font-semibold">IMDb</span>
                   <Star className="w-3 h-3 fill-[#F5C84B]" />
                   <span>{media.rating ? media.rating.toFixed(1) : "—"}</span>
