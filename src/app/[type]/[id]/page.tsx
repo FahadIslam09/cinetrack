@@ -16,6 +16,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getUserMediaLog } from "@/actions/tracking";
 import { MediaDetailsActions } from "./actions-client";
+import { DetailsBackButton } from "./back-button";
 import { db } from "@/lib/db";
 import { profiles, userMediaLogs } from "@/lib/db/schema";
 import { eq, and, isNotNull, desc } from "drizzle-orm";
@@ -35,6 +36,11 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
   const { type, id } = await params;
   const resolvedSearchParams = (await searchParams) || {};
   const fromUsername = resolvedSearchParams.from || resolvedSearchParams.ref;
+  const fallbackUrl = fromUsername
+    ? fromUsername === "library"
+      ? "/library"
+      : `/u/${fromUsername}`
+    : "/";
 
   let media: NormalizedMedia | null = null;
   let rawDetails: any = null;
@@ -276,6 +282,11 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
       <main className="flex-1 flex flex-col w-full pt-16">
         {/* Backdrop & Header Hero */}
         <div className="relative w-full overflow-hidden bg-[#151C27] border-b border-white/[0.06]">
+          {/* Mobile & Tablet Back Button */}
+          <div className="lg:hidden absolute top-3.5 left-4 sm:top-5 sm:left-6 z-20">
+            <DetailsBackButton fallbackUrl={fallbackUrl} />
+          </div>
+
           {/* Backdrop Image */}
           <div
             className="w-full h-80 sm:h-96 bg-cover bg-center relative"
