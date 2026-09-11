@@ -14,6 +14,7 @@ import {
   Sparkles,
   SlidersHorizontal,
   ArrowUpDown,
+  ChevronDown,
   Check,
   Copy,
   X,
@@ -407,7 +408,7 @@ export function LibraryView({
       {/* Controls: Status Tabs, My Rating, Search & Filters */}
       <div className="flex flex-col gap-3">
         {/* Status Filter Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
           {[
             { id: "all", label: `All (${initialItems.length})` },
             { id: "watching", label: `Watching (${stats.watching})` },
@@ -434,8 +435,8 @@ export function LibraryView({
           })}
         </div>
 
-        {/* Toolbar: Search, Type Tabs, Sort */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+        {/* Unified Search & Dropdown Filters Bar */}
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5">
           {/* Instant Client Search */}
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-[#6F7886] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -457,128 +458,101 @@ export function LibraryView({
             )}
           </div>
 
-          {/* Media Format Filter Chips */}
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-            {[
-              { id: "all", label: "All Formats" },
-              { id: "movie", label: "Movies" },
-              { id: "series", label: "TV Shows" },
-              { id: "anime", label: "Anime" },
-            ].map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTypeFilter(t.id)}
-                className={`h-9 px-3 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer border select-none focus:outline-none focus-visible:outline-none ${
-                  typeFilter === t.id
-                    ? "bg-[#3B9EFF]/20 border-[#3B9EFF] text-[#3B9EFF]"
-                    : "bg-[#151C27] border-white/[0.06] text-[#A8B0BD] hover:text-white hover:bg-[#1A2330] hover:border-white/[0.14]"
+          {/* 4 Compact Filter Dropdowns: 2x2 Grid on Mobile, 4 Columns on Tablet, Flex on Desktop */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:flex lg:items-center gap-2 w-full lg:w-auto shrink-0">
+            {/* 1. Format */}
+            <div className="relative w-full lg:w-auto">
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                aria-label="Filter by format"
+                className={`w-full h-9 pl-3 pr-7 rounded-lg text-xs font-medium cursor-pointer appearance-none border transition-colors focus:outline-none focus:border-[#3B9EFF] ${
+                  typeFilter !== "all"
+                    ? "bg-[#3B9EFF]/15 border-[#3B9EFF] text-[#3B9EFF] font-semibold"
+                    : "bg-[#151C27] border-white/[0.08] text-[#A8B0BD] hover:border-white/[0.16] hover:text-white"
                 }`}
               >
-                {t.label}
-              </button>
-            ))}
+                <option value="all" className="bg-[#151C27] text-white">All Formats</option>
+                <option value="movie" className="bg-[#151C27] text-white">Movies</option>
+                <option value="series" className="bg-[#151C27] text-white">TV Shows</option>
+                <option value="anime" className="bg-[#151C27] text-white">Anime</option>
+              </select>
+              <ChevronDown className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${
+                typeFilter !== "all" ? "text-[#3B9EFF]" : "text-[#6F7886]"
+              }`} />
+            </div>
+
+            {/* 2. Rating */}
+            <div className="relative w-full lg:w-auto">
+              <select
+                value={ratingFilter}
+                onChange={(e) => setRatingFilter(e.target.value)}
+                aria-label="Filter by personal rating"
+                className={`w-full h-9 pl-3 pr-7 rounded-lg text-xs font-medium cursor-pointer appearance-none border transition-colors focus:outline-none focus:border-[#3B9EFF] ${
+                  ratingFilter !== "all"
+                    ? "bg-[#3B9EFF]/15 border-[#3B9EFF] text-[#3B9EFF] font-semibold"
+                    : "bg-[#151C27] border-white/[0.08] text-[#A8B0BD] hover:border-white/[0.16] hover:text-white"
+                }`}
+              >
+                <option value="all" className="bg-[#151C27] text-white">All Ratings ({initialItems.length})</option>
+                <option value="masterpiece" className="bg-[#151C27] text-[#F5C84B]">★ Masterpiece ({tasteCounts.masterpiece})</option>
+                <option value="good" className="bg-[#151C27] text-[#3B9EFF]">★ Good ({tasteCounts.good})</option>
+                <option value="average" className="bg-[#151C27] text-[#F59E0B]">★ Average ({tasteCounts.average})</option>
+                <option value="poor" className="bg-[#151C27] text-[#F43F5E]">★ Poor ({tasteCounts.poor})</option>
+                <option value="not_rated" className="bg-[#151C27] text-[#A8B0BD]">Not Rated ({tasteCounts.unrated})</option>
+              </select>
+              <ChevronDown className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${
+                ratingFilter !== "all" ? "text-[#3B9EFF]" : "text-[#6F7886]"
+              }`} />
+            </div>
+
+            {/* 3. Genre */}
+            <div className="relative w-full lg:w-auto">
+              <select
+                value={selectedGenre}
+                onChange={(e) => setSelectedGenre(e.target.value)}
+                aria-label="Filter by genre"
+                className={`w-full h-9 pl-3 pr-7 rounded-lg text-xs font-medium cursor-pointer appearance-none border transition-colors focus:outline-none focus:border-[#3B9EFF] ${
+                  selectedGenre !== "All"
+                    ? "bg-[#3B9EFF]/15 border-[#3B9EFF] text-[#3B9EFF] font-semibold"
+                    : "bg-[#151C27] border-white/[0.08] text-[#A8B0BD] hover:border-white/[0.16] hover:text-white"
+                }`}
+              >
+                <option value="All" className="bg-[#151C27] text-white">All Genres</option>
+                {GENRES.filter((g) => g !== "All").map((g) => (
+                  <option key={g} value={g} className="bg-[#151C27] text-white">
+                    {g}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${
+                selectedGenre !== "All" ? "text-[#3B9EFF]" : "text-[#6F7886]"
+              }`} />
+            </div>
+
+            {/* 4. Sort */}
+            <div className="relative w-full lg:w-auto">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                aria-label="Sort library titles"
+                className={`w-full h-9 pl-3 pr-7 rounded-lg text-xs font-medium cursor-pointer appearance-none border transition-colors focus:outline-none focus:border-[#3B9EFF] ${
+                  sortBy !== "updated_desc"
+                    ? "bg-[#3B9EFF]/15 border-[#3B9EFF] text-[#3B9EFF] font-semibold"
+                    : "bg-[#151C27] border-white/[0.08] text-[#A8B0BD] hover:border-white/[0.16] hover:text-white"
+                }`}
+              >
+                {SORT_OPTIONS.map((opt) => (
+                  <option key={opt.id} value={opt.id} className="bg-[#151C27] text-white">
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <ArrowUpDown className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${
+                sortBy !== "updated_desc" ? "text-[#3B9EFF]" : "text-[#6F7886]"
+              }`} />
+            </div>
           </div>
-
-          {/* Sort Selector */}
-          <div className="relative w-full sm:w-auto shrink-0">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              aria-label="Sort library titles"
-              className="w-full sm:w-auto h-9 pl-3 pr-8 rounded-lg bg-[#151C27] border border-white/[0.08] text-xs text-[#F5F7FA] focus:outline-none focus:border-[#3B9EFF] cursor-pointer appearance-none"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.id} value={opt.id} className="bg-[#151C27] text-white">
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <ArrowUpDown className="w-3.5 h-3.5 text-[#6F7886] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
-        </div>
-
-        {/* My Rating Categorical Filter Row */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#6F7886] mr-1 shrink-0">
-            My Rating:
-          </span>
-          {[
-            { id: "all", label: `All (${initialItems.length})` },
-            {
-              id: "masterpiece",
-              label: `Masterpiece (${tasteCounts.masterpiece})`,
-              dot: "bg-[#F5C84B]",
-              activeClass: "bg-[#F5C84B]/20 border-[#F5C84B] text-[#F5C84B]",
-            },
-            {
-              id: "good",
-              label: `Good (${tasteCounts.good})`,
-              dot: "bg-[#3B9EFF]",
-              activeClass: "bg-[#3B9EFF]/20 border-[#3B9EFF] text-[#3B9EFF]",
-            },
-            {
-              id: "average",
-              label: `Average (${tasteCounts.average})`,
-              dot: "bg-[#F59E0B]",
-              activeClass: "bg-[#F59E0B]/20 border-[#F59E0B] text-[#F59E0B]",
-            },
-            {
-              id: "poor",
-              label: `Poor (${tasteCounts.poor})`,
-              dot: "bg-[#F43F5E]",
-              activeClass: "bg-[#F43F5E]/20 border-[#F43F5E] text-[#F43F5E]",
-            },
-            {
-              id: "not_rated",
-              label: `Not Rated (${tasteCounts.unrated})`,
-              activeClass: "bg-white/20 border-white/40 text-white",
-            },
-          ].map((rTab) => {
-            const isSelected = ratingFilter === rTab.id;
-            return (
-              <button
-                key={rTab.id}
-                type="button"
-                onClick={() => setRatingFilter(rTab.id)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer border select-none focus:outline-none focus-visible:outline-none flex items-center gap-1.5 ${
-                  isSelected
-                    ? rTab.activeClass ||
-                      "bg-[#3B9EFF] text-white border-[#3B9EFF] shadow-sm shadow-[#3B9EFF]/20"
-                    : "bg-[#151C27] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] border-white/[0.06] hover:border-white/[0.14]"
-                }`}
-              >
-                {rTab.dot && (
-                  <span className={`w-1.5 h-1.5 rounded-full ${rTab.dot} shrink-0`} />
-                )}
-                <span>{rTab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Quick Genre Pills (Especially Comedy for funny movie requests) */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#6F7886] mr-1 shrink-0">
-            Genre:
-          </span>
-          {GENRES.map((g) => {
-            const isSelected = selectedGenre === g;
-            return (
-              <button
-                key={g}
-                type="button"
-                onClick={() => setSelectedGenre(g)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium whitespace-nowrap transition-all duration-150 active:scale-95 cursor-pointer border select-none focus:outline-none focus-visible:outline-none ${
-                  isSelected
-                    ? "bg-[#3B9EFF] text-white font-semibold border-[#3B9EFF] shadow-sm shadow-[#3B9EFF]/20"
-                    : "bg-[#151C27] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] border-white/[0.06] hover:border-white/[0.14]"
-                }`}
-              >
-                {g}
-              </button>
-            );
-          })}
         </div>
 
         {/* Active Filter Bar (when any filter is active) */}
