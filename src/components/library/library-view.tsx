@@ -153,7 +153,7 @@ export function LibraryView({
   // Copy Profile URL or trigger Web Share
   const handleShareProfile = async () => {
     const profileUrl = typeof window !== "undefined"
-      ? `${window.location.origin}/${user?.username ? `@${user.username}` : "library"}`
+      ? `${window.location.origin}/${user?.username ? `u/${user.username}` : "library"}`
       : "https://cinetrack.app";
 
     if (navigator.share) {

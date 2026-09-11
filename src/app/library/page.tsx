@@ -373,7 +373,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
 
   return (
     <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D]">
-      <AppHeader />
+      <AppHeader user={userProp} />
 
       <main className="flex-1 w-full max-w-[834px] lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 pt-24 sm:pt-28 pb-24 md:pb-12">
         <LibraryView
