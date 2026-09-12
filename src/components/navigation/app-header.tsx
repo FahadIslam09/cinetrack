@@ -77,45 +77,6 @@ export function AppHeader({ user }: AppHeaderProps) {
                 )}
               </Link>
               <Link
-                href="/discover?type=movie"
-                className={`relative py-2 font-semibold whitespace-nowrap transition-colors items-center gap-1 group hidden xl:flex ${
-                  pathname.includes("type=movie")
-                    ? "text-[#F5F7FA]"
-                    : "text-[#A8B0BD] hover:text-[#F5F7FA]"
-                }`}
-              >
-                <span>Movies</span>
-                {pathname.includes("type=movie") && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
-                )}
-              </Link>
-              <Link
-                href="/discover?type=series"
-                className={`relative py-2 font-semibold whitespace-nowrap transition-colors items-center gap-1 group hidden xl:flex ${
-                  pathname.includes("type=series")
-                    ? "text-[#F5F7FA]"
-                    : "text-[#A8B0BD] hover:text-[#F5F7FA]"
-                }`}
-              >
-                <span>TV Shows</span>
-                {pathname.includes("type=series") && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
-                )}
-              </Link>
-              <Link
-                href="/discover?type=anime"
-                className={`relative py-2 font-semibold whitespace-nowrap transition-colors items-center gap-1 group hidden xl:flex ${
-                  pathname.includes("type=anime")
-                    ? "text-[#F5F7FA]"
-                    : "text-[#A8B0BD] hover:text-[#F5F7FA]"
-                }`}
-              >
-                <span>Anime</span>
-                {pathname.includes("type=anime") && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
-                )}
-              </Link>
-              <Link
                 href="/library"
                 className={`relative py-2 font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
                   pathname === "/library"
