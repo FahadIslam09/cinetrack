@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   Search,
   Plus,
-  Star,
   Clock,
   CheckCircle2,
   Film,
@@ -20,6 +19,7 @@ import {
   Pencil,
   X,
   RotateCcw,
+  Loader2,
 } from "lucide-react";
 import { MediaCard } from "@/components/media/media-card";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
@@ -111,11 +111,21 @@ export function LibraryView({
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recently_updated");
+  const [visibleCount, setVisibleCount] = useState(12);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
+  const filterTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [isUsernameCopied, setIsUsernameCopied] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [currentUserState, setCurrentUserState] = useState(user);
   const [avatarError, setAvatarError] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     setCurrentUserState(user);
@@ -327,14 +337,46 @@ export function LibraryView({
     selectedGenre !== "All" ||
     searchQuery.trim() !== "";
 
+  const handleFilterChange = (setter: (val: any) => void) => (val: any) => {
+    setIsFiltering(true);
+    setVisibleCount(12);
+    setter(val);
+    if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
+    filterTimerRef.current = setTimeout(() => {
+      setIsFiltering(false);
+    }, 280);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVisibleCount(12);
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSeeMore = () => {
+    setIsLoadingMore(true);
+    setTimeout(() => {
+      setVisibleCount((prev) => prev + 12);
+      setIsLoadingMore(false);
+    }, 280);
+  };
+
   const resetFilters = () => {
+    setIsFiltering(true);
+    setVisibleCount(12);
     setStatusFilter("all");
     setTypeFilter("all");
     setRatingFilter("all");
     setSelectedGenre("All");
     setSearchQuery("");
     setSortBy("recently_updated");
+    if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
+    filterTimerRef.current = setTimeout(() => {
+      setIsFiltering(false);
+    }, 280);
   };
+
+  const displayedItems = filteredItems.slice(0, visibleCount);
+  const hasMore = filteredItems.length > visibleCount;
 
   return (
     <div className="flex flex-col gap-6">
@@ -558,7 +600,15 @@ export function LibraryView({
       </div>
 
       {/* Controls: Search, Status & Filter Dropdowns */}
-      <div className="flex flex-col gap-2.5">
+      <div className="relative flex flex-col gap-2.5">
+        {/* Laser beam scan when filtering */}
+        {isFiltering && (
+          <div className="absolute inset-x-0 -top-[1px] h-[2px] overflow-hidden rounded-t-xl z-50 pointer-events-none">
+            <div className="absolute inset-0 bg-[#3B9EFF]/40 shadow-[0_0_8px_#3B9EFF]" />
+            <div className="h-full w-full bg-gradient-to-r from-transparent via-[#5AAFFF] to-transparent animate-laser-beam shadow-[0_0_14px_#3B9EFF]" />
+          </div>
+        )}
+
         {/* Unified Search & Dropdown Filters Bar */}
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5">
           {/* Row 1 on Mobile: Status Dropdown + Search Input Inline */}
@@ -566,7 +616,8 @@ export function LibraryView({
             {/* Status Dropdown */}
             <CustomDropdown
               value={statusFilter}
-              onChange={setStatusFilter}
+              onChange={handleFilterChange(setStatusFilter)}
+              isLoading={isFiltering}
               options={statusOptions}
               triggerLabel={statusTriggerLabel}
               align="left"
@@ -581,14 +632,17 @@ export function LibraryView({
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 placeholder="Filter by title or genre..."
                 className="w-full h-9 pl-9 pr-8 rounded-lg bg-[#151C27] border border-white/[0.08] text-xs text-[#F5F7FA] placeholder-[#6F7886] focus:outline-none focus:border-[#3B9EFF] transition-colors"
               />
               {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => {
+                    setVisibleCount(12);
+                    setSearchQuery("");
+                  }}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6F7886] hover:text-white p-0.5"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -602,7 +656,8 @@ export function LibraryView({
             {/* 1. Format */}
             <CustomDropdown
               value={typeFilter}
-              onChange={setTypeFilter}
+              onChange={handleFilterChange(setTypeFilter)}
+              isLoading={isFiltering}
               options={formatOptions}
               align="left"
               className="w-full lg:w-auto lg:min-w-[125px]"
@@ -613,7 +668,8 @@ export function LibraryView({
             {/* 2. Rating */}
             <CustomDropdown
               value={ratingFilter}
-              onChange={setRatingFilter}
+              onChange={handleFilterChange(setRatingFilter)}
+              isLoading={isFiltering}
               options={ratingOptions}
               triggerLabel={ratingTriggerLabel}
               align="right"
@@ -625,7 +681,8 @@ export function LibraryView({
             {/* 3. Genre */}
             <CustomDropdown
               value={selectedGenre}
-              onChange={setSelectedGenre}
+              onChange={handleFilterChange(setSelectedGenre)}
+              isLoading={isFiltering}
               options={genreOptions}
               align="left"
               className="w-full lg:w-auto lg:min-w-[125px]"
@@ -636,7 +693,8 @@ export function LibraryView({
             {/* 4. Sort */}
             <CustomDropdown
               value={sortBy}
-              onChange={setSortBy}
+              onChange={handleFilterChange(setSortBy)}
+              isLoading={isFiltering}
               options={sortOptions}
               align="right"
               className="w-full lg:w-auto lg:min-w-[160px]"
@@ -651,7 +709,7 @@ export function LibraryView({
         {hasActiveFilters && (
           <div className="flex items-center justify-between text-xs text-[#A8B0BD] pt-1 border-t border-white/[0.04]">
             <span className="text-[11px]">
-              Showing <strong className="text-[#F5F7FA]">{filteredItems.length}</strong> of {initialItems.length} titles
+              Showing <strong className="text-[#F5F7FA]">{Math.min(visibleCount, filteredItems.length)}</strong> of {filteredItems.length} titles
             </span>
             <button
               type="button"
@@ -666,45 +724,84 @@ export function LibraryView({
       </div>
 
       {/* 5. Responsive Media Grid (Full-Width Responsive Cells) */}
-      {filteredItems.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4">
-          {filteredItems.map((item) => (
-            <MediaCard
-              key={item.id}
-              media={item.media}
-              status={item.status}
-              userRating={item.userRating || undefined}
-              userEpisodes={item.userEpisodes}
-              currentSeason={item.currentSeason}
-              currentEpisode={item.currentEpisode}
-              seasons={item.seasons}
-              reviewText={item.reviewText}
-              containsSpoilers={item.containsSpoilers}
-              fromUsername={currentUserState?.username || undefined}
-              readOnly={!isOwner}
-              className="w-full"
-            />
-          ))}
-        </div>
-      ) : (
-        /* Empty State */
-        <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl bg-[#151C27] border border-white/[0.06] my-6">
-          <div className="w-12 h-12 rounded-full bg-[#1D2734] flex items-center justify-center text-[#6F7886] mb-3">
-            <Search className="w-6 h-6" />
+      <div className="relative">
+        {/* Floating beacon during filter transition */}
+        {isFiltering && (
+          <div className="absolute top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#151C27]/90 backdrop-blur-md border border-[#3B9EFF]/30 shadow-[0_4px_20px_rgba(59,158,255,0.25)] text-xs text-[#F5F7FA] font-medium animate-pulse">
+            <Loader2 className="w-3.5 h-3.5 text-[#3B9EFF] animate-spin" />
+            <span>Updating library...</span>
           </div>
-          <h3 className="font-bold text-base text-[#F5F7FA]">No titles match your filters</h3>
-          <p className="text-xs text-[#A8B0BD] max-w-sm mt-1 mb-4 leading-relaxed">
-            Try adjusting your search query, switching format tabs, or clearing genre filters.
-          </p>
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="px-4 py-2 rounded-lg bg-[#1D2734] hover:bg-[#253244] text-[#F5F7FA] text-xs font-semibold border border-white/[0.08] transition-colors cursor-pointer"
-          >
-            Clear All Filters
-          </button>
-        </div>
-      )}
+        )}
+
+        {filteredItems.length > 0 ? (
+          <>
+            <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4 transition-opacity duration-200 ${isFiltering ? "opacity-40" : "opacity-100"}`}>
+              {displayedItems.map((item) => (
+                <MediaCard
+                  key={item.id}
+                  media={item.media}
+                  status={item.status}
+                  userRating={item.userRating || undefined}
+                  userEpisodes={item.userEpisodes}
+                  currentSeason={item.currentSeason}
+                  currentEpisode={item.currentEpisode}
+                  seasons={item.seasons}
+                  reviewText={item.reviewText}
+                  containsSpoilers={item.containsSpoilers}
+                  fromUsername={currentUserState?.username || undefined}
+                  readOnly={!isOwner}
+                  className="w-full"
+                />
+              ))}
+            </div>
+
+            {/* Pagination / See More Button */}
+            {hasMore && (
+              <div className="flex justify-center pt-6 pb-2">
+                <button
+                  type="button"
+                  onClick={handleSeeMore}
+                  disabled={isLoadingMore}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#141B26]/90 hover:bg-[#1A2434] border border-white/[0.08] hover:border-[#3B9EFF]/40 text-xs font-semibold text-[#F5F7FA] hover:text-white transition-all shadow-md hover:shadow-[0_0_16px_rgba(59,158,255,0.15)] cursor-pointer group active:scale-95 select-none disabled:opacity-80 disabled:cursor-default"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 text-[#3B9EFF] animate-spin shrink-0" />
+                      <span className="text-[#3B9EFF] font-medium">Loading titles...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>See More</span>
+                      <ChevronDown className="w-3.5 h-3.5 text-[#8E97A6] group-hover:text-[#3B9EFF] group-hover:translate-y-0.5 transition-all shrink-0" />
+                      <span className="text-[11px] text-[#6F7886] font-normal">
+                        ({filteredItems.length - visibleCount} more)
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </>
+        ) : (
+          /* Empty State */
+          <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl bg-[#151C27] border border-white/[0.06] my-6">
+            <div className="w-12 h-12 rounded-full bg-[#1D2734] flex items-center justify-center text-[#6F7886] mb-3">
+              <Search className="w-6 h-6" />
+            </div>
+            <h3 className="font-bold text-base text-[#F5F7FA]">No titles match your filters</h3>
+            <p className="text-xs text-[#A8B0BD] max-w-sm mt-1 mb-4 leading-relaxed">
+              Try adjusting your search query, switching format tabs, or clearing genre filters.
+            </p>
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="px-4 py-2 rounded-lg bg-[#1D2734] hover:bg-[#253244] text-[#F5F7FA] text-xs font-semibold border border-white/[0.08] transition-colors cursor-pointer"
+            >
+              Clear All Filters
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Add to Library Modal */}
       {isOwner && (
