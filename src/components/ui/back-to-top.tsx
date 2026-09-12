@@ -1,44 +1,96 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowUp } from "lucide-react";
 import { useLenis } from "lenis/react";
 
+const RADIUS = 17;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
 export function BackToTop() {
   const [isVisible, setIsVisible] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const circleRef = useRef<SVGCircleElement>(null);
   const lenis = useLenis();
 
-  // Listen to smooth scroll position via Lenis
+  // Helper to update progress ring smoothly in exact sync with scroll
+  const updateProgress = (currentScroll: number, maxLimit?: number) => {
+    const limit =
+      maxLimit && maxLimit > 0
+        ? maxLimit
+        : typeof document !== "undefined"
+        ? Math.max(document.documentElement.scrollHeight - window.innerHeight, 1)
+        : 1;
+
+    const progress = Math.min(Math.max(currentScroll / limit, 0), 1);
+    const offset = CIRCUMFERENCE * (1 - progress);
+
+    if (circleRef.current) {
+      circleRef.current.style.strokeDashoffset = `${offset}px`;
+    }
+  };
+
+  // 1:1 synchronized frame update with Lenis smooth wheel physics
   useLenis((l) => {
     const scroll = l.scroll;
-    const limit =
-      l.limit ||
-      (typeof document !== "undefined"
-        ? document.documentElement.scrollHeight - window.innerHeight
-        : 1) ||
-      1;
     setIsVisible(scroll > 280);
-    setProgress(Math.min(Math.max(scroll / limit, 0), 1));
+
+    const docLimit =
+      typeof document !== "undefined"
+        ? Math.max(document.documentElement.scrollHeight - window.innerHeight, 1)
+        : 1;
+    const limit = l.limit > 0 ? l.limit : docLimit;
+    updateProgress(scroll, limit);
   });
 
-  // Fallback scroll listener for resilience
+  // Watch DOM size changes (e.g. clicking "See More" button adds items and expands page height)
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScroll = window.scrollY;
-      const maxScroll =
-        document.documentElement.scrollHeight - window.innerHeight;
-      setIsVisible(currentScroll > 280);
-      setProgress(
-        maxScroll > 0
-          ? Math.min(Math.max(currentScroll / maxScroll, 0), 1)
-          : 0
+    if (typeof window === "undefined") return;
+
+    const handleResize = () => {
+      lenis?.resize();
+      const scroll = lenis ? lenis.scroll : window.scrollY;
+      const docLimit = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
       );
+      setIsVisible(scroll > 280);
+      updateProgress(scroll, lenis?.limit || docLimit);
+    };
+
+    // Recalibrate on initial mount
+    handleResize();
+
+    // ResizeObserver detects DOM expansion when "See More" adds cards
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize();
+      });
+      if (document.body) {
+        resizeObserver.observe(document.body);
+      }
+    }
+
+    // Native scroll fallback
+    const handleScroll = () => {
+      const scroll = window.scrollY;
+      setIsVisible(scroll > 280);
+      const docLimit = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      updateProgress(scroll, docLimit);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    window.addEventListener("resize", handleResize, { passive: true });
+
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [lenis]);
 
   const scrollToTop = () => {
     if (lenis) {
@@ -47,10 +99,6 @@ export function BackToTop() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
-
-  const radius = 17;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - progress * circumference;
 
   return (
     <div
@@ -72,31 +120,30 @@ export function BackToTop() {
           className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none p-[2px]"
           viewBox="0 0 40 40"
         >
-          {/* Track Circle */}
+          {/* Muted Track Ring */}
           <circle
             cx="20"
             cy="20"
-            r={radius}
+            r={RADIUS}
             fill="none"
             className="stroke-white/[0.08]"
             strokeWidth="2.5"
           />
-          {/* Active Progress Ring */}
+          {/* Synchronized Progress Ring */}
           <circle
+            ref={circleRef}
             cx="20"
             cy="20"
-            r={radius}
+            r={RADIUS}
             fill="none"
             stroke="#3B9EFF"
             strokeWidth="2.5"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
+            strokeDasharray={CIRCUMFERENCE}
+            strokeDashoffset={CIRCUMFERENCE}
             strokeLinecap="round"
-            className="transition-[stroke-dashoffset] duration-150 ease-out"
           />
         </svg>
 
-        {/* Up Arrow Icon */}
         <ArrowUp className="w-4 h-4 text-[#F5F7FA] group-hover:text-[#3B9EFF] group-hover:-translate-y-0.5 transition-all duration-200 stroke-[2.4]" />
       </button>
     </div>
