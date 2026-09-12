@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { eq, and } from "drizzle-orm";
 import { RatingCategory, isValidRating, parseRating } from "@/lib/rating";
+import { tmdb } from "@/lib/tmdb/client";
 
 export interface LogMediaParams {
   media: NormalizedMedia;
@@ -74,6 +75,28 @@ export async function upsertMediaLog(params: LogMediaParams) {
     }
     const finalRating = rating ? parseRating(rating) : null;
 
+    // Auto-fetch real runtime from TMDb if not provided by search result
+    let runtime = media.runtime;
+    if (!runtime && media.source === "tmdb" && media.sourceId) {
+      try {
+        if (media.mediaType === "movie") {
+          const details = await tmdb.getMovieDetails(media.sourceId);
+          runtime = details?.runtime || undefined;
+        } else if (media.mediaType === "series") {
+          const details = await tmdb.getTVDetails(media.sourceId);
+          runtime =
+            details?.episode_run_time?.[0] ||
+            details?.last_episode_to_air?.runtime ||
+            45;
+        }
+      } catch (err) {
+        console.error("Failed to fetch TMDb runtime:", err);
+      }
+    }
+    if (!runtime) {
+      runtime = media.mediaType === "movie" ? 105 : media.mediaType === "anime" ? 24 : 45;
+    }
+
     // Atomic transaction: upsert media_items first, then user_media_logs
     await db.transaction(async (tx) => {
       // 1. Upsert metadata
@@ -90,7 +113,7 @@ export async function upsertMediaLog(params: LogMediaParams) {
           backdropPath: media.backdropPath,
           releaseDate: media.releaseDate,
           totalEpisodes: media.totalEpisodes,
-          runtime: media.runtime,
+          runtime,
           genres: media.genres,
           streamingProviders: media.streamingProviders || {},
           synopsis: media.synopsis,
@@ -103,7 +126,7 @@ export async function upsertMediaLog(params: LogMediaParams) {
             posterPath: media.posterPath,
             backdropPath: media.backdropPath,
             totalEpisodes: media.totalEpisodes,
-            runtime: media.runtime,
+            runtime,
             genres: media.genres,
             streamingProviders: media.streamingProviders || {},
             synopsis: media.synopsis,

@@ -93,8 +93,19 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
       stats.completed = allUserLogs.filter((l) => l.log.status === "completed").length;
 
       stats.totalMinutes = allUserLogs.reduce((acc, curr) => {
-        const runtime = curr.media.runtime || 90;
-        const eps = curr.log.episodesWatched || 1;
+        const fallback =
+          curr.media.mediaType === "movie"
+            ? 105
+            : curr.media.mediaType === "anime"
+            ? 24
+            : 45;
+        const runtime = curr.media.runtime || fallback;
+        const eps =
+          curr.media.mediaType === "movie"
+            ? curr.log.status === "completed" || curr.log.status === "watching"
+              ? 1
+              : 0
+            : curr.log.episodesWatched || (curr.log.status === "completed" ? curr.media.totalEpisodes || 1 : 0);
         return acc + runtime * eps;
       }, 0);
 
