@@ -40,6 +40,7 @@ export interface LibraryItem {
   seasons?: SeasonInfo[];
   reviewText?: string | null;
   containsSpoilers?: boolean;
+  fromUsername?: string;
   updatedAt?: string | null;
 }
 
