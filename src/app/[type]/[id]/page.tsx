@@ -76,22 +76,18 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
       (v) => v.site === "YouTube" && Boolean(v.key)
     );
 
-    // Prioritize official trailers, then any trailers, teasers, and clips
-    const typePriority: Record<string, number> = {
-      Trailer: 1,
-      Teaser: 2,
-      Clip: 3,
-      "Behind the Scenes": 4,
-      Featurette: 5,
-    };
-
+    // Prioritize actual Trailers first, then Teasers, then other clips
     ytVideos.sort((a, b) => {
-      const aOfficial = a.official ? 0 : 1;
-      const bOfficial = b.official ? 0 : 1;
-      if (aOfficial !== bOfficial) return aOfficial - bOfficial;
-      const aScore = typePriority[a.type] ?? 99;
-      const bScore = typePriority[b.type] ?? 99;
-      return aScore - bScore;
+      const getScore = (v: any) => {
+        const isTrailer = v.type === "Trailer" || v.name?.toLowerCase().includes("trailer");
+        const isTeaser = v.type === "Teaser" || v.name?.toLowerCase().includes("teaser");
+        if (isTrailer && v.official) return 1;
+        if (isTrailer) return 2;
+        if (isTeaser && v.official) return 3;
+        if (isTeaser) return 4;
+        return 10;
+      };
+      return getScore(a) - getScore(b);
     });
 
     trailerVideos = ytVideos.map((v) => ({
