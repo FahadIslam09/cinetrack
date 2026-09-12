@@ -114,6 +114,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         fullName: userProfile?.fullName,
         email: user.email,
         avatarUrl: userProfile?.avatarUrl || user.user_metadata?.avatar_url,
+        backdropUrl: userProfile?.backdropUrl,
         bio: userProfile?.bio,
         createdAt: userProfile?.createdAt,
       }

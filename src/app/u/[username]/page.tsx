@@ -140,6 +140,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
         fullName: targetProfile.fullName,
         email: null,
         avatarUrl: targetProfile.avatarUrl,
+        backdropUrl: targetProfile.backdropUrl,
         bio: targetProfile.bio,
         createdAt: targetProfile.createdAt,
       }
@@ -151,6 +152,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
         email: null,
         avatarUrl:
           "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop",
+        backdropUrl: "https://image.tmdb.org/t/p/w1280/xJHokMbljvjADYdit5fK5VQsXEG.jpg",
         bio: "Film archivist & sci-fi enthusiast. Contributor at Sight & Sound. Focused on post-Soviet speculative fiction and structuralist narratives.",
         createdAt: "2024-01-01",
       };

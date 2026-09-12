@@ -30,6 +30,7 @@ export interface UpdateProfileParams {
   username?: string;
   bio?: string;
   avatarUrl?: string;
+  backdropUrl?: string;
 }
 
 export async function updateProfile(params: UpdateProfileParams) {
@@ -47,6 +48,7 @@ export async function updateProfile(params: UpdateProfileParams) {
     const trimmedName = params.displayName?.trim().slice(0, 50) || null;
     const trimmedBio = params.bio?.trim().slice(0, 160) || null;
     const trimmedAvatar = params.avatarUrl?.trim() || null;
+    const trimmedBackdrop = params.backdropUrl?.trim() || null;
 
     // Get current profile
     const [existing] = await db
@@ -99,6 +101,7 @@ export async function updateProfile(params: UpdateProfileParams) {
           username: targetUsername || existing.username,
           bio: trimmedBio,
           ...(trimmedAvatar ? { avatarUrl: trimmedAvatar } : {}),
+          ...(trimmedBackdrop ? { backdropUrl: trimmedBackdrop } : {}),
           updatedAt: new Date(),
         })
         .where(eq(profiles.id, user.id));
@@ -115,6 +118,7 @@ export async function updateProfile(params: UpdateProfileParams) {
         fullName: trimmedName,
         bio: trimmedBio,
         avatarUrl: trimmedAvatar || user.user_metadata?.avatar_url,
+        backdropUrl: trimmedBackdrop,
         preferredCountry: "US",
       });
       targetUsername = generatedUsername.slice(0, 15).toLowerCase();
@@ -137,6 +141,7 @@ export async function updateProfile(params: UpdateProfileParams) {
         username: targetUsername,
         bio: trimmedBio,
         avatarUrl: trimmedAvatar || existing?.avatarUrl,
+        backdropUrl: trimmedBackdrop || existing?.backdropUrl,
       },
     };
   } catch (err: any) {

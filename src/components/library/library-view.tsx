@@ -52,6 +52,7 @@ interface LibraryViewProps {
     fullName?: string | null;
     email?: string | null;
     avatarUrl?: string | null;
+    backdropUrl?: string | null;
     bio?: string | null;
     createdAt?: string | Date | null;
   } | null;
@@ -113,10 +114,22 @@ export function LibraryView({
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [currentUserState, setCurrentUserState] = useState(user);
+  const [avatarError, setAvatarError] = useState(false);
 
   useEffect(() => {
     setCurrentUserState(user);
+    setAvatarError(false);
   }, [user]);
+
+  const getInitials = (name?: string | null, username?: string | null) => {
+    const target = (name || username || "").trim();
+    if (!target) return "C";
+    const parts = target.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return target.slice(0, 2).toUpperCase();
+  };
 
   // Compute dynamic taste counts across all library items
   const tasteCounts = useMemo(() => {
@@ -324,32 +337,59 @@ export function LibraryView({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 1. Header Identity & Actions Hero Bar */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 p-5 sm:p-6 rounded-2xl bg-[#151C27] border border-white/[0.08] shadow-xl relative overflow-hidden">
-        {/* Subtle Ambient Radial Glow */}
-        <div className="absolute -top-24 -right-24 w-80 h-80 bg-[#3B9EFF]/10 rounded-full blur-3xl pointer-events-none" />
+      {/* 1. Prestigious Vertical Profile Hero Card */}
+      <div className="rounded-3xl bg-[#151C27] border border-white/[0.08] shadow-2xl relative overflow-hidden flex flex-col">
+        {/* Cover Movie Poster / Backdrop Banner */}
+        <div className="relative w-full h-44 sm:h-56 md:h-64 overflow-hidden bg-[#0F172A] group/cover">
+          <img
+            src={
+              currentUserState?.backdropUrl ||
+              "https://image.tmdb.org/t/p/w1280/xJHokMbljvjADYdit5fK5VQsXEG.jpg"
+            }
+            alt="Profile Cover Poster"
+            className="w-full h-full object-cover object-center transition-transform duration-700 group-hover/cover:scale-105"
+          />
+          {/* Subtle gradient scrim at bottom to transition smoothly into the card body */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#151C27] via-[#151C27]/40 to-transparent pointer-events-none" />
 
-        {/* User Identity Info */}
-        <div className="flex items-start gap-4 sm:gap-5 relative z-10 min-w-0 flex-1">
-          {/* Avatar with optional owner hover pencil */}
-          <div className="relative group shrink-0 mt-0.5">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-[#3B9EFF] to-blue-700 p-0.5 shadow-lg flex items-center justify-center">
-              {currentUserState?.avatarUrl ? (
-                <img
-                  src={currentUserState.avatarUrl}
-                  alt={currentUserState.displayName || currentUserState.username || "User"}
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full rounded-full bg-[#0F141D] flex items-center justify-center text-lg sm:text-xl font-bold text-white uppercase">
-                  {currentUserState?.displayName
-                    ? currentUserState.displayName[0]
-                    : currentUserState?.username
-                    ? currentUserState.username[0]
-                    : "C"}
-                </div>
-              )}
+          {/* Top-Right Owner Action: Edit Cover */}
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => setIsEditProfileOpen(true)}
+              className="absolute top-3.5 right-3.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/10 text-white text-xs font-medium inline-flex items-center gap-1.5 transition active:scale-95 cursor-pointer shadow-lg z-10"
+              title="Change Movie Poster Cover"
+            >
+              <Pencil className="w-3 h-3 text-[#A8B0BD]" />
+              <span>Edit Cover</span>
+            </button>
+          )}
+
+          {!isOwner && (
+            <div className="absolute top-3.5 right-3.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[11px] font-semibold text-[#A8B0BD] flex items-center gap-1.5 shadow-lg z-10">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]" />
+              <span>Public Vault</span>
             </div>
+          )}
+        </div>
+
+        {/* Card Body: Overlapping Avatar, Identity, Bio & Actions */}
+        <div className="px-5 sm:px-8 pb-6 flex flex-col items-center text-center relative z-10">
+          {/* Circular Overlapping Avatar */}
+          <div className="relative -mt-14 sm:-mt-16 w-24 h-24 sm:w-28 sm:h-28 rounded-full ring-4 ring-[#151C27] sm:ring-[5px] bg-[#1A2332] shadow-2xl overflow-hidden flex items-center justify-center shrink-0 group">
+            {currentUserState?.avatarUrl && !avatarError ? (
+              <img
+                src={currentUserState.avatarUrl}
+                alt={currentUserState.displayName || currentUserState.username || "User"}
+                onError={() => setAvatarError(true)}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-[#1E293B] to-[#0F172A] flex items-center justify-center text-xl sm:text-2xl font-black text-[#3B9EFF] tracking-wider uppercase select-none">
+                {getInitials(currentUserState?.displayName, currentUserState?.username)}
+              </div>
+            )}
+
             {isOwner && (
               <button
                 type="button"
@@ -357,107 +397,130 @@ export function LibraryView({
                 className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer"
                 title="Change Avatar"
               >
-                <Pencil className="w-4 h-4" />
+                <Pencil className="w-5 h-5" />
               </button>
             )}
           </div>
 
-          <div className="min-w-0 flex-1">
-            {/* 1. Display Name + PRO Badge */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-extrabold text-[#F5F7FA] tracking-tight truncate">
-                {currentUserState?.displayName || currentUserState?.fullName || currentUserState?.username || "Personal Media Vault"}
-              </h1>
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#3B9EFF]/15 text-[#3B9EFF] border border-[#3B9EFF]/30 shrink-0">
-                PRO
-              </span>
-            </div>
-
-            {/* 2. @username + Copy Icon button */}
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-xs sm:text-sm font-medium text-[#A8B0BD]">
-                @{currentUserState?.username || "user"}
-              </span>
-              <button
-                type="button"
-                onClick={handleCopyUsernameLink}
-                title="Copy profile link"
-                className="p-1 rounded-md text-[#6F7886] hover:text-[#3B9EFF] hover:bg-white/[0.06] transition-colors cursor-pointer inline-flex items-center justify-center"
-                aria-label="Copy username link"
-              >
-                {isUsernameCopied ? (
-                  <Check className="w-3.5 h-3.5 text-[#22C55E]" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5" />
-                )}
-              </button>
-              {isUsernameCopied && (
-                <span className="text-[11px] text-[#22C55E] font-medium animate-fade-in">
-                  Link copied!
-                </span>
-              )}
-            </div>
-
-            {/* 3. Bio (up to 160 chars) */}
-            {currentUserState?.bio ? (
-              <p className="text-xs sm:text-[13px] text-[#C5CDD9] mt-2 max-w-2xl leading-relaxed">
-                {currentUserState.bio}
-              </p>
-            ) : isOwner ? (
-              <button
-                type="button"
-                onClick={() => setIsEditProfileOpen(true)}
-                className="text-xs text-[#6F7886] hover:text-[#3B9EFF] italic mt-1.5 inline-flex items-center gap-1 cursor-pointer transition-colors"
-              >
-                <span>+ Add a bio (up to 160 characters)...</span>
-              </button>
-            ) : null}
-
-            {/* 4. Stats: 3 Total Titles Tracked • 2 Completed • 5d 19h Watch Time */}
-            <p className="text-xs text-[#A8B0BD] mt-2.5 flex items-center gap-1.5 sm:gap-2 flex-wrap font-medium">
-              <span><strong className="text-[#F5F7FA] font-semibold">{stats.total}</strong> Total Titles Tracked</span>
-              <span className="w-1 h-1 rounded-full bg-white/20 hidden xs:inline-block" />
-              <span><strong className="text-[#F5F7FA] font-semibold">{stats.completed}</strong> Completed</span>
-              <span className="w-1 h-1 rounded-full bg-white/20 hidden xs:inline-block" />
-              <span><strong className="text-[#3B9EFF] font-semibold">{days}d {hours}h</strong> Watch Time</span>
-              {currentUserState?.createdAt && (
-                <>
-                  <span className="w-1 h-1 rounded-full bg-white/20 hidden sm:inline-block" />
-                  <span className="text-[#6F7886] hidden sm:inline-block text-[11px]">
-                    Joined {new Intl.DateTimeFormat("en", { month: "short", year: "numeric" }).format(new Date(currentUserState.createdAt))}
-                  </span>
-                </>
-              )}
-            </p>
+          {/* 1. Display Name */}
+          <div className="flex items-center justify-center gap-2 mt-3.5 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#F5F7FA] tracking-tight">
+              {currentUserState?.displayName || currentUserState?.fullName || currentUserState?.username || "Personal Media Vault"}
+            </h1>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#3B9EFF]/15 text-[#3B9EFF] border border-[#3B9EFF]/30 shrink-0">
+              PRO
+            </span>
           </div>
-        </div>
 
-        {/* Action Buttons: Edit Profile & Share Profile & Add Title */}
-        <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap relative z-10 self-start md:self-auto shrink-0 mt-2 md:mt-0">
-          {isOwner && (
+          {/* 2. Username Pill with Copy Functionality */}
+          <div className="flex items-center justify-center gap-2 mt-1.5">
+            <button
+              type="button"
+              onClick={handleCopyUsernameLink}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1D2734]/80 hover:bg-[#1D2734] border border-white/[0.08] hover:border-[#3B9EFF]/40 transition-all text-xs font-mono text-[#3B9EFF] group cursor-pointer active:scale-95"
+              title="Click to copy profile link"
+            >
+              <span>@{currentUserState?.username || "user"}</span>
+              {isUsernameCopied ? (
+                <Check className="w-3 h-3 text-emerald-400" />
+              ) : (
+                <Copy className="w-3 h-3 text-[#6F7886] group-hover:text-white transition-colors" />
+              )}
+            </button>
+            {isUsernameCopied && (
+              <span className="text-[11px] font-semibold text-emerald-400 animate-fade-in flex items-center gap-1">
+                Copied!
+              </span>
+            )}
+          </div>
+
+          {/* 3. Bio */}
+          {currentUserState?.bio ? (
+            <p className="mt-3.5 text-xs sm:text-sm text-[#A8B0BD] leading-relaxed max-w-lg mx-auto text-center font-normal">
+              {currentUserState.bio}
+            </p>
+          ) : isOwner ? (
             <button
               type="button"
               onClick={() => setIsEditProfileOpen(true)}
-              className="h-10 px-3.5 rounded-xl bg-[#1D2734] hover:bg-[#253244] border border-white/[0.08] text-[#F5F7FA] text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-              title="Edit Profile"
+              className="mt-2 text-xs text-[#6F7886] hover:text-[#3B9EFF] italic inline-flex items-center gap-1 cursor-pointer transition-colors"
             >
-              <Pencil className="w-3.5 h-3.5 text-[#A8B0BD]" />
-              <span>Edit Profile</span>
+              <span>+ Add a bio (up to 160 characters)...</span>
             </button>
-          )}
+          ) : null}
 
+          {/* 4. Action Buttons */}
+          <div className="flex items-center justify-center gap-2.5 mt-5">
+            {isOwner ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsEditProfileOpen(true)}
+                  className="h-10 px-5 rounded-full bg-[#1D2734] hover:bg-[#253244] border border-white/[0.08] hover:border-white/[0.15] text-[#F5F7FA] text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer"
+                >
+                  <Pencil className="w-3.5 h-3.5 text-[#A8B0BD]" />
+                  <span>Edit Profile</span>
+                </button>
 
-          {isOwner && (
-            <button
-              type="button"
-              suppressHydrationWarning
-              onClick={() => setIsQuickAddOpen(true)}
-              className="h-10 px-4 rounded-xl bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-md shadow-[#3B9EFF]/20 cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add</span>
-            </button>
-          )}
+                <button
+                  type="button"
+                  onClick={() => setIsQuickAddOpen(true)}
+                  className="h-10 px-6 rounded-full bg-[#3B9EFF] hover:bg-[#2F8EEA] text-white text-xs sm:text-sm font-bold inline-flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-[#3B9EFF]/25 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Media</span>
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={handleCopyUsernameLink}
+                className="h-10 px-6 rounded-full bg-[#1D2734] hover:bg-[#253244] border border-white/[0.08] hover:border-white/[0.15] text-[#F5F7FA] text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer"
+              >
+                {isUsernameCopied ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    <span className="text-emerald-400 font-medium">Link Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 text-[#A8B0BD]" />
+                    <span>Share Profile</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+
+          {/* 5. 3-Column Stats Bar with Vertical Dividers */}
+          <div className="w-full mt-6 pt-5 border-t border-white/[0.06] grid grid-cols-3 divide-x divide-white/[0.08] text-center">
+            <div className="flex flex-col items-center justify-center px-2">
+              <span className="text-xl sm:text-2xl font-black text-[#F5F7FA] tracking-tight">
+                {stats.total}
+              </span>
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#6F7886] mt-0.5">
+                Tracked
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center justify-center px-2">
+              <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight">
+                {stats.completed}
+              </span>
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#6F7886] mt-0.5">
+                Completed
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center justify-center px-2">
+              <span className="text-xl sm:text-2xl font-black text-[#3B9EFF] tracking-tight">
+                {days}d {hours}h
+              </span>
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#6F7886] mt-0.5">
+                Watch Time
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -690,6 +753,7 @@ export function LibraryView({
             username: currentUserState?.username,
             bio: currentUserState?.bio,
             avatarUrl: currentUserState?.avatarUrl,
+            backdropUrl: currentUserState?.backdropUrl,
           }}
           onSuccess={(updated) => {
             setCurrentUserState((prev: any) => ({
@@ -699,6 +763,7 @@ export function LibraryView({
               username: updated.username || prev?.username,
               bio: updated.bio,
               avatarUrl: updated.avatarUrl || prev?.avatarUrl,
+              backdropUrl: updated.backdropUrl !== undefined ? updated.backdropUrl : prev?.backdropUrl,
             }));
           }}
         />

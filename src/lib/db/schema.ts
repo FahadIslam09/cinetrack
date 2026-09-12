@@ -18,6 +18,7 @@ export const profiles = pgTable(
     username: text("username").notNull().unique(),
     fullName: text("full_name"),
     avatarUrl: text("avatar_url"),
+    backdropUrl: text("backdrop_url"),
     bio: text("bio"),
     preferredCountry: text("preferred_country").default("US").notNull(),
     isPublic: boolean("is_public").default(true).notNull(),
