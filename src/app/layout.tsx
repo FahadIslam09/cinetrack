@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Sans_Bengali } from "next/font/google";
+import "lenis/dist/lenis.css";
 import "./globals.css";
+import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
+import { BackToTop } from "@/components/ui/back-to-top";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -45,7 +48,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${notoSansBengali.variable} dark`} suppressHydrationWarning>
       <body className="bg-[#0F141D] text-[#F5F7FA] min-h-screen flex flex-col antialiased selection:bg-[#3B9EFF]/30" suppressHydrationWarning>
-        {children}
+        <SmoothScrollProvider>
+          {children}
+          <BackToTop />
+        </SmoothScrollProvider>
       </body>
     </html>
   );
