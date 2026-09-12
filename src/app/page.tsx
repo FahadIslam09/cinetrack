@@ -552,6 +552,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               <ReviewCard
                 author={{
                   name: "Elena Rostova",
+                  username: "elenavance",
                   isVerified: true,
                   role: "Curator",
                   roleColor: "text-[#A8B0BD]",

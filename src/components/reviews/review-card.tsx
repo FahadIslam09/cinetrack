@@ -9,6 +9,8 @@ export interface ReviewCardProps {
   author: {
     name: string;
     avatarUrl?: string;
+    username?: string;
+    profileHref?: string;
     role?: string;
     roleColor?: string;
     isVerified?: boolean;
@@ -47,6 +49,8 @@ export function ReviewCard({
   const [liked, setLiked] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const profileUrl = author.profileHref || (author.username ? `/u/${author.username}` : undefined);
+
   const isLong = (reviewText?.length || 0) > 180 || (reviewText?.split("\n").length || 0) > 3;
 
   const toggleLike = () => {
@@ -64,29 +68,51 @@ export function ReviewCard({
       ? "bg-[#22C55E]/15 text-[#22C55E]"
       : "bg-[#252A34] text-[#A8B0BD]";
 
+  const avatarNode = author.avatarUrl ? (
+    <img
+      src={author.avatarUrl}
+      alt={author.name}
+      referrerPolicy="no-referrer"
+      className="w-9 h-9 rounded-full object-cover ring-1 ring-white/10 shrink-0 bg-[#151C27]"
+    />
+  ) : (
+    <div className="w-9 h-9 rounded-full bg-[#3B9EFF]/20 border border-[#3B9EFF]/30 flex items-center justify-center text-xs font-bold text-[#3B9EFF] shrink-0">
+      {author.name.slice(0, 2).toUpperCase()}
+    </div>
+  );
+
   return (
     <div className="flex flex-col justify-between p-4 sm:p-5 rounded-xl bg-[#1D2734] hover:bg-[#1A2330] border border-white/[0.06] transition-colors gap-3.5 shadow-sm">
       <div>
         {/* Critic Header */}
         <div className="flex items-center gap-2.5 mb-3">
-          {author.avatarUrl ? (
-            <img
-              src={author.avatarUrl}
-              alt={author.name}
-              referrerPolicy="no-referrer"
-              className="w-9 h-9 rounded-full object-cover ring-1 ring-white/10 shrink-0 bg-[#151C27]"
-            />
+          {profileUrl ? (
+            <Link
+              href={profileUrl}
+              className="shrink-0 rounded-full transition-opacity hover:opacity-80 group/avatar focus:outline-none focus:ring-2 focus:ring-[#3B9EFF]/40"
+              title={`View ${author.name}'s profile`}
+            >
+              {avatarNode}
+            </Link>
           ) : (
-            <div className="w-9 h-9 rounded-full bg-[#3B9EFF]/20 border border-[#3B9EFF]/30 flex items-center justify-center text-xs font-bold text-[#3B9EFF] shrink-0">
-              {author.name.slice(0, 2).toUpperCase()}
-            </div>
+            avatarNode
           )}
 
           <div className="flex-1 min-w-0">
             {/* Top Row: Name on left, Rating on right (same line) */}
             <div className="flex items-center justify-between gap-2">
               <h4 className="font-bold text-sm text-[#F5F7FA] leading-tight truncate">
-                {author.name}
+                {profileUrl ? (
+                  <Link
+                    href={profileUrl}
+                    className="hover:text-[#3B9EFF] hover:underline transition-colors"
+                    title={`View ${author.name}'s profile`}
+                  >
+                    {author.name}
+                  </Link>
+                ) : (
+                  author.name
+                )}
               </h4>
 
               {(() => {

@@ -238,6 +238,7 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
     author: {
       name: string;
       avatarUrl?: string;
+      username?: string;
       isVerified?: boolean;
     };
     rating?: string | null;
@@ -282,6 +283,7 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
         author: {
           name: r.profile.fullName || r.profile.username,
           avatarUrl: r.profile.avatarUrl || undefined,
+          username: r.profile.username,
           isVerified: true,
         },
         rating: r.log.rating,
@@ -510,6 +512,7 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
                 author={{
                   name: contextualReview.author.fullName || contextualReview.author.username,
                   avatarUrl: contextualReview.author.avatarUrl,
+                  username: contextualReview.author.username,
                   isVerified: contextualReview.author.isVerified,
                 }}
                 mediaTitle={media.title}
