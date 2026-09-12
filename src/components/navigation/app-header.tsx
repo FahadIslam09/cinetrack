@@ -7,6 +7,8 @@ import { Search, Bell, Film, Plus } from "lucide-react";
 import { QuickAddModal } from "../quick-add/quick-add-modal";
 import { LogoIcon } from "@/components/ui/logo-icon";
 
+import { HeaderSearch } from "./header-search";
+
 interface AppHeaderProps {
   user?: {
     email?: string;
@@ -17,16 +19,8 @@ interface AppHeaderProps {
 
 export function AppHeader({ user }: AppHeaderProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   return (
     <>
@@ -94,38 +88,11 @@ export function AppHeader({ user }: AppHeaderProps) {
 
           {/* Right: Search Bar & Actions */}
           <div className="flex items-center gap-2.5 sm:gap-3 lg:gap-4 shrink-0">
-            {/* Tablet Search Box (768px - 1023px) */}
-            <form
-              onSubmit={handleSearchSubmit}
-              className="relative hidden md:flex lg:hidden items-center w-32 md:w-40"
-            >
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search..."
-                className="w-full bg-[#151C27] text-xs text-slate-200 placeholder-[#6F7886] pl-7 pr-2 py-1.5 rounded-full border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] transition-all"
-              />
-              <Search className="w-3.5 h-3.5 text-[#6F7886] absolute left-2 pointer-events-none" />
-            </form>
-
-            {/* Desktop Search Bar (≥ 1024px) */}
-            <form
-              onSubmit={handleSearchSubmit}
-              className="relative hidden lg:block w-[280px] xl:w-[310px]"
-            >
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#6F7886] pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search movies, TV shows, anime..."
-                className="w-full h-9 pl-9 pr-12 bg-[#1A2330]/70 border border-white/[0.06] hover:border-white/[0.12] focus:border-[#3B9EFF] rounded-lg text-[#F5F7FA] text-[13px] placeholder:text-[#6F7886] focus:outline-none transition-colors"
-              />
-              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-semibold text-[#6F7886] bg-[#1B2029] rounded border border-white/[0.06] pointer-events-none select-none">
-                ⌘K
-              </kbd>
-            </form>
+            {/* Search Input for Desktop / Tablet & Mobile Overlay */}
+            <HeaderSearch
+              isMobileOpen={isMobileSearchOpen}
+              onCloseMobile={() => setIsMobileSearchOpen(false)}
+            />
 
             {/* Quick Add Button - Hidden on mobile */}
             <button
@@ -137,6 +104,17 @@ export function AppHeader({ user }: AppHeaderProps) {
             >
               <Plus className="w-4 h-4" />
               <span className="whitespace-nowrap">Add</span>
+            </button>
+
+            {/* Mobile Search Icon Button (Immediately Beside Notification Bell) */}
+            <button
+              type="button"
+              suppressHydrationWarning
+              onClick={() => setIsMobileSearchOpen((prev) => !prev)}
+              aria-label="Search"
+              className="md:hidden p-2 text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] rounded-lg transition-colors shrink-0 cursor-pointer"
+            >
+              <Search className="w-5 h-5 block" />
             </button>
 
             {/* Notification Bell */}

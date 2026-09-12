@@ -100,10 +100,27 @@ export const tmdb = {
     });
   },
 
-  searchMulti: async (query: string) => {
-    return fetchTmdb<{ results: any[] }>("/search/multi", {
+  searchMulti: async (query: string, page: number = 1) => {
+    return fetchTmdb<{ results: any[]; page?: number; total_pages?: number; total_results?: number }>("/search/multi", {
       query,
       include_adult: "false",
+      page: String(page),
+    });
+  },
+
+  searchMovies: async (query: string, page: number = 1) => {
+    return fetchTmdb<{ results: TmdbMovieItem[]; page?: number; total_pages?: number; total_results?: number }>("/search/movie", {
+      query,
+      include_adult: "false",
+      page: String(page),
+    });
+  },
+
+  searchTV: async (query: string, page: number = 1) => {
+    return fetchTmdb<{ results: TmdbTVItem[]; page?: number; total_pages?: number; total_results?: number }>("/search/tv", {
+      query,
+      include_adult: "false",
+      page: String(page),
     });
   },
 
