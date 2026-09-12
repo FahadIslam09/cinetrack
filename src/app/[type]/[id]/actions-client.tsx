@@ -6,17 +6,22 @@ import { NormalizedMedia } from "@/lib/media/normalize";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
 import { getRatingConfig } from "@/lib/rating";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { TrailerPlayer, TrailerVideo } from "@/components/media/trailer-player";
 
 interface MediaDetailsActionsProps {
   media: NormalizedMedia;
   initialLog?: any;
   trailerKey?: string | null;
+  trailerVideos?: TrailerVideo[];
+  imdbId?: string | null;
 }
 
 export function MediaDetailsActions({
   media,
   initialLog,
   trailerKey,
+  trailerVideos = [],
+  imdbId,
 }: MediaDetailsActionsProps) {
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
@@ -26,6 +31,15 @@ export function MediaDetailsActions({
   useScrollLock(isTrailerModalOpen);
 
   const ratingConfig = getRatingConfig(log?.rating);
+
+  const resolvedVideos: TrailerVideo[] =
+    trailerVideos.length > 0
+      ? trailerVideos
+      : trailerKey
+      ? [{ key: trailerKey, name: "Official Trailer", type: "Trailer" }]
+      : [];
+
+  const hasTrailer = resolvedVideos.length > 0 || Boolean(imdbId);
 
   return (
     <>
@@ -84,12 +98,12 @@ export function MediaDetailsActions({
           </button>
 
           {/* Watch Trailer Button (Hero) */}
-          {trailerKey && (
+          {hasTrailer && (
             <button
               type="button"
               onClick={() => setIsTrailerModalOpen(true)}
               className="h-10 px-3.5 rounded-lg bg-[#1A2330] hover:bg-[#253244] text-[#F5F7FA] border border-white/[0.1] hover:border-white/[0.2] text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer group shrink-0"
-              title="Watch Official Trailer"
+              title="Watch Official Trailer & Clips"
             >
               <Play className="w-3.5 h-3.5 text-[#3B9EFF] fill-[#3B9EFF] group-hover:scale-110 transition-transform" />
               <span>Trailer</span>
@@ -113,21 +127,21 @@ export function MediaDetailsActions({
       </div>
 
       {/* Cinema Mode Trailer Modal */}
-      {isTrailerModalOpen && trailerKey && (
+      {isTrailerModalOpen && hasTrailer && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
           onClick={() => setIsTrailerModalOpen(false)}
         >
           <div
-            className="relative w-full max-w-4xl bg-[#151C27] rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
+            className="relative w-full max-w-4xl bg-[#151C27] rounded-2xl overflow-hidden border border-white/10 shadow-2xl p-4 sm:p-5 flex flex-col gap-3"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-[#121824]">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
               <div className="flex items-center gap-2 min-w-0 pr-2">
                 <Play className="w-4 h-4 text-[#3B9EFF] fill-[#3B9EFF] shrink-0" />
                 <h3 className="text-xs sm:text-sm font-bold text-[#F5F7FA] truncate">
-                  {media.title} — Official Trailer
+                  {media.title} — Official Trailer & Clips
                 </h3>
               </div>
               <button
@@ -140,16 +154,13 @@ export function MediaDetailsActions({
               </button>
             </div>
 
-            {/* 16:9 YouTube Player */}
-            <div className="relative w-full aspect-video bg-black">
-              <iframe
-                src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0`}
-                title={`${media.title} Official Trailer`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="w-full h-full border-0"
-              />
-            </div>
+            {/* Responsive Player with fallbacks and clip switcher */}
+            <TrailerPlayer
+              title={media.title}
+              videos={resolvedVideos}
+              imdbId={imdbId}
+              autoPlay
+            />
           </div>
         </div>
       )}

@@ -17,6 +17,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUserMediaLog } from "@/actions/tracking";
 import { MediaDetailsActions } from "./actions-client";
 import { DetailsBackButton } from "./back-button";
+import { TrailerPlayer, TrailerVideo } from "@/components/media/trailer-player";
 import { db } from "@/lib/db";
 import { profiles, userMediaLogs } from "@/lib/db/schema";
 import { eq, and, isNotNull, desc } from "drizzle-orm";
@@ -63,32 +64,54 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
 
   if (!media) notFound();
 
-  // Extract YouTube trailer key
-  let trailerKey: string | null = null;
+  // Extract IMDb ID for unrestricted trailer / video gallery fallback
+  const imdbId: string | null =
+    rawDetails?.imdb_id || rawDetails?.external_ids?.imdb_id || null;
+
+  // Extract YouTube trailers & clips
+  let trailerVideos: TrailerVideo[] = [];
   if (type === "movie" || type === "series" || type === "tv") {
-    const videos = rawDetails?.videos?.results || [];
-    const officialTrailer = videos.find(
-      (v: any) =>
-        v.site === "YouTube" &&
-        v.type === "Trailer" &&
-        v.official === true &&
-        v.key
+    const rawVideos: any[] = rawDetails?.videos?.results || [];
+    const ytVideos = rawVideos.filter(
+      (v) => v.site === "YouTube" && Boolean(v.key)
     );
-    const anyTrailer = videos.find(
-      (v: any) => v.site === "YouTube" && v.type === "Trailer" && v.key
-    );
-    const anyTeaser = videos.find(
-      (v: any) =>
-        v.site === "YouTube" &&
-        (v.type === "Teaser" || v.type === "Clip") &&
-        v.key
-    );
-    trailerKey = officialTrailer?.key || anyTrailer?.key || anyTeaser?.key || null;
+
+    // Prioritize official trailers, then any trailers, teasers, and clips
+    const typePriority: Record<string, number> = {
+      Trailer: 1,
+      Teaser: 2,
+      Clip: 3,
+      "Behind the Scenes": 4,
+      Featurette: 5,
+    };
+
+    ytVideos.sort((a, b) => {
+      const aOfficial = a.official ? 0 : 1;
+      const bOfficial = b.official ? 0 : 1;
+      if (aOfficial !== bOfficial) return aOfficial - bOfficial;
+      const aScore = typePriority[a.type] ?? 99;
+      const bScore = typePriority[b.type] ?? 99;
+      return aScore - bScore;
+    });
+
+    trailerVideos = ytVideos.map((v) => ({
+      key: v.key,
+      name: v.name,
+      type: v.type,
+    }));
   } else if (type === "anime") {
     if (rawDetails?.trailer?.site === "youtube" && rawDetails?.trailer?.id) {
-      trailerKey = rawDetails.trailer.id;
+      trailerVideos = [
+        {
+          key: rawDetails.trailer.id,
+          name: "Official Trailer",
+          type: "Trailer",
+        },
+      ];
     }
   }
+
+  const trailerKey = trailerVideos[0]?.key || null;
 
   // Fetch user tracking log for this title if authenticated
   const userLog = await getUserMediaLog(media.id);
@@ -396,7 +419,13 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
             </div>
 
             {/* Client Interactive Action Buttons (Add to Library / Rate / Trailer) */}
-            <MediaDetailsActions media={media} initialLog={userLog} trailerKey={trailerKey} />
+            <MediaDetailsActions
+              media={media}
+              initialLog={userLog}
+              trailerKey={trailerKey}
+              trailerVideos={trailerVideos}
+              imdbId={imdbId}
+            />
           </div>
         </div>
 
@@ -514,8 +543,8 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
             </p>
           </section>
 
-          {/* Official Trailer */}
-          {trailerKey && (
+          {/* Official Trailer & Video Clips */}
+          {(trailerVideos.length > 0 || imdbId) && (
             <section id="official-trailer" className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-3.5 bg-[#3B9EFF] rounded-full" />
@@ -523,15 +552,11 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
                   Official Trailer
                 </h3>
               </div>
-              <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/[0.08] bg-black shadow-2xl">
-                <iframe
-                  src={`https://www.youtube.com/embed/${trailerKey}?rel=0`}
-                  title={`${media.title} Official Trailer`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="w-full h-full border-0"
-                />
-              </div>
+              <TrailerPlayer
+                title={media.title}
+                videos={trailerVideos}
+                imdbId={imdbId}
+              />
             </section>
           )}
 
