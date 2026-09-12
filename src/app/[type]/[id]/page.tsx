@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Star, Plus, Film, Tv, Check, Bookmark, ChevronRight, ExternalLink } from "lucide-react";
+import { ArrowLeft, Star, Plus, Film, Tv, Check, Bookmark, ChevronRight } from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { ReviewCard } from "@/components/reviews/review-card";
@@ -285,81 +285,38 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
     console.error("Community reviews fetch error:", err);
   }
 
-  // Streaming Providers resolution
+  // Streaming Providers
   const rawProviderResults = (media.streamingProviders as any) || {};
+  const countryData =
+    rawProviderResults["US"] ||
+    rawProviderResults["GB"] ||
+    rawProviderResults["CA"] ||
+    rawProviderResults["IN"] ||
+    rawProviderResults["BD"] ||
+    Object.values(rawProviderResults)[0] ||
+    null;
 
-  // Find country with best availability: prefer US, then GB, CA, AU, or first available country with data
-  const preferredCountries = ["US", "GB", "CA", "AU", "IN", "BD"];
-  const availableCountry =
-    preferredCountries.find((c) => {
-      const data = rawProviderResults[c];
-      return (
-        data &&
-        (data.flatrate?.length || data.ads?.length || data.rent?.length || data.buy?.length)
-      );
-    }) ||
-    Object.keys(rawProviderResults).find((c) => {
-      const data = rawProviderResults[c];
-      return (
-        data &&
-        (data.flatrate?.length || data.ads?.length || data.rent?.length || data.buy?.length)
-      );
-    });
-
-  const countryData = availableCountry ? rawProviderResults[availableCountry] : null;
-
-  interface ResolvedProvider {
-    provider_id: number;
-    provider_name: string;
-    logo_path: string;
-    typeBadge: "Stream" | "Free" | "Rent/Buy";
-  }
-
-  const providers: ResolvedProvider[] = [];
+  const providers: Array<{ provider_id: number; provider_name: string; logo_path: string }> = [];
   const seenProviderIds = new Set<number>();
 
   if (countryData) {
-    // 1. Subscription / Flatrate streaming (e.g. Netflix, Prime Video, MGM+, Max)
-    (countryData.flatrate || []).forEach((p: any) => {
-      if (!seenProviderIds.has(p.provider_id)) {
+    const list = [
+      ...(countryData.flatrate || []),
+      ...(countryData.ads || []),
+      ...(countryData.buy || []),
+      ...(countryData.rent || []),
+    ];
+    list.forEach((p: any) => {
+      if (p.provider_id && !seenProviderIds.has(p.provider_id)) {
         seenProviderIds.add(p.provider_id);
         providers.push({
           provider_id: p.provider_id,
           provider_name: p.provider_name,
           logo_path: p.logo_path,
-          typeBadge: "Stream",
-        });
-      }
-    });
-
-    // 2. Free with Ads (e.g. Tubi, YouTube Free)
-    (countryData.ads || []).forEach((p: any) => {
-      if (!seenProviderIds.has(p.provider_id)) {
-        seenProviderIds.add(p.provider_id);
-        providers.push({
-          provider_id: p.provider_id,
-          provider_name: p.provider_name,
-          logo_path: p.logo_path,
-          typeBadge: "Free",
-        });
-      }
-    });
-
-    // 3. Rent / Buy (VOD stores: Apple TV, Amazon Video, Google Play)
-    [...(countryData.rent || []), ...(countryData.buy || [])].forEach((p: any) => {
-      if (!seenProviderIds.has(p.provider_id)) {
-        seenProviderIds.add(p.provider_id);
-        providers.push({
-          provider_id: p.provider_id,
-          provider_name: p.provider_name,
-          logo_path: p.logo_path,
-          typeBadge: "Rent/Buy",
         });
       }
     });
   }
-
-  const watchUrl = countryData?.link || null;
 
   // Cast members
   const castList =
@@ -563,72 +520,37 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
 
           {/* Where to Watch (OTT Providers) */}
           <section className="p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex flex-col gap-3">
-            <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-3.5 bg-[#3B9EFF] rounded-full" />
                 <h3 className="font-bold text-sm text-[#F5F7FA]">Where to Watch</h3>
-                {availableCountry && (
-                  <span className="text-[10px] font-bold text-[#6F7886] uppercase tracking-wider bg-white/[0.05] border border-white/[0.06] px-1.5 py-0.5 rounded">
-                    {availableCountry}
-                  </span>
-                )}
               </div>
-              {watchUrl ? (
-                <a
-                  href={watchUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[11px] font-bold text-[#3B9EFF] hover:underline flex items-center gap-1 cursor-pointer"
-                  title="View all streaming & purchase options on JustWatch"
-                >
-                  <span>Powered by JustWatch</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              ) : (
-                <span className="text-[11px] text-[#A8B0BD]">STREAMING AVAILABILITY</span>
-              )}
+              <span className="text-[11px] text-[#A8B0BD]">STREAMING AVAILABILITY</span>
             </div>
 
             {providers.length > 0 ? (
-              <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1">
-                {providers.map((p) => (
+              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
+                {providers.map((p: any) => (
                   <div
                     key={p.provider_id}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-[#1D2734] border border-white/[0.06] shrink-0"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#1D2734] border border-white/[0.06] shrink-0"
                   >
-                    {p.logo_path ? (
+                    {p.logo_path && (
                       <img
                         src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
                         alt={p.provider_name}
-                        className="w-7 h-7 rounded-md object-cover shadow-sm"
+                        className="w-6 h-6 rounded object-cover"
                       />
-                    ) : (
-                      <div className="w-7 h-7 rounded-md bg-[#253244] flex items-center justify-center text-[10px] font-bold text-[#A8B0BD]">
-                        {p.provider_name.slice(0, 2)}
-                      </div>
                     )}
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-xs font-semibold text-[#F5F7FA] whitespace-nowrap">
-                        {p.provider_name}
-                      </span>
-                      <span
-                        className={`text-[9px] font-bold uppercase tracking-wider ${
-                          p.typeBadge === "Stream"
-                            ? "text-[#3B9EFF]"
-                            : p.typeBadge === "Free"
-                            ? "text-[#22C55E]"
-                            : "text-[#A8B0BD]"
-                        }`}
-                      >
-                        {p.typeBadge}
-                      </span>
-                    </div>
+                    <span className="text-xs font-medium text-[#F5F7FA]">
+                      {p.provider_name}
+                    </span>
                   </div>
                 ))}
               </div>
             ) : (
               <p className="text-xs text-[#6F7886]">
-                Streaming information currently unavailable for this title. Check back soon.
+                Streaming information currently unavailable for this region. Check back soon.
               </p>
             )}
           </section>
