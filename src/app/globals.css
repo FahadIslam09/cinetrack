@@ -77,6 +77,39 @@ select:focus-visible,
   -webkit-tap-highlight-color: transparent !important;
 }
 
+/* Ensure pointer cursor for all interactive elements */
+a,
+a:hover,
+button,
+button:hover,
+[role="button"],
+[role="button"]:hover,
+[role="link"],
+[role="link"]:hover,
+select,
+summary,
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+label[for] {
+  cursor: pointer;
+}
+
+/* Ensure disabled interactive elements show not-allowed cursor */
+button:disabled,
+button[disabled],
+input:disabled,
+select:disabled,
+textarea:disabled,
+a[aria-disabled="true"],
+[role="button"][aria-disabled="true"],
+[role="link"][aria-disabled="true"],
+[aria-disabled="true"] {
+  cursor: not-allowed !important;
+}
+
 /* Hide scrollbars for horizontal shelves */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
