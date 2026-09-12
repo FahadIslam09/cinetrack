@@ -19,8 +19,8 @@ import { MediaDetailsActions, WriteReviewButton } from "./actions-client";
 import { DetailsBackButton } from "./back-button";
 import { TrailerPlayer, TrailerVideo } from "@/components/media/trailer-player";
 import { db } from "@/lib/db";
-import { profiles, userMediaLogs } from "@/lib/db/schema";
-import { eq, and, isNotNull, desc, count } from "drizzle-orm";
+import { mediaItems, profiles, userMediaLogs } from "@/lib/db/schema";
+import { eq, and, ne, isNotNull, desc, count } from "drizzle-orm";
 
 interface PageProps {
   params: Promise<{
@@ -349,18 +349,87 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
             : null,
         }));
 
-  // Similar / recommendations
-  const similarItems: NormalizedMedia[] =
-    type === "anime"
-      ? (rawDetails?.recommendations?.nodes || [])
-          .slice(0, 4)
-          .map((r: any) => normalizeAniListAnime(r.mediaRecommendation))
-          .filter(Boolean)
-      : (rawDetails?.similar?.results || [])
-          .slice(0, 4)
-          .map((item: any) =>
-            type === "movie" ? normalizeTmdbMovie(item) : normalizeTmdbTV(item)
-          );
+  // Similar / recommendations (strictly only media added to CineTrack platform)
+  let similarItems: NormalizedMedia[] = [];
+
+  try {
+    const platformRows = await db
+      .select()
+      .from(mediaItems)
+      .where(
+        and(
+          ne(mediaItems.id, media.id),
+          ne(mediaItems.sourceId, String(id))
+        )
+      );
+
+    if (platformRows.length > 0) {
+      // External recommendation IDs for relevance boost
+      const extSimilarIds = new Set<string>();
+      if (type === "anime") {
+        (rawDetails?.recommendations?.nodes || []).forEach((r: any) => {
+          if (r.mediaRecommendation?.id) {
+            extSimilarIds.add(String(r.mediaRecommendation.id));
+          }
+        });
+      } else {
+        (rawDetails?.similar?.results || []).forEach((item: any) => {
+          if (item.id) {
+            extSimilarIds.add(String(item.id));
+          }
+        });
+      }
+
+      const currentGenres = new Set(
+        (media.genres || []).map((g: string) => g.toLowerCase())
+      );
+
+      const scored = platformRows.map((cMedia) => {
+        let score = 0;
+        if (extSimilarIds.has(cMedia.sourceId)) {
+          score += 50;
+        }
+        if (cMedia.mediaType === media.mediaType) {
+          score += 20;
+        }
+        const cGenres = cMedia.genres || [];
+        for (const g of cGenres) {
+          if (currentGenres.has(g.toLowerCase())) {
+            score += 10;
+          }
+        }
+
+        return {
+          score,
+          item: {
+            id: cMedia.id,
+            source: cMedia.source as "tmdb" | "anilist",
+            sourceId: cMedia.sourceId,
+            mediaType: cMedia.mediaType as "movie" | "series" | "anime",
+            title: cMedia.title,
+            originalTitle: cMedia.originalTitle || undefined,
+            posterPath: cMedia.posterPath || null,
+            backdropPath: cMedia.backdropPath || null,
+            releaseDate: cMedia.releaseDate || undefined,
+            year: cMedia.releaseDate
+              ? cMedia.releaseDate.substring(0, 4)
+              : undefined,
+            rating: 8.0,
+            totalEpisodes: cMedia.totalEpisodes || 1,
+            runtime: cMedia.runtime || undefined,
+            genres: cMedia.genres || [],
+            synopsis: cMedia.synopsis || undefined,
+            streamingProviders: (cMedia.streamingProviders as any) || {},
+          } as NormalizedMedia,
+        };
+      });
+
+      scored.sort((a, b) => b.score - a.score);
+      similarItems = scored.slice(0, 4).map((s) => s.item);
+    }
+  } catch (err) {
+    console.error("Related platform media query error:", err);
+  }
 
   return (
     <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] pb-24 md:pb-12">
