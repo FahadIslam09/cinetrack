@@ -130,9 +130,8 @@ export function MediaCard({
     seasonsData.length,
   ]);
 
-  const detailUrl = `/${media.mediaType}/${
-    media.source === "anilist" ? media.sourceId : media.sourceId
-  }${fromUsername ? `?from=${fromUsername}` : ""}`;
+  const detailUrl = `/${media.mediaType}/${media.source === "anilist" ? media.sourceId : media.sourceId
+    }${fromUsername ? `?from=${fromUsername}` : ""}`;
 
   // Whether this card represents an active watching series/anime
   const isWatchingSeries =
@@ -151,8 +150,8 @@ export function MediaCard({
     media.mediaType === "movie"
       ? "Film"
       : media.mediaType === "anime"
-      ? "Anime"
-      : "TV Series";
+        ? "Anime"
+        : "TV Series";
 
   // Year display: "2008–2013" if series has ended with end year, "2022–" if ongoing, "2024" if single-year or film
   const getYearDisplay = () => {
@@ -208,9 +207,6 @@ export function MediaCard({
       return topProvider.provider_name;
     }
 
-    if (media.genres && media.genres.length > 0) {
-      return media.genres[0];
-    }
     return null;
   };
   const extraMetadata = getExtraMeta();
@@ -313,10 +309,12 @@ export function MediaCard({
 
   // Bottom right genre text
   const getBottomRightText = () => {
-    const titleLower = media.title.toLowerCase();
+    const titleLower = media.title.trim().toLowerCase();
     if (titleLower.includes("spider-man")) return "Action • Comic";
     if (titleLower.includes("dune")) return "IMAX 70mm";
     if (titleLower.includes("oppenheimer")) return "Biopic • Drama";
+    if (titleLower.includes("breaking bad")) return "Crime • Drama";
+    if (titleLower === "from") return "Mystery • Drama";
 
     if (media.genres && media.genres.length > 1) {
       return media.genres.slice(0, 2).join(" • ");
@@ -445,9 +443,8 @@ export function MediaCard({
   return (
     <>
       <div
-        className={`${
-          className || "w-[170px] sm:w-[190px] lg:w-[210px] shrink-0 snap-start"
-        } group relative flex flex-col rounded-[14px] bg-[#121824] border border-white/[0.08] hover:border-[#3B9EFF]/40 hover:shadow-[0_12px_32px_rgba(0,0,0,0.65)] hover:-translate-y-1 transition-all duration-300 ease-out overflow-hidden`}
+        className={`${className || "w-[170px] sm:w-[190px] lg:w-[210px] shrink-0 snap-start"
+          } group relative flex flex-col rounded-[14px] bg-[#121824] border border-white/[0.08] hover:border-[#3B9EFF]/40 hover:shadow-[0_12px_32px_rgba(0,0,0,0.65)] hover:-translate-y-1 transition-all duration-300 ease-out overflow-hidden`}
       >
         {/* Poster Container (2:3 Aspect Ratio) */}
         <div className="relative w-full aspect-[2/3] overflow-hidden bg-[#161E2C]">
@@ -466,9 +463,8 @@ export function MediaCard({
               />
             ) : null}
             <div
-              className={`w-full h-full flex flex-col items-center justify-center text-xs text-[#6F7886] p-2 text-center bg-[#161E2C] ${
-                media.posterPath ? "hidden" : "flex"
-              }`}
+              className={`w-full h-full flex flex-col items-center justify-center text-xs text-[#6F7886] p-2 text-center bg-[#161E2C] ${media.posterPath ? "hidden" : "flex"
+                }`}
             >
               <Film className="w-8 h-8 text-white/10 mb-2" />
               <span>No Poster</span>
@@ -512,11 +508,10 @@ export function MediaCard({
                   e.stopPropagation();
                   setIsQuickAddOpen(true);
                 }}
-                className={`pointer-events-auto px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 backdrop-blur-xl text-white text-xs font-semibold shadow-2xl transition-all duration-200 active:scale-95 flex items-center gap-2 cursor-pointer ${
-                  localStatus
-                    ? "border border-white/20 hover:border-[#22C55E] hover:shadow-[0_0_16px_rgba(34,197,94,0.35)]"
-                    : "border border-white/20 hover:border-[#3B9EFF] hover:shadow-[0_0_16px_rgba(59,158,255,0.35)]"
-                }`}
+                className={`pointer-events-auto px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 backdrop-blur-xl text-white text-xs font-semibold shadow-2xl transition-all duration-200 active:scale-95 flex items-center gap-2 cursor-pointer ${localStatus
+                  ? "border border-white/20 hover:border-[#22C55E] hover:shadow-[0_0_16px_rgba(34,197,94,0.35)]"
+                  : "border border-white/20 hover:border-[#3B9EFF] hover:shadow-[0_0_16px_rgba(59,158,255,0.35)]"
+                  }`}
               >
                 {localStatus ? (
                   <>
@@ -557,15 +552,14 @@ export function MediaCard({
               onClick={handleAdvanceEpisode}
               disabled={isAdvancing}
               className="group/plus absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#121824]/90 hover:bg-[#3B9EFF] border border-white/20 hover:border-[#3B9EFF] text-[#3B9EFF] hover:text-white flex items-center justify-center shadow-lg hover:shadow-[0_0_16px_rgba(59,158,255,0.55)] hover:scale-110 active:scale-95 z-20 cursor-pointer transition-all duration-200 ease-out backdrop-blur-md disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-[#121824]/90 disabled:hover:text-[#3B9EFF]"
-              title={`Advance to ${
-                getNextEpisodePosition(seasonsData, localSeason, localEpisode).isCompleted
-                  ? "Completed"
-                  : `S${String(
-                      getNextEpisodePosition(seasonsData, localSeason, localEpisode).nextSeason
-                    ).padStart(2, "0")} · E${String(
-                      getNextEpisodePosition(seasonsData, localSeason, localEpisode).nextEpisode
-                    ).padStart(2, "0")}`
-              }`}
+              title={`Advance to ${getNextEpisodePosition(seasonsData, localSeason, localEpisode).isCompleted
+                ? "Completed"
+                : `S${String(
+                  getNextEpisodePosition(seasonsData, localSeason, localEpisode).nextSeason
+                ).padStart(2, "0")} · E${String(
+                  getNextEpisodePosition(seasonsData, localSeason, localEpisode).nextEpisode
+                ).padStart(2, "0")}`
+                }`}
               aria-label="Advance watch progress by 1 episode"
             >
               {isAdvancing ? (
