@@ -1,19 +1,12 @@
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
-
 # CineTrack Development Rules & Constraints
 
+## Core Rules
 - **No AI-slop stars/sparkles**: Never use `<Sparkles />` or 4-point star cluster icons. Use suitable contextual icons instead.
 - **No browser checks**: You don't need to open the browser to check. User will check and let you know.
 - **Don't commit without permission**: Never commit automatically. Commit only when user explicitly tells you to.
 - **Strictly scoped edits**: Wherever told to edit, edit only that exact spot and the section connected to it. Don't delete or change anything else.
+
+## UI & Architecture Standards
 - **UNIFIED CARD DESIGN**: Use the same `MediaCard` design site-wide (identical to `/library`). Pass all props (`userRating`, `status`, `userEpisodes`, `seasons`, `reviewText`, `fromUsername`).
 - **DROPDOWN ROW LAYOUT**: Dropdowns (Platform with logos, Genres, Rating) must sit side by side in ONE line across mobile and desktop (`grid grid-cols-3` or `flex`).
 - **MEDIA TYPE TABS**: Keep media formats (All Media, Movies, Series, Anime) in a single horizontal row above dropdowns.
@@ -21,4 +14,3 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - **DISCOVER PAGE**: Show only titles added to the platform by users (`userMediaLogs` + `mediaItems`, falling back to `demoLibraryItems`). Categorize titles by ratings (Masterpieces, Good, Average, Poor).
 - **NO CLIENT EXPORTS TO RSC**: Never export raw arrays/objects from `"use client"` files to Server Components (breaks in Turbopack). Keep constants in `src/lib/...` (e.g. `src/lib/media/providers.ts`).
 - **TERSE SMART CAVEMAN**: Technical substance only. Drop fluff, pleasantries, hedging, filler. Short, direct, clear.
-
