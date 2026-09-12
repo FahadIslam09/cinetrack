@@ -18,11 +18,13 @@ import {
   ChevronDown,
   Check,
   Copy,
+  Pencil,
   X,
   RotateCcw,
 } from "lucide-react";
 import { MediaCard } from "@/components/media/media-card";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
+import { EditProfileModal } from "@/components/profile/edit-profile-modal";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { RatingCategory, getRatingRank, RATING_CONFIG } from "@/lib/rating";
 import { CustomDropdown, DropdownOption } from "@/components/ui/custom-dropdown";
@@ -47,8 +49,12 @@ interface LibraryViewProps {
   user: {
     id?: string;
     username?: string | null;
+    displayName?: string | null;
+    fullName?: string | null;
     email?: string | null;
     avatarUrl?: string | null;
+    bio?: string | null;
+    createdAt?: string | Date | null;
   } | null;
   stats: {
     total: number;
@@ -105,7 +111,14 @@ export function LibraryView({
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recently_updated");
   const [isCopied, setIsCopied] = useState(false);
+  const [isUsernameCopied, setIsUsernameCopied] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [currentUserState, setCurrentUserState] = useState(user);
+
+  useEffect(() => {
+    setCurrentUserState(user);
+  }, [user]);
 
   // Compute dynamic taste counts across all library items
   const tasteCounts = useMemo(() => {
@@ -270,13 +283,13 @@ export function LibraryView({
   const handleShareProfile = async () => {
     const profileUrl =
       typeof window !== "undefined"
-        ? `${window.location.origin}/${user?.username || "library"}`
+        ? `${window.location.origin}/${currentUserState?.username || "library"}`
         : "https://cinetrack.app";
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${user?.username || "My"} CineTrack Library`,
+          title: `${currentUserState?.displayName || currentUserState?.username || "My"} CineTrack Library`,
           text: `Check out what I've been watching and my top rated recommendations on CineTrack!`,
           url: profileUrl,
         });
@@ -311,6 +324,35 @@ export function LibraryView({
     }
   };
 
+  // Quick Copy @username Link
+  const handleCopyUsernameLink = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const link =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/${currentUserState?.username || "library"}`
+        : "https://cinetrack.app";
+
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = link;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      setIsUsernameCopied(true);
+      setTimeout(() => setIsUsernameCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy username link:", err);
+    }
+  };
+
   const hasActiveFilters =
     statusFilter !== "all" ||
     typeFilter !== "all" ||
@@ -330,47 +372,127 @@ export function LibraryView({
   return (
     <div className="flex flex-col gap-6">
       {/* 1. Header Identity & Actions Hero Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-[#151C27] border border-white/[0.08] shadow-xl relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 p-5 sm:p-6 rounded-2xl bg-[#151C27] border border-white/[0.08] shadow-xl relative overflow-hidden">
         {/* Subtle Ambient Radial Glow */}
         <div className="absolute -top-24 -right-24 w-80 h-80 bg-[#3B9EFF]/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* User Identity Info */}
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-[#3B9EFF] to-blue-700 p-0.5 shrink-0 shadow-lg flex items-center justify-center">
-            {user?.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                alt={user.username || "User"}
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full rounded-full bg-[#0F141D] flex items-center justify-center text-lg sm:text-xl font-bold text-white uppercase">
-                {user?.username ? user.username[0] : "C"}
-              </div>
+        <div className="flex items-start gap-4 sm:gap-5 relative z-10 min-w-0 flex-1">
+          {/* Avatar with optional owner hover pencil */}
+          <div className="relative group shrink-0 mt-0.5">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-[#3B9EFF] to-blue-700 p-0.5 shadow-lg flex items-center justify-center">
+              {currentUserState?.avatarUrl ? (
+                <img
+                  src={currentUserState.avatarUrl}
+                  alt={currentUserState.displayName || currentUserState.username || "User"}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full rounded-full bg-[#0F141D] flex items-center justify-center text-lg sm:text-xl font-bold text-white uppercase">
+                  {currentUserState?.displayName
+                    ? currentUserState.displayName[0]
+                    : currentUserState?.username
+                    ? currentUserState.username[0]
+                    : "C"}
+                </div>
+              )}
+            </div>
+            {isOwner && (
+              <button
+                type="button"
+                onClick={() => setIsEditProfileOpen(true)}
+                className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer"
+                title="Change Avatar"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
             )}
           </div>
 
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold text-[#F5F7FA] tracking-tight truncate">
-                {user?.username ? `@${user.username}` : "Personal Media Vault"}
+          <div className="min-w-0 flex-1">
+            {/* 1. Display Name + PRO Badge */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl sm:text-2xl font-extrabold text-[#F5F7FA] tracking-tight truncate">
+                {currentUserState?.displayName || currentUserState?.fullName || currentUserState?.username || "Personal Media Vault"}
               </h1>
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#3B9EFF]/15 text-[#3B9EFF] border border-[#3B9EFF]/30">
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#3B9EFF]/15 text-[#3B9EFF] border border-[#3B9EFF]/30 shrink-0">
                 PRO
               </span>
             </div>
-            <p className="text-xs text-[#A8B0BD] mt-1 flex items-center gap-1.5 sm:gap-2 flex-wrap">
-              <span>{stats.total} Total Titles Tracked</span>
+
+            {/* 2. @username + Copy Icon button */}
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-xs sm:text-sm font-medium text-[#A8B0BD]">
+                @{currentUserState?.username || "user"}
+              </span>
+              <button
+                type="button"
+                onClick={handleCopyUsernameLink}
+                title="Copy profile link"
+                className="p-1 rounded-md text-[#6F7886] hover:text-[#3B9EFF] hover:bg-white/[0.06] transition-colors cursor-pointer inline-flex items-center justify-center"
+                aria-label="Copy username link"
+              >
+                {isUsernameCopied ? (
+                  <Check className="w-3.5 h-3.5 text-[#22C55E]" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
+              </button>
+              {isUsernameCopied && (
+                <span className="text-[11px] text-[#22C55E] font-medium animate-fade-in">
+                  Link copied!
+                </span>
+              )}
+            </div>
+
+            {/* 3. Bio (up to 160 chars) */}
+            {currentUserState?.bio ? (
+              <p className="text-xs sm:text-[13px] text-[#C5CDD9] mt-2 max-w-2xl leading-relaxed">
+                {currentUserState.bio}
+              </p>
+            ) : isOwner ? (
+              <button
+                type="button"
+                onClick={() => setIsEditProfileOpen(true)}
+                className="text-xs text-[#6F7886] hover:text-[#3B9EFF] italic mt-1.5 inline-flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                <span>+ Add a bio (up to 160 characters)...</span>
+              </button>
+            ) : null}
+
+            {/* 4. Stats: 3 Total Titles Tracked • 2 Completed • 5d 19h Watch Time */}
+            <p className="text-xs text-[#A8B0BD] mt-2.5 flex items-center gap-1.5 sm:gap-2 flex-wrap font-medium">
+              <span><strong className="text-[#F5F7FA] font-semibold">{stats.total}</strong> Total Titles Tracked</span>
               <span className="w-1 h-1 rounded-full bg-white/20 hidden xs:inline-block" />
-              <span>{stats.completed} Completed</span>
+              <span><strong className="text-[#F5F7FA] font-semibold">{stats.completed}</strong> Completed</span>
               <span className="w-1 h-1 rounded-full bg-white/20 hidden xs:inline-block" />
-              <span>{days}d {hours}h Watch Time</span>
+              <span><strong className="text-[#3B9EFF] font-semibold">{days}d {hours}h</strong> Watch Time</span>
+              {currentUserState?.createdAt && (
+                <>
+                  <span className="w-1 h-1 rounded-full bg-white/20 hidden sm:inline-block" />
+                  <span className="text-[#6F7886] hidden sm:inline-block text-[11px]">
+                    Joined {new Intl.DateTimeFormat("en", { month: "short", year: "numeric" }).format(new Date(currentUserState.createdAt))}
+                  </span>
+                </>
+              )}
             </p>
           </div>
         </div>
 
-        {/* Action Buttons: Share Profile & Add Title */}
-        <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap relative z-10 self-start md:self-auto">
+        {/* Action Buttons: Edit Profile & Share Profile & Add Title */}
+        <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap relative z-10 self-start md:self-auto shrink-0 mt-2 md:mt-0">
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => setIsEditProfileOpen(true)}
+              className="h-10 px-3.5 rounded-xl bg-[#1D2734] hover:bg-[#253244] border border-white/[0.08] text-[#F5F7FA] text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+              title="Edit Profile"
+            >
+              <Pencil className="w-3.5 h-3.5 text-[#A8B0BD]" />
+              <span>Edit Profile</span>
+            </button>
+          )}
+
           <button
             type="button"
             suppressHydrationWarning
@@ -592,7 +714,7 @@ export function LibraryView({
               seasons={item.seasons}
               reviewText={item.reviewText}
               containsSpoilers={item.containsSpoilers}
-              fromUsername={user?.username || undefined}
+              fromUsername={currentUserState?.username || undefined}
               readOnly={!isOwner}
               className="w-full"
             />
@@ -624,6 +746,30 @@ export function LibraryView({
           isOpen={isQuickAddOpen}
           onClose={() => setIsQuickAddOpen(false)}
           media={null}
+        />
+      )}
+
+      {/* Edit Profile Modal */}
+      {isOwner && (
+        <EditProfileModal
+          isOpen={isEditProfileOpen}
+          onClose={() => setIsEditProfileOpen(false)}
+          initialData={{
+            displayName: currentUserState?.displayName || currentUserState?.fullName,
+            username: currentUserState?.username,
+            bio: currentUserState?.bio,
+            avatarUrl: currentUserState?.avatarUrl,
+          }}
+          onSuccess={(updated) => {
+            setCurrentUserState((prev: any) => ({
+              ...prev,
+              displayName: updated.displayName,
+              fullName: updated.displayName,
+              username: updated.username || prev?.username,
+              bio: updated.bio,
+              avatarUrl: updated.avatarUrl || prev?.avatarUrl,
+            }));
+          }}
         />
       )}
     </div>

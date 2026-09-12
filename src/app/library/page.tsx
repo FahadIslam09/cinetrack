@@ -110,8 +110,12 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
     ? {
         id: user.id,
         username: userProfile?.username || user.email?.split("@")[0] || "user",
+        displayName: userProfile?.fullName || user.user_metadata?.full_name || userProfile?.username || user.email?.split("@")[0] || "Film Explorer",
+        fullName: userProfile?.fullName,
         email: user.email,
         avatarUrl: userProfile?.avatarUrl || user.user_metadata?.avatar_url,
+        bio: userProfile?.bio,
+        createdAt: userProfile?.createdAt,
       }
     : null;
 

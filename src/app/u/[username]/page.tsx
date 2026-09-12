@@ -136,15 +136,23 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
     ? {
         id: targetProfile.id,
         username: targetProfile.username,
+        displayName: targetProfile.fullName || targetProfile.username,
+        fullName: targetProfile.fullName,
         email: null,
         avatarUrl: targetProfile.avatarUrl,
+        bio: targetProfile.bio,
+        createdAt: targetProfile.createdAt,
       }
     : {
         id: "demo-elenavance",
         username: "elenavance",
+        displayName: "Elena Vance",
+        fullName: "Elena Vance",
         email: null,
         avatarUrl:
           "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop",
+        bio: "Film archivist & sci-fi enthusiast. Contributor at Sight & Sound. Focused on post-Soviet speculative fiction and structuralist narratives.",
+        createdAt: "2024-01-01",
       };
 
   return (
