@@ -195,7 +195,15 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
                 prov.provider_name?.toLowerCase().includes(pLower) ||
                 (pLower === "prime" && prov.provider_name?.toLowerCase().includes("amazon")) ||
                 (pLower === "apple" && prov.provider_name?.toLowerCase().includes("apple")) ||
-                (pLower === "disney" && prov.provider_name?.toLowerCase().includes("disney"))
+                (pLower === "disney" && prov.provider_name?.toLowerCase().includes("disney")) ||
+                (pLower === "paramount" && prov.provider_name?.toLowerCase().includes("paramount")) ||
+                (pLower === "peacock" && prov.provider_name?.toLowerCase().includes("peacock")) ||
+                (pLower === "hulu" && prov.provider_name?.toLowerCase().includes("hulu")) ||
+                (pLower === "jio" && (prov.provider_name?.toLowerCase().includes("jio") || prov.provider_name?.toLowerCase().includes("hotstar"))) ||
+                (pLower === "zee5" && prov.provider_name?.toLowerCase().includes("zee")) ||
+                (pLower === "sonyliv" && prov.provider_name?.toLowerCase().includes("sony")) ||
+                (pLower === "hoichoi" && prov.provider_name?.toLowerCase().includes("hoichoi")) ||
+                (pLower === "chorki" && prov.provider_name?.toLowerCase().includes("chorki"))
             )
           ) {
             return true;
@@ -218,6 +226,14 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
       if (pLower === "netflix" && (t.includes("stranger") || t.includes("squid") || t.includes("queen")))
         return true;
       if (pLower === "max" && (t.includes("dune") || t.includes("succession") || t.includes("game of thrones")))
+        return true;
+      if (pLower === "hulu" && (t.includes("bear") || t.includes("shogun") || t.includes("only murders")))
+        return true;
+      if (pLower === "paramount" && (t.includes("yellowstone") || t.includes("top gun") || t.includes("tulsa king")))
+        return true;
+      if (pLower === "peacock" && (t.includes("oppenheimer") || t.includes("poker face") || t.includes("office")))
+        return true;
+      if (pLower === "chorki" && (t.includes("myself allen") || t.includes("networker") || t.includes("redrum") || t.includes("guti") || t.includes("pet kata") || t.includes("unoloukik")))
         return true;
       return false;
     });

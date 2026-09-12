@@ -62,6 +62,9 @@ export function DiscoverFilterBar({
             alt={provider.name}
             className="w-4 h-4 rounded object-cover shrink-0"
             loading="lazy"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
           />
         ),
       })),
