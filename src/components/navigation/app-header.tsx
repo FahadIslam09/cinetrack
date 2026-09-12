@@ -203,6 +203,7 @@ export function AppHeader({ user }: AppHeaderProps) {
                   <img
                     src={user.avatarUrl}
                     alt="Profile"
+                    referrerPolicy="no-referrer"
                     className="w-8 h-8 rounded-full object-cover border border-white/[0.06] hover:border-white/[0.16] ring-1 ring-white/[0.08] hover:ring-[#3B9EFF]/50 transition-all"
                   />
                 ) : (

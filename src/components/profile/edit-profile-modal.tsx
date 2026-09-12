@@ -312,6 +312,7 @@ export function EditProfileModal({
                   <img
                     src={avatarUrl}
                     alt="Avatar Preview"
+                    referrerPolicy="no-referrer"
                     className="w-full h-full rounded-full object-cover"
                   />
                 ) : (

@@ -73,6 +73,7 @@ export function ReviewCard({
             <img
               src={author.avatarUrl}
               alt={author.name}
+              referrerPolicy="no-referrer"
               className="w-9 h-9 rounded-full object-cover ring-1 ring-white/10 shrink-0 bg-[#151C27]"
             />
           ) : (

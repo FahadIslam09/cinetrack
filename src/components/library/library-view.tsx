@@ -364,13 +364,6 @@ export function LibraryView({
               <span>Edit Cover</span>
             </button>
           )}
-
-          {!isOwner && (
-            <div className="absolute top-3.5 right-3.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[11px] font-semibold text-[#A8B0BD] flex items-center gap-1.5 shadow-lg z-10">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]" />
-              <span>Public Vault</span>
-            </div>
-          )}
         </div>
 
         {/* Card Body: Overlapping Avatar, Identity, Bio & Actions */}
@@ -381,6 +374,7 @@ export function LibraryView({
               <img
                 src={currentUserState.avatarUrl}
                 alt={currentUserState.displayName || currentUserState.username || "User"}
+                referrerPolicy="no-referrer"
                 onError={() => setAvatarError(true)}
                 className="w-full h-full object-cover"
               />
@@ -449,48 +443,28 @@ export function LibraryView({
             </button>
           ) : null}
 
-          {/* 4. Action Buttons */}
-          <div className="flex items-center justify-center gap-2.5 mt-5">
-            {isOwner ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setIsEditProfileOpen(true)}
-                  className="h-10 px-5 rounded-full bg-[#1D2734] hover:bg-[#253244] border border-white/[0.08] hover:border-white/[0.15] text-[#F5F7FA] text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer"
-                >
-                  <Pencil className="w-3.5 h-3.5 text-[#A8B0BD]" />
-                  <span>Edit Profile</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsQuickAddOpen(true)}
-                  className="h-10 px-6 rounded-full bg-[#3B9EFF] hover:bg-[#2F8EEA] text-white text-xs sm:text-sm font-bold inline-flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-[#3B9EFF]/25 cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Media</span>
-                </button>
-              </>
-            ) : (
+          {/* 4. Action Buttons (Owner Only) */}
+          {isOwner && (
+            <div className="flex items-center justify-center gap-2.5 mt-5">
               <button
                 type="button"
-                onClick={handleCopyUsernameLink}
-                className="h-10 px-6 rounded-full bg-[#1D2734] hover:bg-[#253244] border border-white/[0.08] hover:border-white/[0.15] text-[#F5F7FA] text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer"
+                onClick={() => setIsEditProfileOpen(true)}
+                className="h-10 px-5 rounded-full bg-[#1D2734] hover:bg-[#253244] border border-white/[0.08] hover:border-white/[0.15] text-[#F5F7FA] text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer"
               >
-                {isUsernameCopied ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-400" />
-                    <span className="text-emerald-400 font-medium">Link Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 text-[#A8B0BD]" />
-                    <span>Share Profile</span>
-                  </>
-                )}
+                <Pencil className="w-3.5 h-3.5 text-[#A8B0BD]" />
+                <span>Edit Profile</span>
               </button>
-            )}
-          </div>
+
+              <button
+                type="button"
+                onClick={() => setIsQuickAddOpen(true)}
+                className="h-10 px-6 rounded-full bg-[#3B9EFF] hover:bg-[#2F8EEA] text-white text-xs sm:text-sm font-bold inline-flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-[#3B9EFF]/25 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Media</span>
+              </button>
+            </div>
+          )}
 
           {/* 5. 3-Column Stats Bar with Vertical Dividers */}
           <div className="w-full mt-6 pt-5 border-t border-white/[0.06] grid grid-cols-3 divide-x divide-white/[0.08] text-center">
