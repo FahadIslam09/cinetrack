@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { updateProfile } from "@/actions/profile";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 const IMGBB_API_KEY = "991f94ae55c7ee215507ec80b51bfa5b";
 
@@ -88,6 +89,8 @@ export function EditProfileModal({
       setError(null);
     }
   }, [isOpen, initialData]);
+
+  useScrollLock(isOpen);
 
   if (!isOpen) return null;
 
@@ -185,7 +188,7 @@ export function EditProfileModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-fade-in overscroll-contain"
       onClick={(e) => {
         if (e.target === e.currentTarget && !isSaving && !isUploadingImage && !isUploadingCover) {
           onClose();

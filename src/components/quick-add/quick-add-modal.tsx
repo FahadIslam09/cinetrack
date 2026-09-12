@@ -28,6 +28,7 @@ import {
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { upsertMediaLog, deleteMediaLog } from "@/actions/tracking";
 import { RatingCategory, RATING_CONFIG, parseRating } from "@/lib/rating";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { SeasonInfo } from "@/app/api/tv/[id]/seasons/route";
 import { CustomDropdown, DropdownOption } from "@/components/ui/custom-dropdown";
 
@@ -148,17 +149,8 @@ export function QuickAddModal({
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  // Lock background scroll when modal is open, restore cleanly when closed
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = "";
-      };
-    } else {
-      document.body.style.overflow = "";
-    }
-  }, [isOpen]);
+  // Lock background screen scroll cleanly across all devices when modal is open
+  useScrollLock(isOpen);
 
   // Handle ESC key to close modal or dismiss confirmation popup
   useEffect(() => {
@@ -581,7 +573,7 @@ export function QuickAddModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="add-to-library-title"
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
     >
       <div
         className="w-full max-w-lg bg-[#151C27] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[88dvh] sm:h-[620px] max-h-[92dvh] sm:max-h-[88vh] animate-in zoom-in-95 duration-200"
@@ -1365,7 +1357,7 @@ export function QuickAddModal({
           aria-modal="true"
           aria-labelledby="delete-confirm-title"
           aria-describedby="delete-confirm-desc"
-          className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
           onClick={() => {
             if (!isDeleting) setIsDeleteConfirmOpen(false);
           }}

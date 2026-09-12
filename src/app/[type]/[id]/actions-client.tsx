@@ -5,6 +5,7 @@ import { Plus, Check, Edit3, Play, X } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
 import { getRatingConfig } from "@/lib/rating";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 interface MediaDetailsActionsProps {
   media: NormalizedMedia;
@@ -20,6 +21,9 @@ export function MediaDetailsActions({
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
   const [log, setLog] = useState(initialLog);
+
+  // Lock background scroll when trailer cinema modal is open
+  useScrollLock(isTrailerModalOpen);
 
   const ratingConfig = getRatingConfig(log?.rating);
 
@@ -111,7 +115,7 @@ export function MediaDetailsActions({
       {/* Cinema Mode Trailer Modal */}
       {isTrailerModalOpen && trailerKey && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
           onClick={() => setIsTrailerModalOpen(false)}
         >
           <div
