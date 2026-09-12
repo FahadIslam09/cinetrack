@@ -20,7 +20,13 @@ export interface NormalizedMedia {
   synopsis?: string;
   streamingProviders?: Record<
     string,
-    Array<{ provider_id: number; provider_name: string; logo_path: string }>
+    {
+      link?: string;
+      flatrate?: Array<{ provider_id: number; provider_name: string; logo_path: string }>;
+      rent?: Array<{ provider_id: number; provider_name: string; logo_path: string }>;
+      buy?: Array<{ provider_id: number; provider_name: string; logo_path: string }>;
+      ads?: Array<{ provider_id: number; provider_name: string; logo_path: string }>;
+    }
   >;
 }
 

@@ -199,9 +199,13 @@ export function MediaCard({
       return "Christopher Nolan";
 
     const usProviders = media.streamingProviders?.US;
-    if (usProviders && usProviders.length > 0) {
-      const p = usProviders.find((x: any) => x.provider_name);
-      if (p) return p.provider_name;
+    const topProvider =
+      usProviders?.flatrate?.[0] ||
+      usProviders?.ads?.[0] ||
+      usProviders?.buy?.[0] ||
+      usProviders?.rent?.[0];
+    if (topProvider?.provider_name) {
+      return topProvider.provider_name;
     }
 
     if (media.genres && media.genres.length > 0) {
