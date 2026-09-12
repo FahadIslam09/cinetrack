@@ -37,6 +37,42 @@ interface SearchResponse {
   };
 }
 
+function MediaCardSkeleton() {
+  return (
+    <div className="w-full flex flex-col rounded-[14px] bg-[#121824] border border-white/[0.08] overflow-hidden">
+      {/* Poster 2:3 with top-left badge and top-right rating pill */}
+      <div className="relative w-full aspect-[2/3] overflow-hidden bg-[#161E2C] skeleton-shimmer">
+        {/* Top-Left Status Pill */}
+        <div className="absolute top-2.5 left-2.5 h-5 w-16 rounded-full bg-black/60 border border-white/10" />
+        {/* Top-Right Pill */}
+        <div className="absolute top-2.5 right-2.5 h-5 w-10 rounded-full bg-black/60 border border-white/10" />
+        {/* Bottom Vignette */}
+        <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#121824] via-[#121824]/40 to-transparent pointer-events-none" />
+      </div>
+
+      {/* Card Content Section */}
+      <div className="p-3 sm:p-3.5 flex flex-col justify-between flex-1 relative z-10 bg-[#121824]">
+        <div>
+          {/* Title */}
+          <div className="h-4 w-4/5 rounded bg-white/[0.08] skeleton-shimmer" />
+          {/* Subtitle / Year • Format */}
+          <div className="flex items-center gap-1.5 mt-2">
+            <div className="h-3 w-8 rounded bg-white/[0.05] skeleton-shimmer" />
+            <div className="w-1 h-1 rounded-full bg-white/20" />
+            <div className="h-3 w-10 rounded bg-white/[0.05] skeleton-shimmer" />
+          </div>
+        </div>
+
+        {/* Bottom Row: Tag Badge & Right Genre */}
+        <div className="mt-2.5 pt-2 border-t border-white/[0.04] flex items-center justify-between gap-2">
+          <div className="h-4 w-16 rounded-md bg-white/[0.06] skeleton-shimmer" />
+          <div className="h-3 w-12 rounded bg-white/[0.04] skeleton-shimmer" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SearchPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -307,10 +343,7 @@ function SearchPageContent() {
             {activeTab !== "profiles" && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4">
                 {Array.from({ length: 12 }).map((_, idx) => (
-                  <div
-                    key={idx}
-                    className="aspect-[2/3] rounded-[14px] bg-[#151C27] border border-white/[0.06] overflow-hidden skeleton-shimmer"
-                  />
+                  <MediaCardSkeleton key={idx} />
                 ))}
               </div>
             )}
@@ -542,8 +575,13 @@ export default function SearchPage() {
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={i}
-                  className="w-20 h-9 rounded-xl bg-[#151C27] border border-white/[0.06] skeleton-shimmer"
+                  className="w-24 h-9 rounded-xl bg-[#151C27] border border-white/[0.06] skeleton-shimmer"
                 />
+              ))}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4 mt-2">
+              {Array.from({ length: 12 }).map((_, idx) => (
+                <MediaCardSkeleton key={idx} />
               ))}
             </div>
           </main>
