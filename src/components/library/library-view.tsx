@@ -401,9 +401,6 @@ export function LibraryView({
             <h1 className="text-2xl sm:text-3xl font-black text-[#F5F7FA] tracking-tight">
               {currentUserState?.displayName || currentUserState?.fullName || currentUserState?.username || "Personal Media Vault"}
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#3B9EFF]/15 text-[#3B9EFF] border border-[#3B9EFF]/30 shrink-0">
-              PRO
-            </span>
           </div>
 
           {/* 2. Username Pill with Copy Functionality */}

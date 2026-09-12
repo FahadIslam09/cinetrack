@@ -43,9 +43,6 @@ export function AppHeader({ user }: AppHeaderProps) {
               <span className="font-bold text-lg tracking-tight text-[#F5F7FA]">
                 Cine<span className="text-[#3B9EFF]">Track</span>
               </span>
-              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-[#3B9EFF]/10 text-[#3B9EFF] border border-[#3B9EFF]/20">
-                PRO
-              </span>
             </Link>
 
             {/* Main Navigation Menu Links */}
