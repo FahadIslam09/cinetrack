@@ -247,4 +247,17 @@ html::-webkit-scrollbar-thumb:active {
   pointer-events: none;
 }
 
+/* Laser beam sweep animation for loading indicator */
+@keyframes laser-beam {
+  0% {
+    transform: translateX(-30%);
+  }
+  100% {
+    transform: translateX(130%);
+  }
+}
+
+.animate-laser-beam {
+  animation: laser-beam 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
 

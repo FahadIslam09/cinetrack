@@ -1,22 +1,12 @@
-import Link from "next/link";
-import {
-  Compass,
-  Crown,
-  CheckCircle2,
-  Award,
-  Flame,
-  Clock,
-} from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
-import { MediaCard } from "@/components/media/media-card";
-import { DiscoverFilterBar } from "@/components/discover/discover-filter-bar";
+import { DiscoverView } from "@/components/discover/discover-view";
 import { LibraryItem } from "@/components/library/library-view";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { userMediaLogs, mediaItems, profiles } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { parseRating, getRatingRank, getConsensusRating } from "@/lib/rating";
+import { parseRating, getConsensusRating } from "@/lib/rating";
 import { demoLibraryItems } from "@/lib/demo-library";
 
 interface DiscoverPageProps {
@@ -244,69 +234,6 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
       (i) => String(i.userRating || "").toLowerCase() === rating.toLowerCase()
     );
   }
-
-  // 5. Categorize based on community ratings
-  const ratingCategories = [
-    {
-      id: "masterpiece",
-      title: "Masterpieces",
-      label: "Masterpiece",
-      description: "Highest rated by users on the platform",
-      icon: <Crown className="w-4 h-4 text-[#F5C84B]" />,
-      pillClass: "bg-[#F5C84B]/15 text-[#F5C84B] border-[#F5C84B]/30",
-      dotClass: "bg-[#F5C84B]",
-      items: filteredItems.filter((i) => i.userRating === "masterpiece"),
-    },
-    {
-      id: "good",
-      title: "Good",
-      label: "Good",
-      description: "Consistently recommended and praised",
-      icon: <CheckCircle2 className="w-4 h-4 text-[#3B9EFF]" />,
-      pillClass: "bg-[#3B9EFF]/15 text-[#3B9EFF] border-[#3B9EFF]/30",
-      dotClass: "bg-[#3B9EFF]",
-      items: filteredItems.filter((i) => i.userRating === "good"),
-    },
-    {
-      id: "average",
-      title: "Average",
-      label: "Average",
-      description: "Solid entertainment with mixed community reception",
-      icon: <Award className="w-4 h-4 text-[#F59E0B]" />,
-      pillClass: "bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/30",
-      dotClass: "bg-[#F59E0B]",
-      items: filteredItems.filter((i) => i.userRating === "average"),
-    },
-    {
-      id: "poor",
-      title: "Poor",
-      label: "Poor",
-      description: "Disappointing or dropped titles",
-      icon: <Flame className="w-4 h-4 text-[#F43F5E]" />,
-      pillClass: "bg-[#F43F5E]/15 text-[#F43F5E] border-[#F43F5E]/30",
-      dotClass: "bg-[#F43F5E]",
-      items: filteredItems.filter((i) => i.userRating === "poor"),
-    },
-  ];
-
-  // If unrated items exist and user hasn't filtered to a specific rating:
-  const unratedItems = filteredItems.filter((i) => !i.userRating);
-  if (unratedItems.length > 0 && (!rating || rating === "all")) {
-    ratingCategories.push({
-      id: "unrated",
-      title: "Community Tracked",
-      label: "Unrated",
-      description: "Recently added titles pending user rating",
-      icon: <Clock className="w-4 h-4 text-[#A8B0BD]" />,
-      pillClass: "bg-white/[0.06] text-[#A8B0BD] border-white/[0.1]",
-      dotClass: "bg-[#A8B0BD]",
-      items: unratedItems,
-    });
-  }
-
-  // Only display categories that contain matching items
-  const activeCategories = ratingCategories.filter((cat) => cat.items.length > 0);
-
   return (
     <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] pb-24 md:pb-12">
       <AppHeader user={userProp} />
@@ -322,90 +249,17 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
           </p>
         </div>
 
-        {/* Single Row Dropdown Filter Bar */}
-        <div className="relative z-30">
-          <DiscoverFilterBar
-            currentType={type}
-            currentProvider={provider}
-            currentGenre={genre}
-            currentRating={rating}
-            totalResults={filteredItems.length}
-          />
-        </div>
-
-        {/* Results Categorized by Ratings (or Empty State) */}
-        {activeCategories.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-4 text-center rounded-2xl bg-[#151C27]/40 border border-white/[0.04] mt-2">
-            <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#6F7886] mb-3.5">
-              <Compass className="w-7 h-7" />
-            </div>
-            <h3 className="text-base font-bold text-[#F5F7FA]">No titles match your filters</h3>
-            <p className="text-xs text-[#A8B0BD] max-w-xs sm:max-w-sm mt-1 leading-relaxed">
-              No user-added titles match the selected format, platform, genre, or rating.
-            </p>
-            <Link
-              href="/discover"
-              className="mt-5 px-4 py-2 rounded-xl bg-[#3B9EFF] hover:bg-[#2F8EEA] text-white text-xs font-semibold transition-all shadow-md shadow-[#3B9EFF]/20"
-            >
-              Reset all filters
-            </Link>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-9 mt-1">
-            {activeCategories.map((cat) => (
-              <section key={cat.id} className="flex flex-col gap-3.5">
-                {/* Rating Category Header */}
-                <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${cat.pillClass}`}
-                    >
-                      {cat.icon}
-                    </div>
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-base sm:text-lg font-bold text-[#F5F7FA] tracking-tight">
-                          {cat.title}
-                        </h2>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${cat.pillClass}`}
-                        >
-                          {cat.items.length}
-                        </span>
-                      </div>
-                      <span className="text-[11px] sm:text-xs text-[#A8B0BD]">
-                        {cat.description}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Media Cards Grid - Same design as library page */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4">
-                  {cat.items.map((item) => (
-                    <MediaCard
-                      key={item.id}
-                      media={item.media}
-                      status={item.status}
-                      userRating={item.userRating || undefined}
-                      userEpisodes={item.userEpisodes}
-                      currentSeason={item.currentSeason}
-                      currentEpisode={item.currentEpisode}
-                      seasons={item.seasons}
-                      reviewText={item.reviewText}
-                      containsSpoilers={item.containsSpoilers}
-                      readOnly={true}
-                      className="w-full"
-                    />
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        )}
+        <DiscoverView
+          items={filteredItems}
+          currentType={type}
+          currentProvider={provider}
+          currentGenre={genre}
+          currentRating={rating}
+        />
       </main>
 
       <BottomNav />
     </div>
   );
 }
+

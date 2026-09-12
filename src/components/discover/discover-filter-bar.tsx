@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition, useMemo } from "react";
+import { useTransition, useMemo, useState, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import {
   Layers,
@@ -12,6 +12,7 @@ import {
   RotateCcw,
   Award,
   X,
+  Loader2,
 } from "lucide-react";
 import { CustomDropdown, DropdownOption } from "@/components/ui/custom-dropdown";
 import { OTT_PROVIDERS, DISCOVER_GENRES } from "@/lib/media/providers";
@@ -23,6 +24,9 @@ interface DiscoverFilterBarProps {
   currentGenre?: string;
   currentRating?: string;
   totalResults?: number;
+  isPending?: boolean;
+  onUpdateFilter?: (key: string, value: string) => void;
+  onResetFilters?: () => void;
 }
 
 export function DiscoverFilterBar({
@@ -31,11 +35,27 @@ export function DiscoverFilterBar({
   currentGenre = "all",
   currentRating = "all",
   totalResults,
+  isPending: externalPending,
+  onUpdateFilter,
+  onResetFilters,
 }: DiscoverFilterBarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const [internalPending, startTransition] = useTransition();
+  const [localPending, setLocalPending] = useState(false);
+
+  const isPending = externalPending !== undefined ? externalPending : (localPending || internalPending);
+
+  useEffect(() => {
+    setLocalPending(false);
+  }, [searchParams, currentType, currentProvider, currentGenre, currentRating]);
+
+  useEffect(() => {
+    if (!localPending) return;
+    const timer = setTimeout(() => setLocalPending(false), 6000);
+    return () => clearTimeout(timer);
+  }, [localPending]);
 
   // 1. Media Type Tabs (Segmented Control)
   const mediaTabs = [
@@ -120,7 +140,13 @@ export function DiscoverFilterBar({
     []
   );
 
-  const updateFilter = (key: string, value: string) => {
+  const handleUpdateFilter = (key: string, value: string) => {
+    if (onUpdateFilter) {
+      onUpdateFilter(key, value);
+      return;
+    }
+
+    setLocalPending(true);
     const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
 
     if (!value || value === "all" || value === "All") {
@@ -135,7 +161,13 @@ export function DiscoverFilterBar({
     });
   };
 
-  const resetFilters = () => {
+  const handleResetFilters = () => {
+    if (onResetFilters) {
+      onResetFilters();
+      return;
+    }
+
+    setLocalPending(true);
     startTransition(() => {
       router.push(pathname, { scroll: false });
     });
@@ -150,11 +182,19 @@ export function DiscoverFilterBar({
   return (
     <div
       className={`w-full relative z-30 rounded-2xl bg-gradient-to-b from-[#141B26]/90 via-[#0F1420]/90 to-[#0A0E17]/95 backdrop-blur-xl border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.4)] p-2.5 sm:p-3 flex flex-col gap-3 transition-opacity duration-200 ${
-        isPending ? "opacity-75" : "opacity-100"
+        isPending ? "opacity-90" : "opacity-100"
       }`}
     >
       {/* Top subtle glow highlight line */}
       <div className="absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#3B9EFF]/30 to-transparent pointer-events-none" />
+
+      {/* Laser beam sweep animation during active filtering */}
+      {isPending && (
+        <div className="absolute inset-x-0 -top-[1px] h-[2px] overflow-hidden rounded-t-2xl z-50 pointer-events-none">
+          <div className="absolute inset-0 bg-[#3B9EFF]/40 shadow-[0_0_8px_#3B9EFF]" />
+          <div className="h-full w-full bg-gradient-to-r from-transparent via-[#5AAFFF] to-transparent animate-laser-beam shadow-[0_0_14px_#3B9EFF]" />
+        </div>
+      )}
 
       {/* Main Bar: Flex row on Desktop, Stack on Mobile */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 w-full">
@@ -168,7 +208,7 @@ export function DiscoverFilterBar({
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => updateFilter("type", tab.id)}
+                  onClick={() => handleUpdateFilter("type", tab.id)}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-150 cursor-pointer select-none active:scale-95 ${
                     isActive
                       ? "bg-gradient-to-r from-[#3B9EFF] to-[#2563EB] text-white font-semibold shadow-md shadow-[#3B9EFF]/25"
@@ -192,7 +232,7 @@ export function DiscoverFilterBar({
             {/* Streaming Platform */}
             <CustomDropdown
               value={currentProvider}
-              onChange={(val) => updateFilter("provider", val)}
+              onChange={(val) => handleUpdateFilter("provider", val)}
               options={streamingOptions}
               align="left"
               className="w-full lg:w-[165px] xl:w-[185px] shrink-0 min-w-0"
@@ -204,7 +244,7 @@ export function DiscoverFilterBar({
             {/* Genre */}
             <CustomDropdown
               value={currentGenre}
-              onChange={(val) => updateFilter("genre", val)}
+              onChange={(val) => handleUpdateFilter("genre", val)}
               options={genreOptions}
               align="left"
               className="w-full lg:w-[150px] xl:w-[170px] shrink-0 min-w-0"
@@ -216,7 +256,7 @@ export function DiscoverFilterBar({
             {/* Rating */}
             <CustomDropdown
               value={currentRating}
-              onChange={(val) => updateFilter("rating", val)}
+              onChange={(val) => handleUpdateFilter("rating", val)}
               options={ratingOptions}
               align="right"
               className="w-full lg:w-[150px] xl:w-[170px] shrink-0 min-w-0"
@@ -229,7 +269,12 @@ export function DiscoverFilterBar({
 
         {/* Right Section: Results Counter Badge & Reset Button */}
         <div className="flex items-center justify-between lg:justify-end gap-2.5 shrink-0 pt-1 lg:pt-0 border-t border-white/[0.04] lg:border-t-0">
-          {totalResults !== undefined && (
+          {isPending ? (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#090D15]/90 border border-[#3B9EFF]/50 shadow-[0_0_12px_rgba(59,158,255,0.25)] text-xs animate-in fade-in duration-75">
+              <Loader2 className="w-3.5 h-3.5 text-[#3B9EFF] animate-spin shrink-0" />
+              <span className="text-[#3B9EFF] font-semibold whitespace-nowrap">Updating...</span>
+            </div>
+          ) : totalResults !== undefined ? (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#080C14]/80 border border-white/[0.06] text-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-[#3B9EFF] animate-pulse shrink-0" />
               <span className="text-[#8E97A6] font-medium whitespace-nowrap">
@@ -244,12 +289,12 @@ export function DiscoverFilterBar({
                 )}
               </span>
             </div>
-          )}
+          ) : null}
 
           {hasActiveFilters && (
             <button
               type="button"
-              onClick={resetFilters}
+              onClick={handleResetFilters}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-[#F43F5E] bg-[#F43F5E]/10 hover:bg-[#F43F5E]/15 border border-[#F43F5E]/25 hover:border-[#F43F5E]/40 transition-all cursor-pointer select-none active:scale-95"
               title="Reset all filters"
             >
@@ -272,7 +317,7 @@ export function DiscoverFilterBar({
               <span>{mediaTabs.find((t) => t.id === currentType)?.label}</span>
               <button
                 type="button"
-                onClick={() => updateFilter("type", "all")}
+                onClick={() => handleUpdateFilter("type", "all")}
                 className="hover:text-white p-0.5 rounded cursor-pointer transition-colors"
                 title="Remove format filter"
               >
@@ -286,7 +331,7 @@ export function DiscoverFilterBar({
               <span>{streamingOptions.find((o) => o.id === currentProvider)?.label}</span>
               <button
                 type="button"
-                onClick={() => updateFilter("provider", "all")}
+                onClick={() => handleUpdateFilter("provider", "all")}
                 className="hover:text-white p-0.5 rounded cursor-pointer transition-colors"
                 title="Remove platform filter"
               >
@@ -300,7 +345,7 @@ export function DiscoverFilterBar({
               <span>{currentGenre}</span>
               <button
                 type="button"
-                onClick={() => updateFilter("genre", "all")}
+                onClick={() => handleUpdateFilter("genre", "all")}
                 className="hover:text-white p-0.5 rounded cursor-pointer transition-colors"
                 title="Remove genre filter"
               >
@@ -314,7 +359,7 @@ export function DiscoverFilterBar({
               <span>{ratingOptions.find((o) => o.id === currentRating)?.label}</span>
               <button
                 type="button"
-                onClick={() => updateFilter("rating", "all")}
+                onClick={() => handleUpdateFilter("rating", "all")}
                 className="hover:text-white p-0.5 rounded cursor-pointer transition-colors"
                 title="Remove rating filter"
               >
@@ -325,7 +370,7 @@ export function DiscoverFilterBar({
 
           <button
             type="button"
-            onClick={resetFilters}
+            onClick={handleResetFilters}
             className="text-[11px] text-[#A8B0BD] hover:text-[#F5F7FA] underline underline-offset-2 ml-1 cursor-pointer transition-colors font-medium"
           >
             Clear all
