@@ -13,7 +13,6 @@ import {
   UploadCloud,
   AlertCircle,
   Film,
-  Sparkles,
 } from "lucide-react";
 import { updateProfile } from "@/actions/profile";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
@@ -287,8 +286,8 @@ export function EditProfileModal({
 
             {/* Quick Movie Presets */}
             <div className="flex items-center gap-1.5 flex-wrap pt-1">
-              <span className="text-[10px] font-semibold text-[#6F7886] flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-[#3B9EFF]" /> Presets:
+              <span className="text-[10px] font-semibold text-[#6F7886]">
+                Presets:
               </span>
               {COVER_PRESETS.map((p) => (
                 <button

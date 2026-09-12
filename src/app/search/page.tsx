@@ -10,7 +10,6 @@ import {
   Users,
   Film,
   Tv,
-  Sparkles,
   ChevronLeft,
   ChevronRight,
   UserCheck,
