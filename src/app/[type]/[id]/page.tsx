@@ -688,8 +688,8 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
           {/* Related Titles */}
           {similarItems.length > 0 && (
             <section className="flex flex-col gap-3 mt-2">
-              <h3 className="font-bold text-sm text-[#A8B0BD] uppercase tracking-wider">
-                Related Resonance
+              <h3 className="font-bold text-sm sm:text-base text-[#F5F7FA]">
+                If you liked {media.title}, you might also like...
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {similarItems.map((item) => (
