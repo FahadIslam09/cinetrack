@@ -99,3 +99,41 @@ export function getRatingRank(val: unknown): number {
   const cat = parseRating(val);
   return cat ? RATING_CONFIG[cat].order : 0;
 }
+
+export function getConsensusRating(
+  ratings: Array<unknown>
+): RatingCategory | null {
+  const counts: Record<RatingCategory, number> = {
+    poor: 0,
+    average: 0,
+    good: 0,
+    masterpiece: 0,
+  };
+  let hasValid = false;
+
+  for (const r of ratings) {
+    const parsed = parseRating(r);
+    if (parsed) {
+      counts[parsed]++;
+      hasValid = true;
+    }
+  }
+
+  if (!hasValid) return null;
+
+  let bestCategory: RatingCategory | null = null;
+  let maxCount = -1;
+  let maxOrder = -1;
+
+  for (const cat of RATING_CATEGORIES) {
+    const count = counts[cat];
+    const order = RATING_CONFIG[cat].order;
+    if (count > maxCount || (count === maxCount && order > maxOrder)) {
+      maxCount = count;
+      maxOrder = order;
+      bestCategory = cat;
+    }
+  }
+
+  return maxCount > 0 ? bestCategory : null;
+}

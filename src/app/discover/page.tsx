@@ -16,7 +16,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { userMediaLogs, mediaItems, profiles } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { parseRating, getRatingRank } from "@/lib/rating";
+import { parseRating, getRatingRank, getConsensusRating } from "@/lib/rating";
 import { demoLibraryItems } from "@/lib/demo-library";
 
 interface DiscoverPageProps {
@@ -136,18 +136,32 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
     allItems = demoLibraryItems;
   }
 
-  // 3. Deduplicate by media.id to showcase distinct titles, retaining highest rating
+  // 3. Collect all user ratings per media item to determine platform consensus rating
+  const ratingsByMediaId = new Map<string, string[]>();
+  for (const item of allItems) {
+    if (item.userRating) {
+      const list = ratingsByMediaId.get(item.media.id) || [];
+      list.push(String(item.userRating));
+      ratingsByMediaId.set(item.media.id, list);
+    }
+  }
+
+  // Deduplicate by media.id to showcase distinct titles
   const mediaMap = new Map<string, LibraryItem>();
   for (const item of allItems) {
     const existing = mediaMap.get(item.media.id);
     if (!existing) {
-      mediaMap.set(item.media.id, item);
-    } else {
-      const currRank = getRatingRank(item.userRating);
-      const prevRank = getRatingRank(existing.userRating);
-      if (currRank > prevRank || (!existing.reviewText && item.reviewText)) {
-        mediaMap.set(item.media.id, item);
-      }
+      mediaMap.set(item.media.id, { ...item });
+    } else if (!existing.reviewText && item.reviewText) {
+      mediaMap.set(item.media.id, { ...item });
+    }
+  }
+
+  // Apply consensus rating across all users for each title on Discover
+  for (const [mediaId, item] of mediaMap.entries()) {
+    const ratings = ratingsByMediaId.get(mediaId);
+    if (ratings && ratings.length > 0) {
+      item.userRating = getConsensusRating(ratings);
     }
   }
   let filteredItems = Array.from(mediaMap.values());

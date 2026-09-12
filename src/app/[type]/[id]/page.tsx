@@ -21,6 +21,7 @@ import { TrailerPlayer, TrailerVideo } from "@/components/media/trailer-player";
 import { db } from "@/lib/db";
 import { mediaItems, profiles, userMediaLogs } from "@/lib/db/schema";
 import { eq, and, ne, isNotNull, desc, count } from "drizzle-orm";
+import { getConsensusRating, RatingCategory } from "@/lib/rating";
 
 interface PageProps {
   params: Promise<{
@@ -349,8 +350,11 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
             : null,
         }));
 
-  // Similar / recommendations (strictly only media added to CineTrack platform)
-  let similarItems: NormalizedMedia[] = [];
+  // Similar / recommendations (strictly only media added to CineTrack platform with consensus ratings)
+  let similarItems: Array<{
+    media: NormalizedMedia;
+    consensusRating: RatingCategory | null;
+  }> = [];
 
   try {
     const platformRows = await db
@@ -364,6 +368,24 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
       );
 
     if (platformRows.length > 0) {
+      // Fetch all ratings across platform for related media items
+      const platformLogs = await db
+        .select({
+          mediaId: userMediaLogs.mediaId,
+          rating: userMediaLogs.rating,
+        })
+        .from(userMediaLogs)
+        .where(isNotNull(userMediaLogs.rating));
+
+      const ratingsMap = new Map<string, string[]>();
+      for (const l of platformLogs) {
+        if (l.rating) {
+          const list = ratingsMap.get(l.mediaId) || [];
+          list.push(l.rating);
+          ratingsMap.set(l.mediaId, list);
+        }
+      }
+
       // External recommendation IDs for relevance boost
       const extSimilarIds = new Set<string>();
       if (type === "anime") {
@@ -399,9 +421,12 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
           }
         }
 
+        const consensusRating = getConsensusRating(ratingsMap.get(cMedia.id) || []);
+
         return {
           score,
-          item: {
+          consensusRating,
+          media: {
             id: cMedia.id,
             source: cMedia.source as "tmdb" | "anilist",
             sourceId: cMedia.sourceId,
@@ -425,7 +450,10 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
       });
 
       scored.sort((a, b) => b.score - a.score);
-      similarItems = scored.slice(0, 4).map((s) => s.item);
+      similarItems = scored.slice(0, 4).map((s) => ({
+        media: s.media,
+        consensusRating: s.consensusRating,
+      }));
     }
   } catch (err) {
     console.error("Related platform media query error:", err);
@@ -773,8 +801,13 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
                 If you liked {media.title}, you might also like...
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {similarItems.map((item) => (
-                  <MediaCard key={item.id} media={item} className="w-full" />
+                {similarItems.map(({ media: itemMedia, consensusRating }) => (
+                  <MediaCard
+                    key={itemMedia.id}
+                    media={itemMedia}
+                    userRating={consensusRating}
+                    className="w-full"
+                  />
                 ))}
               </div>
             </section>
