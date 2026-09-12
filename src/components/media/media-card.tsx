@@ -32,6 +32,7 @@ export interface MediaCardProps {
   tagLabel?: string;
   subMeta?: string;
   className?: string;
+  readOnly?: boolean;
   onUpdate?: () => void;
 }
 
@@ -51,6 +52,7 @@ export function MediaCard({
   tagLabel,
   subMeta,
   className,
+  readOnly = false,
   onUpdate,
 }: MediaCardProps) {
   const router = useRouter();
@@ -496,37 +498,39 @@ export function MediaCard({
             </div>
           )}
 
-          {/* Hover Quick Action Pill Overlay - Desktop only (hidden on mobile/tablet so clicking poster opens movie details) */}
-          <div className="hidden lg:flex absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none items-center justify-center p-3 z-10">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsQuickAddOpen(true);
-              }}
-              className={`pointer-events-auto px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 backdrop-blur-xl text-white text-xs font-semibold shadow-2xl transition-all duration-200 active:scale-95 flex items-center gap-2 cursor-pointer ${
-                localStatus
-                  ? "border border-white/20 hover:border-[#22C55E] hover:shadow-[0_0_16px_rgba(34,197,94,0.35)]"
-                  : "border border-white/20 hover:border-[#3B9EFF] hover:shadow-[0_0_16px_rgba(59,158,255,0.35)]"
-              }`}
-            >
-              {localStatus ? (
-                <>
-                  <Check className="w-3.5 h-3.5 text-[#22C55E]" />
-                  <span>Edit Log</span>
-                </>
-              ) : (
-                <>
-                  <Plus className="w-3.5 h-3.5 text-[#3B9EFF]" />
-                  <span>Add to Library</span>
-                </>
-              )}
-            </button>
-          </div>
+          {/* Hover Quick Action Pill Overlay - Desktop only (hidden if readOnly or on mobile/tablet) */}
+          {!readOnly && (
+            <div className="hidden lg:flex absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none items-center justify-center p-3 z-10">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsQuickAddOpen(true);
+                }}
+                className={`pointer-events-auto px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 backdrop-blur-xl text-white text-xs font-semibold shadow-2xl transition-all duration-200 active:scale-95 flex items-center gap-2 cursor-pointer ${
+                  localStatus
+                    ? "border border-white/20 hover:border-[#22C55E] hover:shadow-[0_0_16px_rgba(34,197,94,0.35)]"
+                    : "border border-white/20 hover:border-[#3B9EFF] hover:shadow-[0_0_16px_rgba(59,158,255,0.35)]"
+                }`}
+              >
+                {localStatus ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-[#22C55E]" />
+                    <span>Edit Log</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-3.5 h-3.5 text-[#3B9EFF]" />
+                    <span>Add to Library</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
 
           {/* Mobile & Tablet Quick Edit Button at Bottom-Left of Poster */}
-          {localStatus && (
+          {!readOnly && localStatus && (
             <button
               type="button"
               onClick={(e) => {
@@ -543,7 +547,7 @@ export function MediaCard({
           )}
 
           {/* Quick Action Button in bottom-right corner of poster */}
-          {isWatchingSeries ? (
+          {!readOnly && (isWatchingSeries ? (
             <button
               type="button"
               onClick={handleAdvanceEpisode}
@@ -580,7 +584,7 @@ export function MediaCard({
             >
               <Plus className="w-3.5 h-3.5 text-[#3B9EFF]" />
             </button>
-          ) : null}
+          ) : null)}
         </div>
 
         {/* Overall Series Progress Bar underneath poster for active Watching items */}

@@ -62,6 +62,7 @@ interface LibraryViewProps {
   };
   initialStatus?: string;
   initialType?: string;
+  isOwner?: boolean;
 }
 
 const GENRES = [
@@ -95,6 +96,7 @@ export function LibraryView({
   stats,
   initialStatus = "all",
   initialType = "all",
+  isOwner = true,
 }: LibraryViewProps) {
   const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [typeFilter, setTypeFilter] = useState(initialType);
@@ -268,7 +270,7 @@ export function LibraryView({
   const handleShareProfile = async () => {
     const profileUrl =
       typeof window !== "undefined"
-        ? `${window.location.origin}/${user?.username ? `u/${user.username}` : "library"}`
+        ? `${window.location.origin}/${user?.username || "library"}`
         : "https://cinetrack.app";
 
     if (navigator.share) {
@@ -392,15 +394,17 @@ export function LibraryView({
             )}
           </button>
 
-          <button
-            type="button"
-            suppressHydrationWarning
-            onClick={() => setIsQuickAddOpen(true)}
-            className="h-10 px-4 rounded-xl bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-md shadow-[#3B9EFF]/20 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add</span>
-          </button>
+          {isOwner && (
+            <button
+              type="button"
+              suppressHydrationWarning
+              onClick={() => setIsQuickAddOpen(true)}
+              className="h-10 px-4 rounded-xl bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-md shadow-[#3B9EFF]/20 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -589,6 +593,7 @@ export function LibraryView({
               reviewText={item.reviewText}
               containsSpoilers={item.containsSpoilers}
               fromUsername={user?.username || undefined}
+              readOnly={!isOwner}
               className="w-full"
             />
           ))}
@@ -614,11 +619,13 @@ export function LibraryView({
       )}
 
       {/* Add to Library Modal */}
-      <QuickAddModal
-        isOpen={isQuickAddOpen}
-        onClose={() => setIsQuickAddOpen(false)}
-        media={null}
-      />
+      {isOwner && (
+        <QuickAddModal
+          isOpen={isQuickAddOpen}
+          onClose={() => setIsQuickAddOpen(false)}
+          media={null}
+        />
+      )}
     </div>
   );
 }

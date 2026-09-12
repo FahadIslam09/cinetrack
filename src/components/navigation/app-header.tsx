@@ -195,7 +195,7 @@ export function AppHeader({ user }: AppHeaderProps) {
             {/* User Profile Avatar / Sign In */}
             {user ? (
               <Link
-                href={user.username ? `/u/${user.username}` : "/library"}
+                href={user.username ? `/${user.username}` : "/library"}
                 className="flex items-center shrink-0 pl-1"
                 title="User Profile"
               >

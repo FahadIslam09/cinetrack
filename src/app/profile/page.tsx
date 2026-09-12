@@ -22,7 +22,7 @@ export default async function ProfileRedirectPage() {
       .limit(1);
 
     if (profile?.username) {
-      redirect(`/u/${profile.username}`);
+      redirect(`/${profile.username}`);
     }
   } catch (err) {
     console.error("Profile lookup error:", err);
