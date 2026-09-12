@@ -93,10 +93,31 @@ export function BackToTop() {
   }, [lenis]);
 
   const scrollToTop = () => {
+    // Gradual, gentle easeInOutCubic: no sudden initial jerk, steady glide, smooth landing
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
     if (lenis) {
-      lenis.scrollTo(0, { duration: 1.2 });
+      lenis.scrollTo(0, {
+        duration: 1.8,
+        easing: easeInOutCubic,
+      });
     } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      const startY = window.scrollY;
+      if (startY === 0) return;
+      const durationMs = 1800;
+      const startTime = performance.now();
+
+      const step = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / durationMs, 1);
+        window.scrollTo(0, startY * (1 - easeInOutCubic(progress)));
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        }
+      };
+
+      requestAnimationFrame(step);
     }
   };
 
