@@ -26,6 +26,7 @@ import {
   ChevronDown,
   Trash2,
   AlertCircle,
+  AlertTriangle,
 } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { upsertMediaLog, deleteMediaLog } from "@/actions/tracking";
@@ -1123,17 +1124,59 @@ export function QuickAddModal({
                   rows={3}
                   className="w-full p-3 rounded-xl bg-[#1D2734] border border-white/[0.08] text-sm text-[#F5F7FA] placeholder-[#6F7886] focus:outline-none focus:border-[#3B9EFF] transition-colors resize-none font-sans"
                 />
-                <label className="flex items-center gap-2 mt-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={containsSpoilers}
-                    onChange={(e) => setContainsSpoilers(e.target.checked)}
-                    className="w-4 h-4 rounded bg-[#1D2734] border-white/20 text-[#3B9EFF] focus:ring-0 cursor-pointer"
-                  />
-                  <span className="text-xs text-[#A8B0BD]">
-                    Review contains spoilers
-                  </span>
-                </label>
+                {/* Premium Spoiler Toggle Switch */}
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={containsSpoilers}
+                  onClick={() => setContainsSpoilers(!containsSpoilers)}
+                  className={`w-full mt-2.5 p-2.5 sm:p-3 rounded-xl border flex items-center justify-between gap-3 transition-all duration-200 cursor-pointer select-none text-left group ${
+                    containsSpoilers
+                      ? "bg-amber-500/[0.08] border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.08)]"
+                      : "bg-[#151C27]/80 hover:bg-[#1A2330] border-white/[0.06] hover:border-white/[0.12]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                        containsSpoilers
+                          ? "bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-sm"
+                          : "bg-white/[0.04] text-[#6F7886] group-hover:text-[#A8B0BD]"
+                      }`}
+                    >
+                      <AlertTriangle className="w-4 h-4 stroke-[2.2]" />
+                    </div>
+                    <div className="min-w-0">
+                      <span
+                        className={`text-xs font-semibold block transition-colors ${
+                          containsSpoilers ? "text-amber-300" : "text-[#F5F7FA]"
+                        }`}
+                      >
+                        Review contains spoilers
+                      </span>
+                      <span className="text-[11px] text-[#6F7886] block truncate">
+                        {containsSpoilers
+                          ? "Spoiler warning will blur text until clicked"
+                          : "Warn community readers about major plot details"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Polished iOS-style Toggle Switch */}
+                  <div
+                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200 ease-in-out p-0.5 ${
+                      containsSpoilers
+                        ? "bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.35)]"
+                        : "bg-white/15"
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                        containsSpoilers ? "translate-x-4" : "translate-x-0"
+                      }`}
+                    />
+                  </div>
+                </button>
               </div>
             </div>
           )}
