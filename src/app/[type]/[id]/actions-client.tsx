@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Check, Edit3, Play, X } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
@@ -16,6 +16,18 @@ interface MediaDetailsActionsProps {
   imdbId?: string | null;
 }
 
+export function WriteReviewButton() {
+  return (
+    <button
+      type="button"
+      onClick={() => window.dispatchEvent(new CustomEvent("open-quick-add"))}
+      className="text-xs text-[#3B9EFF] hover:text-[#5AAFFF] font-semibold uppercase tracking-wider transition cursor-pointer"
+    >
+      Write Review
+    </button>
+  );
+}
+
 export function MediaDetailsActions({
   media,
   initialLog,
@@ -26,6 +38,13 @@ export function MediaDetailsActions({
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
   const [log, setLog] = useState(initialLog);
+
+  // Listen for open-quick-add event from Write Review button
+  useEffect(() => {
+    const handleOpen = () => setIsQuickAddOpen(true);
+    window.addEventListener("open-quick-add", handleOpen);
+    return () => window.removeEventListener("open-quick-add", handleOpen);
+  }, []);
 
   // Lock background scroll when trailer cinema modal is open
   useScrollLock(isTrailerModalOpen);

@@ -15,12 +15,12 @@ import {
 } from "@/lib/media/normalize";
 import { createClient } from "@/lib/supabase/server";
 import { getUserMediaLog } from "@/actions/tracking";
-import { MediaDetailsActions } from "./actions-client";
+import { MediaDetailsActions, WriteReviewButton } from "./actions-client";
 import { DetailsBackButton } from "./back-button";
 import { TrailerPlayer, TrailerVideo } from "@/components/media/trailer-player";
 import { db } from "@/lib/db";
 import { profiles, userMediaLogs } from "@/lib/db/schema";
-import { eq, and, isNotNull, desc } from "drizzle-orm";
+import { eq, and, isNotNull, desc, count } from "drizzle-orm";
 
 interface PageProps {
   params: Promise<{
@@ -231,7 +231,8 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
     }
   }
 
-  // Fetch broader community reviews for lower Member Dispatches section
+  // Fetch broader community reviews for lower Reviews section
+  let totalReviews = 0;
   let communityReviews: Array<{
     id: string;
     author: {
@@ -261,6 +262,18 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
       )
       .orderBy(desc(userMediaLogs.updatedAt))
       .limit(6);
+
+    const [countRow] = await db
+      .select({ value: count() })
+      .from(userMediaLogs)
+      .where(
+        and(
+          eq(userMediaLogs.mediaId, media.id),
+          isNotNull(userMediaLogs.reviewText)
+        )
+      );
+
+    totalReviews = Number(countRow?.value || 0);
 
     communityReviews = rawCommunityLogs
       .filter((r) => r.log.reviewText && r.log.reviewText.trim().length > 0)
@@ -521,10 +534,7 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
           {/* Where to Watch (OTT Providers) */}
           <section className="p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-3.5 bg-[#3B9EFF] rounded-full" />
-                <h3 className="font-bold text-sm text-[#F5F7FA]">Where to Watch</h3>
-              </div>
+              <h3 className="font-bold text-sm text-[#F5F7FA]">Where to Watch</h3>
               <span className="text-[11px] text-[#A8B0BD]">STREAMING AVAILABILITY</span>
             </div>
 
@@ -568,12 +578,9 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
           {/* Official Trailer & Video Clips */}
           {(trailerVideos.length > 0 || imdbId) && (
             <section id="official-trailer" className="flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-3.5 bg-[#3B9EFF] rounded-full" />
-                <h3 className="font-bold text-sm text-[#F5F7FA] uppercase tracking-wider">
-                  Official Trailer
-                </h3>
-              </div>
+              <h3 className="font-bold text-sm text-[#A8B0BD] uppercase tracking-wider">
+                Official Trailer
+              </h3>
               <TrailerPlayer
                 title={media.title}
                 videos={trailerVideos}
@@ -617,14 +624,16 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
             </section>
           )}
 
-          {/* Member Dispatches */}
+          {/* Reviews */}
           <section className="flex flex-col gap-3 mt-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-4 bg-[#3B9EFF] rounded-full" />
-                <h3 className="font-bold text-base text-[#F5F7FA]">Member Dispatches</h3>
+                <h3 className="font-bold text-base text-[#F5F7FA]">Reviews</h3>
+                <span className="text-xs font-semibold text-[#A8B0BD] bg-white/[0.06] border border-white/[0.08] px-2 py-0.5 rounded-full">
+                  {totalReviews}
+                </span>
               </div>
-              <span className="text-xs text-[#3B9EFF] font-semibold">WRITE LOG</span>
+              <WriteReviewButton />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

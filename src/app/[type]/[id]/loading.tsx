@@ -70,10 +70,7 @@ export default function MediaDetailsLoading() {
           {/* Where to Watch Section Skeleton */}
           <section className="p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-3.5 bg-[#3B9EFF]/60 rounded-full" />
-                <div className="w-28 h-4 rounded bg-white/[0.08] skeleton-shimmer" />
-              </div>
+              <div className="w-28 h-4 rounded bg-white/[0.08] skeleton-shimmer" />
               <div className="w-28 h-3 rounded bg-white/[0.04] skeleton-shimmer" />
             </div>
 
@@ -120,10 +117,7 @@ export default function MediaDetailsLoading() {
           {/* Member Dispatches Skeleton */}
           <section className="flex flex-col gap-3 mt-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-4 bg-[#3B9EFF]/60 rounded-full" />
-                <div className="w-36 h-4 rounded bg-white/[0.08] skeleton-shimmer" />
-              </div>
+              <div className="w-36 h-4 rounded bg-white/[0.08] skeleton-shimmer" />
               <div className="w-16 h-3.5 rounded bg-white/[0.06] skeleton-shimmer" />
             </div>
 
@@ -169,10 +163,7 @@ export default function MediaDetailsLoading() {
 
           {/* Similar Recommendations Skeleton */}
           <section className="flex flex-col gap-3 mt-2">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-4 bg-[#3B9EFF]/60 rounded-full" />
-              <div className="w-32 h-4 rounded bg-white/[0.08] skeleton-shimmer" />
-            </div>
+            <div className="w-32 h-4 rounded bg-white/[0.08] skeleton-shimmer" />
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
               {[...Array(4)].map((_, idx) => (
