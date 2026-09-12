@@ -219,10 +219,10 @@ function SearchPageContent() {
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id as FilterTab)}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all outline-none focus:outline-none focus-visible:outline-none select-none border ${
                     isActive
-                      ? "bg-[#3B9EFF] text-white shadow-md shadow-[#3B9EFF]/25 font-semibold"
-                      : "bg-[#151C27] text-[#A8B0BD] hover:text-[#F5F7FA] border border-white/[0.06] hover:bg-[#1A2230]"
+                      ? "bg-[#3B9EFF] text-white border-[#3B9EFF] shadow-md shadow-[#3B9EFF]/25 font-semibold"
+                      : "bg-[#151C27] text-[#A8B0BD] hover:text-[#F5F7FA] border-white/[0.06] hover:border-white/[0.14] hover:bg-[#1A2230]"
                   }`}
                 >
                   <span>{tab.label}</span>
@@ -425,7 +425,7 @@ function SearchPageContent() {
                     <button
                       onClick={() => handlePageChange(pagination.page - 1)}
                       disabled={pagination.page <= 1}
-                      className="p-2.5 rounded-xl bg-[#151C27] border border-white/[0.06] text-[#A8B0BD] hover:text-white hover:bg-[#1A2230] disabled:opacity-40 disabled:pointer-events-none transition-all"
+                      className="p-2.5 rounded-xl bg-[#151C27] border border-white/[0.06] hover:border-white/[0.14] text-[#A8B0BD] hover:text-white hover:bg-[#1A2330] disabled:opacity-40 disabled:pointer-events-none transition-all outline-none focus:outline-none focus-visible:outline-none select-none"
                       aria-label="Previous page"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -451,10 +451,10 @@ function SearchPageContent() {
                             <button
                               key={pageNum}
                               onClick={() => handlePageChange(pageNum)}
-                              className={`w-9 h-9 rounded-xl text-xs font-semibold transition-all ${
+                              className={`w-9 h-9 rounded-xl text-xs font-semibold transition-all outline-none focus:outline-none focus-visible:outline-none select-none border ${
                                 isCurrent
-                                  ? "bg-[#3B9EFF] text-white shadow-md shadow-[#3B9EFF]/25"
-                                  : "bg-[#151C27] text-[#A8B0BD] hover:text-white border border-white/[0.06] hover:bg-[#1A2230]"
+                                  ? "bg-[#3B9EFF] text-white border-[#3B9EFF] shadow-md shadow-[#3B9EFF]/25"
+                                  : "bg-[#151C27] text-[#A8B0BD] hover:text-white border-white/[0.06] hover:border-white/[0.14] hover:bg-[#1A2230]"
                               }`}
                             >
                               {pageNum}
@@ -467,7 +467,7 @@ function SearchPageContent() {
                     <button
                       onClick={() => handlePageChange(pagination.page + 1)}
                       disabled={pagination.page >= pagination.totalPages}
-                      className="p-2.5 rounded-xl bg-[#151C27] border border-white/[0.06] text-[#A8B0BD] hover:text-white hover:bg-[#1A2230] disabled:opacity-40 disabled:pointer-events-none transition-all"
+                      className="p-2.5 rounded-xl bg-[#151C27] border border-white/[0.06] hover:border-white/[0.14] text-[#A8B0BD] hover:text-white hover:bg-[#1A2330] disabled:opacity-40 disabled:pointer-events-none transition-all outline-none focus:outline-none focus-visible:outline-none select-none"
                       aria-label="Next page"
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -515,7 +515,7 @@ function SearchPageContent() {
                     setInputValue(suggestion);
                     updateUrl(suggestion, activeTab, 1);
                   }}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#151C27] text-[#A8B0BD] hover:text-[#3B9EFF] hover:border-[#3B9EFF]/40 border border-white/[0.06] transition-colors"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#151C27] text-[#A8B0BD] hover:text-[#3B9EFF] hover:border-[#3B9EFF]/40 border border-white/[0.06] transition-colors outline-none focus:outline-none focus-visible:outline-none select-none"
                 >
                   {suggestion}
                 </button>

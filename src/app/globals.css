@@ -64,8 +64,16 @@ body {
 button,
 button:focus,
 button:focus-visible,
-button:active {
+button:active,
+select,
+select:focus,
+select:focus-visible,
+[role="button"]:focus,
+[role="button"]:focus-visible,
+[tabindex]:focus,
+[tabindex]:focus-visible {
   outline: none !important;
+  outline-color: transparent !important;
   -webkit-tap-highlight-color: transparent !important;
 }
 

@@ -176,10 +176,10 @@ export function ReviewModal({
                     key={key}
                     type="button"
                     onClick={() => setRating(isSelected ? null : key)}
-                    className={`py-2 px-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    className={`py-2 px-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none ${
                       isSelected
-                        ? `${cfg.activeBg} ${cfg.activeBorder} ${cfg.activeText} shadow-sm ring-1 ring-white/10`
-                        : "bg-[#1A2330] hover:bg-[#202C3D] border-white/[0.06] text-[#A8B0BD]"
+                        ? `${cfg.activeBg} ${cfg.activeBorder} ${cfg.activeText} shadow-sm`
+                        : "bg-[#1A2330] hover:bg-[#202C3D] border-white/[0.06] hover:border-white/[0.14] text-[#A8B0BD]"
                     }`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${cfg.dotColor}`} />

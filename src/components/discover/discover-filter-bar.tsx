@@ -209,10 +209,10 @@ export function DiscoverFilterBar({
                   key={tab.id}
                   type="button"
                   onClick={() => handleUpdateFilter("type", tab.id)}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-150 cursor-pointer select-none active:scale-95 ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-150 cursor-pointer select-none active:scale-95 outline-none focus:outline-none focus-visible:outline-none border ${
                     isActive
-                      ? "bg-gradient-to-r from-[#3B9EFF] to-[#2563EB] text-white font-semibold shadow-md shadow-[#3B9EFF]/25"
-                      : "text-[#8E97A6] hover:text-[#F5F7FA] hover:bg-white/[0.04]"
+                      ? "bg-gradient-to-r from-[#3B9EFF] to-[#2563EB] text-white font-semibold border-transparent shadow-md shadow-[#3B9EFF]/25"
+                      : "text-[#8E97A6] hover:text-[#F5F7FA] hover:bg-white/[0.04] border-transparent"
                   }`}
                 >
                   <span className={isActive ? "text-white" : "text-[#6F7886]"}>
@@ -236,7 +236,7 @@ export function DiscoverFilterBar({
               options={streamingOptions}
               align="left"
               className="w-full lg:w-[165px] xl:w-[185px] shrink-0 min-w-0"
-              buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30] border-white/[0.08]"
+              buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30]"
               menuWidth="w-[210px]"
               ariaLabel="Filter by streaming platform"
               isLoading={isPending}
@@ -249,7 +249,7 @@ export function DiscoverFilterBar({
               options={genreOptions}
               align="left"
               className="w-full lg:w-[150px] xl:w-[170px] shrink-0 min-w-0"
-              buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30] border-white/[0.08]"
+              buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30]"
               menuWidth="w-[190px]"
               ariaLabel="Filter by genre"
               isLoading={isPending}
@@ -262,7 +262,7 @@ export function DiscoverFilterBar({
               options={ratingOptions}
               align="right"
               className="w-full lg:w-[150px] xl:w-[170px] shrink-0 min-w-0"
-              buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30] border-white/[0.08]"
+              buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30]"
               menuWidth="w-[190px]"
               ariaLabel="Filter by rating"
               isLoading={isPending}

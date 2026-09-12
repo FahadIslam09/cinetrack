@@ -130,14 +130,14 @@ export function CustomDropdown({
         onClick={handleToggle}
         aria-label={ariaLabel}
         aria-expanded={isOpen}
-        className={`w-full px-3 rounded-xl text-xs font-medium flex items-center justify-between gap-1.5 transition-all duration-150 cursor-pointer border select-none ${
+        className={`w-full px-3 rounded-xl text-xs font-medium flex items-center justify-between gap-1.5 transition-all duration-150 cursor-pointer border select-none outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 ${
           buttonClassName || "h-9"
         } ${
           isFiltered
             ? "bg-[#3B9EFF]/12 border-[#3B9EFF]/60 text-[#3B9EFF] font-semibold shadow-[0_0_12px_rgba(59,158,255,0.12)]"
             : isOpen
-            ? "bg-[#1A2330] border-[#3B9EFF]/50 text-[#F5F7FA] ring-2 ring-[#3B9EFF]/20"
-            : "bg-[#151C27] hover:bg-[#1A2330] border-white/[0.08] hover:border-white/[0.18] text-[#A8B0BD] hover:text-[#F5F7FA]"
+            ? "bg-[#1A2330] border-[#3B9EFF] text-[#F5F7FA]"
+            : "bg-[#151C27] hover:bg-[#1A2330] border-white/[0.08] hover:border-white/[0.14] text-[#A8B0BD] hover:text-[#F5F7FA]"
         }`}
       >
         <span className="flex items-center gap-1.5 truncate">
@@ -189,7 +189,7 @@ export function CustomDropdown({
                     onChange(opt.id);
                     setIsOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors text-left ${
+                  className={`w-full flex items-center justify-between gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors text-left outline-none focus:outline-none focus-visible:outline-none select-none ${
                     isSelected
                       ? "bg-[#3B9EFF]/15 text-[#3B9EFF] font-semibold"
                       : "text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-white/[0.06]"
