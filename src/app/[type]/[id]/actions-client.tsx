@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Check, Edit3, Play, X } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
@@ -58,9 +59,14 @@ export function MediaDetailsActions({
   trailerVideos = [],
   imdbId,
 }: MediaDetailsActionsProps) {
+  const [mounted, setMounted] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
   const [log, setLog] = useState(initialLog);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Lock background scroll when trailer cinema modal is open
   useScrollLock(isTrailerModalOpen);
@@ -162,43 +168,45 @@ export function MediaDetailsActions({
       </div>
 
       {/* Cinema Mode Trailer Modal */}
-      {isTrailerModalOpen && hasTrailer && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
-          onClick={() => setIsTrailerModalOpen(false)}
-        >
+      {isTrailerModalOpen && hasTrailer && mounted &&
+        createPortal(
           <div
-            className="relative w-full max-w-4xl bg-[#151C27] rounded-2xl overflow-hidden border border-white/10 shadow-2xl p-4 sm:p-5 flex flex-col gap-3"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
+            onClick={() => setIsTrailerModalOpen(false)}
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-              <div className="flex items-center gap-2 min-w-0 pr-2">
-                <Play className="w-4 h-4 text-[#3B9EFF] fill-[#3B9EFF] shrink-0" />
-                <h3 className="text-xs sm:text-sm font-bold text-[#F5F7FA] truncate">
-                  {media.title} — Official Trailer & Clips
-                </h3>
+            <div
+              className="relative w-full max-w-4xl bg-[#151C27] rounded-2xl overflow-hidden border border-white/10 shadow-2xl p-4 sm:p-5 flex flex-col gap-3"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+                <div className="flex items-center gap-2 min-w-0 pr-2">
+                  <Play className="w-4 h-4 text-[#3B9EFF] fill-[#3B9EFF] shrink-0" />
+                  <h3 className="text-xs sm:text-sm font-bold text-[#F5F7FA] truncate">
+                    {media.title} — Official Trailer & Clips
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsTrailerModalOpen(false)}
+                  className="w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-[#A8B0BD] hover:text-white flex items-center justify-center transition cursor-pointer shrink-0"
+                  title="Close Trailer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsTrailerModalOpen(false)}
-                className="w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-[#A8B0BD] hover:text-white flex items-center justify-center transition cursor-pointer shrink-0"
-                title="Close Trailer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
 
-            {/* Responsive Player with fallbacks and clip switcher */}
-            <TrailerPlayer
-              title={media.title}
-              videos={resolvedVideos}
-              imdbId={imdbId}
-              autoPlay
-            />
-          </div>
-        </div>
-      )}
+              {/* Responsive Player with fallbacks and clip switcher */}
+              <TrailerPlayer
+                title={media.title}
+                videos={resolvedVideos}
+                imdbId={imdbId}
+                autoPlay
+              />
+            </div>
+          </div>,
+          document.body
+        )}
 
       <QuickAddModal
         media={media}

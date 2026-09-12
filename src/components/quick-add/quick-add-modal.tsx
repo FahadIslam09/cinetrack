@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useTransition, useMemo } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -106,6 +107,11 @@ export function QuickAddModal({
 }: QuickAddModalProps) {
   const router = useRouter();
   const [, startTransition] = useTransition();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Step state: 1 = Search & Select, 2 = Set Watch Info, 3 = Summary & Add
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -451,7 +457,7 @@ export function QuickAddModal({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   // Handle media selection from Step 1
   const handleSelectMedia = (selected: NormalizedMedia) => {
@@ -568,19 +574,19 @@ export function QuickAddModal({
     );
   };
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="add-to-library-title"
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
+      className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
     >
       <div
-        className="w-full max-w-lg bg-[#151C27] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[88dvh] sm:h-[620px] max-h-[92dvh] sm:max-h-[88vh] animate-in zoom-in-95 duration-200"
+        className="w-full max-w-lg bg-[#151C27] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90dvh] sm:h-[620px] max-h-[92dvh] sm:max-h-[88vh] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header & Step Indicator */}
-        <div className="p-4 sm:p-5 border-b border-white/[0.06] bg-[#1A2330]/40 flex flex-col gap-3">
+        <div className="p-4 sm:p-5 border-b border-white/[0.06] bg-[#1A2330]/40 flex flex-col gap-3 shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {step > 1 && !media && (
@@ -1245,7 +1251,7 @@ export function QuickAddModal({
         </div>
 
         {/* Modal Footer Controls */}
-        <div className="p-4 sm:p-5 border-t border-white/[0.06] bg-[#1A2330]/40 flex items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-t border-white/[0.06] bg-[#1A2330]/90 backdrop-blur-md flex items-center justify-between gap-2 sm:gap-3 shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-5">
           {step === 1 ? (
             <div className="flex items-center justify-between w-full">
               <span className="text-xs text-[#6F7886]">
@@ -1260,12 +1266,12 @@ export function QuickAddModal({
               </button>
             </div>
           ) : step === 2 ? (
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between w-full gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => (media ? onClose() : setStep(1))}
-                  className="h-10 px-4 rounded-xl text-xs font-semibold text-[#A8B0BD] hover:text-white hover:bg-white/[0.04] transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                  className="h-10 px-3 sm:px-4 rounded-xl text-xs font-semibold text-[#A8B0BD] hover:text-white hover:bg-white/[0.04] transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   <span>{media ? "Cancel" : "Back"}</span>
@@ -1275,7 +1281,8 @@ export function QuickAddModal({
                   <button
                     type="button"
                     onClick={() => setIsDeleteConfirmOpen(true)}
-                    className="h-10 px-3 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 transition-all inline-flex items-center gap-1.5 cursor-pointer active:scale-95"
+                    className="h-10 px-2.5 sm:px-3 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 transition-all inline-flex items-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
+                    title="Remove from Library"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Remove from Library</span>
@@ -1287,23 +1294,25 @@ export function QuickAddModal({
               <button
                 type="button"
                 onClick={() => setStep(3)}
-                className="h-10 px-5 rounded-xl text-xs font-semibold bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white transition-all active:scale-95 shadow-md shadow-[#3B9EFF]/20 inline-flex items-center gap-1.5 cursor-pointer"
+                className="h-10 px-4 sm:px-5 rounded-xl text-xs font-semibold bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white transition-all active:scale-95 shadow-md shadow-[#3B9EFF]/20 inline-flex items-center justify-center gap-1.5 cursor-pointer ml-auto shrink-0"
               >
-                <span>Continue to Summary</span>
+                <span className="sm:hidden">Continue</span>
+                <span className="hidden sm:inline">Continue to Summary</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between w-full gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <button
                   type="button"
                   disabled={isSubmitting || saveSuccess || isDeleting}
                   onClick={() => setStep(2)}
-                  className="h-10 px-4 rounded-xl text-xs font-semibold text-[#A8B0BD] hover:text-white hover:bg-white/[0.04] disabled:opacity-40 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                  className="h-10 px-3 sm:px-4 rounded-xl text-xs font-semibold text-[#A8B0BD] hover:text-white hover:bg-white/[0.04] disabled:opacity-40 transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  <span>Back to Edit</span>
+                  <span className="hidden sm:inline">Back to Edit</span>
+                  <span className="sm:hidden">Back</span>
                 </button>
 
                 {initialLog?.status && (
@@ -1311,7 +1320,8 @@ export function QuickAddModal({
                     type="button"
                     disabled={isSubmitting || saveSuccess || isDeleting}
                     onClick={() => setIsDeleteConfirmOpen(true)}
-                    className="h-10 px-3 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 transition-all inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-40 active:scale-95"
+                    className="h-10 px-2.5 sm:px-3 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 transition-all inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-40 active:scale-95 shrink-0"
+                    title="Remove from Library"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Remove from Library</span>
@@ -1324,7 +1334,7 @@ export function QuickAddModal({
                 type="button"
                 disabled={isSubmitting || saveSuccess || isDeleting}
                 onClick={handleSave}
-                className="h-10 px-6 rounded-xl text-xs font-semibold bg-[#3B9EFF] hover:bg-[#5AAFFF] disabled:opacity-50 text-white transition-all active:scale-95 shadow-md shadow-[#3B9EFF]/20 inline-flex items-center gap-2 cursor-pointer"
+                className="h-10 px-5 sm:px-6 rounded-xl text-xs font-semibold bg-[#3B9EFF] hover:bg-[#5AAFFF] disabled:opacity-50 text-white transition-all active:scale-95 shadow-md shadow-[#3B9EFF]/20 inline-flex items-center justify-center gap-2 cursor-pointer ml-auto shrink-0"
               >
                 {isSubmitting ? (
                   <>
@@ -1357,7 +1367,7 @@ export function QuickAddModal({
           aria-modal="true"
           aria-labelledby="delete-confirm-title"
           aria-describedby="delete-confirm-desc"
-          className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
+          className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
           onClick={() => {
             if (!isDeleting) setIsDeleteConfirmOpen(false);
           }}
@@ -1468,6 +1478,7 @@ export function QuickAddModal({
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }

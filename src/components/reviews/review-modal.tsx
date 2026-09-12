@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Star, AlertCircle, Loader2, Trash2, Film } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { RATING_CONFIG, RatingCategory } from "@/lib/rating";
@@ -22,6 +23,12 @@ export function ReviewModal({
   onClose,
   onSuccess,
 }: ReviewModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const isEditing = Boolean(initialLog?.reviewText && initialLog.reviewText.trim().length > 0);
 
   const [rating, setRating] = useState<RatingCategory | null>(
@@ -40,7 +47,7 @@ export function ReviewModal({
 
   useScrollLock(isOpen);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,9 +107,9 @@ export function ReviewModal({
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 overscroll-contain"
+      className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 overscroll-contain"
       onClick={onClose}
     >
       <div
@@ -259,7 +266,7 @@ export function ReviewModal({
           aria-modal="true"
           aria-labelledby="delete-review-confirm-title"
           aria-describedby="delete-review-confirm-desc"
-          className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
+          className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
           onClick={() => {
             if (!isDeleting) setIsDeleteConfirmOpen(false);
           }}
@@ -364,6 +371,7 @@ export function ReviewModal({
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }
