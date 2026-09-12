@@ -122,10 +122,10 @@ export function Footer() {
           <div>© {new Date().getFullYear()} CineTrack Platform. All rights reserved.</div>
           <div className="flex items-center gap-4 sm:gap-6 flex-wrap justify-center">
             <span>API v2.4 Editorial Core</span>
-            <Link href="/discover" className="hover:text-white transition-colors">
+            <Link href="/terms" className="hover:text-white transition-colors">
               Terms of Service
             </Link>
-            <Link href="/discover" className="hover:text-white transition-colors">
+            <Link href="/privacy" className="hover:text-white transition-colors">
               Privacy Policy
             </Link>
           </div>

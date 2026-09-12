@@ -16,6 +16,10 @@ const RESERVED_ROUTES = new Set([
   "series",
   "anime",
   "tv",
+  "about",
+  "contact",
+  "terms",
+  "privacy",
 ]);
 
 export default function proxy(request: NextRequest) {

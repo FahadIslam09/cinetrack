@@ -1,9 +1,21 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Home, Compass, Film, Tv, BookmarkCheck, Plus } from "lucide-react";
+import {
+  Compass,
+  Film,
+  BookmarkCheck,
+  Plus,
+  MoreHorizontal,
+  X,
+  ChevronRight,
+  Info,
+  Mail,
+  FileText,
+  Shield,
+} from "lucide-react";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
 
 function BottomNavContent() {
@@ -11,6 +23,50 @@ function BottomNavContent() {
   const searchParams = useSearchParams();
   const currentType = searchParams.get("type");
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+
+  // Close sheet on route change
+  useEffect(() => {
+    setIsMoreOpen(false);
+  }, [pathname]);
+
+  // Close sheet on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsMoreOpen(false);
+    };
+    if (isMoreOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMoreOpen]);
+
+  const moreLinks = [
+    {
+      label: "About",
+      href: "/about",
+      icon: Info,
+    },
+    {
+      label: "Contact",
+      href: "/contact",
+      icon: Mail,
+    },
+    {
+      label: "Terms and Conditions",
+      href: "/terms",
+      icon: FileText,
+    },
+    {
+      label: "Privacy Policy",
+      href: "/privacy",
+      icon: Shield,
+    },
+  ];
+
+  const isMoreActive =
+    isMoreOpen ||
+    ["/about", "/contact", "/terms", "/privacy"].includes(pathname);
 
   const navItems = [
     {
@@ -39,7 +95,16 @@ function BottomNavContent() {
       isActive:
         pathname === "/library" ||
         pathname.startsWith("/u/") ||
-        (!["/", "/discover", "/search", "/login"].includes(pathname) &&
+        (![
+          "/",
+          "/discover",
+          "/search",
+          "/login",
+          "/about",
+          "/contact",
+          "/terms",
+          "/privacy",
+        ].includes(pathname) &&
           !pathname.startsWith("/movie") &&
           !pathname.startsWith("/series") &&
           !pathname.startsWith("/anime") &&
@@ -49,8 +114,73 @@ function BottomNavContent() {
 
   return (
     <>
+      {/* Backdrop for More Sheet */}
+      {isMoreOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+          onClick={() => setIsMoreOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Slide-up Sheet for More links */}
+      {isMoreOpen && (
+        <div
+          className="md:hidden fixed bottom-16 left-0 right-0 z-50 p-4 pb-6 bg-[#151C27] border-t border-white/10 rounded-t-2xl shadow-[0_-12px_32px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-200 ease-out"
+          role="dialog"
+          aria-label="More navigation links"
+        >
+          {/* Subtle drag indicator handle */}
+          <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-3" />
+
+          <div className="flex items-center justify-between px-1 mb-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#6F7886]">
+              More Links
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsMoreOpen(false)}
+              className="p-1 text-[#6F7886] hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors cursor-pointer"
+              aria-label="Close menu"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="space-y-1">
+            {moreLinks.map((link) => {
+              const Icon = link.icon;
+              const isCurrent = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setIsMoreOpen(false)}
+                  className={`flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer ${
+                    isCurrent
+                      ? "bg-[#3B9EFF]/15 text-[#3B9EFF] font-semibold"
+                      : "text-[#F5F7FA] hover:bg-white/[0.06] active:bg-white/[0.1] font-medium"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      className={`w-4 h-4 ${
+                        isCurrent ? "text-[#3B9EFF]" : "text-[#A8B0BD]"
+                      }`}
+                    />
+                    <span className="text-sm">{link.label}</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#6F7886]" />
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Main Bottom Navigation Bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 pb-safe bg-[#151C27]/95 backdrop-blur-xl border-t border-white/[0.06] shadow-2xl">
-        <div className="h-16 flex items-center justify-around px-2">
+        <div className="h-16 flex items-center justify-around px-1 sm:px-2">
           {navItems.map((item) => {
             if (item.isPrimary) {
               return (
@@ -59,7 +189,7 @@ function BottomNavContent() {
                   type="button"
                   suppressHydrationWarning
                   onClick={() => setIsAddOpen(true)}
-                  className="flex flex-col items-center justify-center min-w-[52px] h-full py-1 gap-0.5 group focus:outline-none cursor-pointer"
+                  className="flex flex-col items-center justify-center min-w-[48px] h-full py-1 gap-0.5 group focus:outline-none cursor-pointer"
                   aria-label="Add to Library"
                 >
                   <div
@@ -83,7 +213,7 @@ function BottomNavContent() {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex flex-col items-center justify-center min-w-[48px] h-full py-1 gap-1 transition-colors ${
+                className={`flex flex-col items-center justify-center min-w-[44px] h-full py-1 gap-1 transition-colors cursor-pointer ${
                   item.isActive
                     ? "text-[#3B9EFF]"
                     : "text-[#A8B0BD] hover:text-[#F5F7FA]"
@@ -101,6 +231,27 @@ function BottomNavContent() {
               </Link>
             );
           })}
+
+          {/* Right Corner: "More" Button */}
+          <button
+            type="button"
+            onClick={() => setIsMoreOpen((prev) => !prev)}
+            className={`flex flex-col items-center justify-center min-w-[44px] h-full py-1 gap-1 transition-colors cursor-pointer ${
+              isMoreActive
+                ? "text-[#3B9EFF]"
+                : "text-[#A8B0BD] hover:text-[#F5F7FA]"
+            }`}
+            aria-expanded={isMoreOpen}
+            aria-label="More navigation links"
+          >
+            <div className="relative">
+              <MoreHorizontal className="w-5 h-5" />
+              {isMoreActive && (
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#3B9EFF]" />
+              )}
+            </div>
+            <span className="text-[11px] font-medium tracking-tight">More</span>
+          </button>
         </div>
       </nav>
 
