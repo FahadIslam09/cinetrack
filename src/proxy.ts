@@ -18,7 +18,7 @@ const RESERVED_ROUTES = new Set([
   "tv",
 ]);
 
-export function proxy(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. Rewrite /@username to /u/[username]
@@ -45,6 +45,8 @@ export function proxy(request: NextRequest) {
 
   return NextResponse.next();
 }
+
+export { proxy };
 
 export const config = {
   matcher: [
