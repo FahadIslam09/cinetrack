@@ -18,7 +18,7 @@ const RESERVED_ROUTES = new Set([
   "tv",
 ]);
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. Rewrite /@username to /u/[username]
