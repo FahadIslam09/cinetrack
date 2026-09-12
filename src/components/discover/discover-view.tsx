@@ -1,8 +1,6 @@
 "use client";
 
-import { useTransition, useState, useEffect } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import Link from "next/link";
+import { useState, useEffect, useMemo } from "react";
 import {
   Compass,
   Crown,
@@ -10,7 +8,7 @@ import {
   Award,
   Flame,
   Clock,
-  Loader2,
+  ChevronDown,
 } from "lucide-react";
 import { DiscoverFilterBar } from "./discover-filter-bar";
 import { MediaCard } from "@/components/media/media-card";
@@ -18,76 +16,158 @@ import { LibraryItem } from "@/components/library/library-view";
 
 interface DiscoverViewProps {
   items: LibraryItem[];
-  currentType?: string;
-  currentProvider?: string;
-  currentGenre?: string;
-  currentRating?: string;
+  initialType?: string;
+  initialProvider?: string;
+  initialGenre?: string;
+  initialRating?: string;
 }
 
 export function DiscoverView({
   items,
-  currentType = "all",
-  currentProvider = "all",
-  currentGenre = "all",
-  currentRating = "all",
+  initialType = "all",
+  initialProvider = "all",
+  initialGenre = "all",
+  initialRating = "all",
 }: DiscoverViewProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
-  const [isFiltering, setIsFiltering] = useState(false);
+  const [selectedType, setSelectedType] = useState(initialType || "all");
+  const [selectedProvider, setSelectedProvider] = useState(initialProvider || "all");
+  const [selectedGenre, setSelectedGenre] = useState(initialGenre || "all");
+  const [selectedRating, setSelectedRating] = useState(initialRating || "all");
+  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
 
-  const isBusy = isFiltering || isPending;
-
-  // Reset immediate filtering state once new server props or searchParams arrive
+  // Sync if initial props change (e.g. browser back/forward or navigation)
   useEffect(() => {
-    setIsFiltering(false);
-  }, [items, searchParams, currentType, currentProvider, currentGenre, currentRating]);
-
-  // Safety timer to prevent stuck loading indicator
-  useEffect(() => {
-    if (!isFiltering) return;
-    const timer = setTimeout(() => setIsFiltering(false), 6000);
-    return () => clearTimeout(timer);
-  }, [isFiltering]);
+    if (initialType) setSelectedType(initialType);
+    if (initialProvider) setSelectedProvider(initialProvider);
+    if (initialGenre) setSelectedGenre(initialGenre);
+    if (initialRating) setSelectedRating(initialRating);
+  }, [initialType, initialProvider, initialGenre, initialRating]);
 
   const updateFilter = (key: string, value: string) => {
-    const currentVal =
-      key === "type"
-        ? currentType
-        : key === "provider"
-        ? currentProvider
-        : key === "genre"
-        ? currentGenre
-        : key === "rating"
-        ? currentRating
-        : null;
+    if (key === "type") setSelectedType(value);
+    if (key === "provider") setSelectedProvider(value);
+    if (key === "genre") setSelectedGenre(value);
+    if (key === "rating") setSelectedRating(value);
+    setVisibleCounts({});
 
-    if (currentVal?.toLowerCase() === value.toLowerCase()) return;
-
-    // Trigger instant loader feedback synchronously in same event tick
-    setIsFiltering(true);
-
-    const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
-
-    if (!value || value === "all" || value === "All") {
-      params.delete(key);
-    } else {
-      params.set(key, value);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (!value || value === "all" || value === "All") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+      const qs = params.toString();
+      window.history.replaceState(
+        null,
+        "",
+        qs ? `${window.location.pathname}?${qs}` : window.location.pathname
+      );
     }
-
-    const qs = params.toString();
-    startTransition(() => {
-      router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    });
   };
 
   const resetFilters = () => {
-    setIsFiltering(true);
-    startTransition(() => {
-      router.push(pathname, { scroll: false });
-    });
+    setSelectedType("all");
+    setSelectedProvider("all");
+    setSelectedGenre("all");
+    setSelectedRating("all");
+    setVisibleCounts({});
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
   };
+
+  const handleSeeMore = (catId: string) => {
+    setVisibleCounts((prev) => ({
+      ...prev,
+      [catId]: (prev[catId] ?? 12) + 12,
+    }));
+  };
+
+  // Instant in-memory client-side filtering (0ms latency, zero network trips)
+  const filteredItems = useMemo(() => {
+    let list = items;
+
+    if (selectedType && selectedType !== "all") {
+      list = list.filter((i) => i.media.mediaType === selectedType);
+    }
+
+    if (selectedGenre && selectedGenre !== "all") {
+      list = list.filter((i) =>
+        i.media.genres?.some((g) => g.toLowerCase().includes(selectedGenre.toLowerCase()))
+      );
+    }
+
+    if (selectedProvider && selectedProvider !== "all") {
+      const pLower = selectedProvider.toLowerCase();
+      list = list.filter((item) => {
+        const sp = item.media.streamingProviders;
+        if (sp) {
+          for (const region of Object.values(sp as Record<string, any>)) {
+            const providers = [
+              ...(region?.flatrate || []),
+              ...(region?.ads || []),
+              ...(region?.buy || []),
+              ...(region?.rent || []),
+            ];
+            if (
+              providers.some(
+                (prov: any) =>
+                  prov.provider_name?.toLowerCase().includes(pLower) ||
+                  (pLower === "prime" && prov.provider_name?.toLowerCase().includes("amazon")) ||
+                  (pLower === "apple" && prov.provider_name?.toLowerCase().includes("apple")) ||
+                  (pLower === "disney" && prov.provider_name?.toLowerCase().includes("disney")) ||
+                  (pLower === "paramount" && prov.provider_name?.toLowerCase().includes("paramount")) ||
+                  (pLower === "peacock" && prov.provider_name?.toLowerCase().includes("peacock")) ||
+                  (pLower === "hulu" && prov.provider_name?.toLowerCase().includes("hulu")) ||
+                  (pLower === "jio" && (prov.provider_name?.toLowerCase().includes("jio") || prov.provider_name?.toLowerCase().includes("hotstar"))) ||
+                  (pLower === "zee5" && prov.provider_name?.toLowerCase().includes("zee")) ||
+                  (pLower === "sonyliv" && prov.provider_name?.toLowerCase().includes("sony")) ||
+                  (pLower === "hoichoi" && prov.provider_name?.toLowerCase().includes("hoichoi")) ||
+                  (pLower === "chorki" && prov.provider_name?.toLowerCase().includes("chorki"))
+              )
+            ) {
+              return true;
+            }
+          }
+        }
+        // Heuristic fallback for demo and community titles
+        const t = item.media.title.toLowerCase();
+        if (pLower === "apple" && t.includes("severance")) return true;
+        if (
+          pLower === "crunchyroll" &&
+          (item.media.mediaType === "anime" ||
+            t.includes("frieren") ||
+            t.includes("jujutsu") ||
+            t.includes("titan") ||
+            t.includes("chainsaw") ||
+            t.includes("demon slayer"))
+        )
+          return true;
+        if (pLower === "netflix" && (t.includes("stranger") || t.includes("squid") || t.includes("queen")))
+          return true;
+        if (pLower === "max" && (t.includes("dune") || t.includes("succession") || t.includes("game of thrones")))
+          return true;
+        if (pLower === "hulu" && (t.includes("bear") || t.includes("shogun") || t.includes("only murders")))
+          return true;
+        if (pLower === "paramount" && (t.includes("yellowstone") || t.includes("top gun") || t.includes("tulsa king")))
+          return true;
+        if (pLower === "peacock" && (t.includes("oppenheimer") || t.includes("poker face") || t.includes("office")))
+          return true;
+        if (pLower === "chorki" && (t.includes("myself allen") || t.includes("networker") || t.includes("redrum") || t.includes("guti") || t.includes("pet kata") || t.includes("unoloukik")))
+          return true;
+        return false;
+      });
+    }
+
+    if (selectedRating && selectedRating !== "all") {
+      list = list.filter(
+        (i) => String(i.userRating || "").toLowerCase() === selectedRating.toLowerCase()
+      );
+    }
+
+    return list;
+  }, [items, selectedType, selectedProvider, selectedGenre, selectedRating]);
 
   // Categorize based on community ratings
   const ratingCategories = [
@@ -99,7 +179,7 @@ export function DiscoverView({
       icon: <Crown className="w-4 h-4 text-[#F5C84B]" />,
       pillClass: "bg-[#F5C84B]/15 text-[#F5C84B] border-[#F5C84B]/30",
       dotClass: "bg-[#F5C84B]",
-      items: items.filter((i) => i.userRating === "masterpiece"),
+      items: filteredItems.filter((i) => i.userRating === "masterpiece"),
     },
     {
       id: "good",
@@ -109,7 +189,7 @@ export function DiscoverView({
       icon: <CheckCircle2 className="w-4 h-4 text-[#3B9EFF]" />,
       pillClass: "bg-[#3B9EFF]/15 text-[#3B9EFF] border-[#3B9EFF]/30",
       dotClass: "bg-[#3B9EFF]",
-      items: items.filter((i) => i.userRating === "good"),
+      items: filteredItems.filter((i) => i.userRating === "good"),
     },
     {
       id: "average",
@@ -119,7 +199,7 @@ export function DiscoverView({
       icon: <Award className="w-4 h-4 text-[#F59E0B]" />,
       pillClass: "bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/30",
       dotClass: "bg-[#F59E0B]",
-      items: items.filter((i) => i.userRating === "average"),
+      items: filteredItems.filter((i) => i.userRating === "average"),
     },
     {
       id: "poor",
@@ -129,13 +209,13 @@ export function DiscoverView({
       icon: <Flame className="w-4 h-4 text-[#F43F5E]" />,
       pillClass: "bg-[#F43F5E]/15 text-[#F43F5E] border-[#F43F5E]/30",
       dotClass: "bg-[#F43F5E]",
-      items: items.filter((i) => i.userRating === "poor"),
+      items: filteredItems.filter((i) => i.userRating === "poor"),
     },
   ];
 
   // If unrated items exist and user hasn't filtered to a specific rating:
-  const unratedItems = items.filter((i) => !i.userRating);
-  if (unratedItems.length > 0 && (!currentRating || currentRating === "all")) {
+  const unratedItems = filteredItems.filter((i) => !i.userRating);
+  if (unratedItems.length > 0 && (!selectedRating || selectedRating === "all")) {
     ratingCategories.push({
       id: "unrated",
       title: "Community Tracked",
@@ -155,58 +235,43 @@ export function DiscoverView({
       {/* Filter Bar */}
       <div className="relative z-30">
         <DiscoverFilterBar
-          currentType={currentType}
-          currentProvider={currentProvider}
-          currentGenre={currentGenre}
-          currentRating={currentRating}
-          totalResults={items.length}
-          isPending={isBusy}
+          currentType={selectedType}
+          currentProvider={selectedProvider}
+          currentGenre={selectedGenre}
+          currentRating={selectedRating}
+          totalResults={filteredItems.length}
           onUpdateFilter={updateFilter}
           onResetFilters={resetFilters}
         />
       </div>
 
-      {/* Results Content Area with Transition Feedback */}
+      {/* Results Content Area */}
       <div className="relative min-h-[350px]">
-        {/* Floating Loading Beacon Indicator */}
-        {isBusy && (
-          <div className="absolute inset-x-0 top-16 sm:top-24 z-30 flex justify-center pointer-events-none animate-in fade-in duration-75">
-            <div className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#121824]/95 backdrop-blur-xl border border-white/[0.12] shadow-2xl shadow-black/80 text-xs font-semibold text-[#F5F7FA]">
-              <div className="relative flex items-center justify-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#3B9EFF] animate-ping absolute opacity-60" />
-                <Loader2 className="w-3.5 h-3.5 text-[#3B9EFF] animate-spin relative" />
-              </div>
-              <span className="tracking-wide">Updating catalog...</span>
+        {activeCategories.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 px-4 text-center rounded-2xl bg-[#151C27]/40 border border-white/[0.04] mt-2">
+            <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#6F7886] mb-3.5">
+              <Compass className="w-7 h-7" />
             </div>
+            <h3 className="text-base font-bold text-[#F5F7FA]">No titles match your filters</h3>
+            <p className="text-xs text-[#A8B0BD] max-w-xs sm:max-w-sm mt-1 leading-relaxed">
+              No user-added titles match the selected format, platform, genre, or rating.
+            </p>
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="mt-5 px-4 py-2 rounded-xl bg-[#3B9EFF] hover:bg-[#2F8EEA] text-white text-xs font-semibold transition-all shadow-md shadow-[#3B9EFF]/20 cursor-pointer"
+            >
+              Reset all filters
+            </button>
           </div>
-        )}
+        ) : (
+          <div className="flex flex-col gap-9 mt-1">
+            {activeCategories.map((cat) => {
+              const visibleCount = visibleCounts[cat.id] ?? 12;
+              const displayedItems = cat.items.slice(0, visibleCount);
+              const hasMore = cat.items.length > visibleCount;
 
-        {/* Content Container (Gracefully dims during transition) */}
-        <div
-          className={`transition-all duration-150 ${
-            isBusy ? "opacity-35 blur-[0.5px] scale-[0.995] pointer-events-none" : "opacity-100"
-          }`}
-        >
-          {activeCategories.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 px-4 text-center rounded-2xl bg-[#151C27]/40 border border-white/[0.04] mt-2">
-              <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#6F7886] mb-3.5">
-                <Compass className="w-7 h-7" />
-              </div>
-              <h3 className="text-base font-bold text-[#F5F7FA]">No titles match your filters</h3>
-              <p className="text-xs text-[#A8B0BD] max-w-xs sm:max-w-sm mt-1 leading-relaxed">
-                No user-added titles match the selected format, platform, genre, or rating.
-              </p>
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="mt-5 px-4 py-2 rounded-xl bg-[#3B9EFF] hover:bg-[#2F8EEA] text-white text-xs font-semibold transition-all shadow-md shadow-[#3B9EFF]/20 cursor-pointer"
-              >
-                Reset all filters
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-9 mt-1">
-              {activeCategories.map((cat) => (
+              return (
                 <section key={cat.id} className="flex flex-col gap-3.5">
                   {/* Rating Category Header */}
                   <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
@@ -236,7 +301,7 @@ export function DiscoverView({
 
                   {/* Media Cards Grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4">
-                    {cat.items.map((item) => (
+                    {displayedItems.map((item) => (
                       <MediaCard
                         key={item.id}
                         media={item.media}
@@ -253,11 +318,28 @@ export function DiscoverView({
                       />
                     ))}
                   </div>
+
+                  {/* See More Button (adds 12 more) */}
+                  {hasMore && (
+                    <div className="flex justify-center pt-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSeeMore(cat.id)}
+                        className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#141B26]/90 hover:bg-[#1A2434] border border-white/[0.08] hover:border-[#3B9EFF]/40 text-xs font-semibold text-[#F5F7FA] hover:text-white transition-all shadow-md hover:shadow-[0_0_16px_rgba(59,158,255,0.15)] cursor-pointer group active:scale-95 select-none"
+                      >
+                        <span>See More</span>
+                        <ChevronDown className="w-3.5 h-3.5 text-[#8E97A6] group-hover:text-[#3B9EFF] group-hover:translate-y-0.5 transition-all" />
+                        <span className="text-[11px] text-[#6F7886] font-normal">
+                          ({cat.items.length - visibleCount} more)
+                        </span>
+                      </button>
+                    </div>
+                  )}
                 </section>
-              ))}
-            </div>
-          )}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -83,7 +83,8 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
       .from(userMediaLogs)
       .innerJoin(mediaItems, eq(userMediaLogs.mediaId, mediaItems.id))
       .leftJoin(profiles, eq(userMediaLogs.userId, profiles.id))
-      .orderBy(desc(userMediaLogs.updatedAt));
+      .orderBy(desc(userMediaLogs.updatedAt))
+      .limit(200);
 
     if (dbLogs && dbLogs.length > 0) {
       allItems = dbLogs.map((l) => ({
@@ -154,86 +155,8 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
       item.userRating = getConsensusRating(ratings);
     }
   }
-  let filteredItems = Array.from(mediaMap.values());
+  const allUniqueItems = Array.from(mediaMap.values());
 
-  // 4. Apply Filters: Media Type, Genre, Streaming Platform, Rating
-  if (type && type !== "all") {
-    filteredItems = filteredItems.filter((i) => i.media.mediaType === type);
-  }
-
-  if (genre && genre !== "all") {
-    filteredItems = filteredItems.filter((i) =>
-      i.media.genres?.some((g) => g.toLowerCase().includes(genre.toLowerCase()))
-    );
-  }
-
-  if (provider && provider !== "all") {
-    const pLower = provider.toLowerCase();
-    filteredItems = filteredItems.filter((item) => {
-      const sp = item.media.streamingProviders;
-      if (sp) {
-        for (const region of Object.values(sp as Record<string, any>)) {
-          const list = [
-            ...(region?.flatrate || []),
-            ...(region?.ads || []),
-            ...(region?.buy || []),
-            ...(region?.rent || []),
-          ];
-          if (
-            list.some(
-              (prov: any) =>
-                prov.provider_name?.toLowerCase().includes(pLower) ||
-                (pLower === "prime" && prov.provider_name?.toLowerCase().includes("amazon")) ||
-                (pLower === "apple" && prov.provider_name?.toLowerCase().includes("apple")) ||
-                (pLower === "disney" && prov.provider_name?.toLowerCase().includes("disney")) ||
-                (pLower === "paramount" && prov.provider_name?.toLowerCase().includes("paramount")) ||
-                (pLower === "peacock" && prov.provider_name?.toLowerCase().includes("peacock")) ||
-                (pLower === "hulu" && prov.provider_name?.toLowerCase().includes("hulu")) ||
-                (pLower === "jio" && (prov.provider_name?.toLowerCase().includes("jio") || prov.provider_name?.toLowerCase().includes("hotstar"))) ||
-                (pLower === "zee5" && prov.provider_name?.toLowerCase().includes("zee")) ||
-                (pLower === "sonyliv" && prov.provider_name?.toLowerCase().includes("sony")) ||
-                (pLower === "hoichoi" && prov.provider_name?.toLowerCase().includes("hoichoi")) ||
-                (pLower === "chorki" && prov.provider_name?.toLowerCase().includes("chorki"))
-            )
-          ) {
-            return true;
-          }
-        }
-      }
-      // Heuristic fallback for demo and community titles
-      const t = item.media.title.toLowerCase();
-      if (pLower === "apple" && t.includes("severance")) return true;
-      if (
-        pLower === "crunchyroll" &&
-        (item.media.mediaType === "anime" ||
-          t.includes("frieren") ||
-          t.includes("jujutsu") ||
-          t.includes("titan") ||
-          t.includes("chainsaw") ||
-          t.includes("demon slayer"))
-      )
-        return true;
-      if (pLower === "netflix" && (t.includes("stranger") || t.includes("squid") || t.includes("queen")))
-        return true;
-      if (pLower === "max" && (t.includes("dune") || t.includes("succession") || t.includes("game of thrones")))
-        return true;
-      if (pLower === "hulu" && (t.includes("bear") || t.includes("shogun") || t.includes("only murders")))
-        return true;
-      if (pLower === "paramount" && (t.includes("yellowstone") || t.includes("top gun") || t.includes("tulsa king")))
-        return true;
-      if (pLower === "peacock" && (t.includes("oppenheimer") || t.includes("poker face") || t.includes("office")))
-        return true;
-      if (pLower === "chorki" && (t.includes("myself allen") || t.includes("networker") || t.includes("redrum") || t.includes("guti") || t.includes("pet kata") || t.includes("unoloukik")))
-        return true;
-      return false;
-    });
-  }
-
-  if (rating && rating !== "all") {
-    filteredItems = filteredItems.filter(
-      (i) => String(i.userRating || "").toLowerCase() === rating.toLowerCase()
-    );
-  }
   return (
     <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] pb-24 md:pb-12">
       <AppHeader user={userProp} />
@@ -250,11 +173,11 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
         </div>
 
         <DiscoverView
-          items={filteredItems}
-          currentType={type}
-          currentProvider={provider}
-          currentGenre={genre}
-          currentRating={rating}
+          items={allUniqueItems}
+          initialType={type}
+          initialProvider={provider}
+          initialGenre={genre}
+          initialRating={rating}
         />
       </main>
 
