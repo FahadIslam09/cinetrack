@@ -536,23 +536,32 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
 
           {/* Where to Watch (OTT Providers) */}
           <section className="p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-sm text-[#F5F7FA]">Where to Watch</h3>
-              <span className="text-[11px] text-[#A8B0BD]">STREAMING AVAILABILITY</span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-sm text-[#F5F7FA]">Where to Watch</h3>
+                {providers.length > 0 && (
+                  <span className="text-[11px] font-semibold text-[#6F7886] bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded-md">
+                    {providers.length}
+                  </span>
+                )}
+              </div>
+              <span className="text-[11px] text-[#A8B0BD] uppercase tracking-wider font-semibold">
+                Streaming Availability
+              </span>
             </div>
 
             {providers.length > 0 ? (
-              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
+              <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1 md:flex-wrap md:overflow-visible">
                 {providers.map((p: any) => (
                   <div
                     key={p.provider_id}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#1D2734] border border-white/[0.06] shrink-0"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#1D2734] hover:bg-[#222E3D] border border-white/[0.06] hover:border-white/[0.12] transition-colors shrink-0 select-none"
                   >
                     {p.logo_path && (
                       <img
                         src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
                         alt={p.provider_name}
-                        className="w-6 h-6 rounded object-cover"
+                        className="w-6 h-6 rounded-md object-cover ring-1 ring-white/10 shrink-0"
                       />
                     )}
                     <span className="text-xs font-medium text-[#F5F7FA]">
