@@ -633,7 +633,7 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
                   {totalReviews}
                 </span>
               </div>
-              <WriteReviewButton />
+              <WriteReviewButton media={media} initialLog={userLog} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

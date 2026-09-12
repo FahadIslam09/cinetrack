@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus, Check, Edit3, Play, X } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
+import { ReviewModal } from "@/components/reviews/review-modal";
 import { getRatingConfig } from "@/lib/rating";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { TrailerPlayer, TrailerVideo } from "@/components/media/trailer-player";
@@ -16,15 +17,37 @@ interface MediaDetailsActionsProps {
   imdbId?: string | null;
 }
 
-export function WriteReviewButton() {
+interface WriteReviewButtonProps {
+  media: NormalizedMedia;
+  initialLog?: any;
+}
+
+export function WriteReviewButton({ media, initialLog }: WriteReviewButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const hasReview = Boolean(initialLog?.reviewText && initialLog.reviewText.trim().length > 0);
+
   return (
-    <button
-      type="button"
-      onClick={() => window.dispatchEvent(new CustomEvent("open-quick-add"))}
-      className="text-xs text-[#3B9EFF] hover:text-[#5AAFFF] font-semibold uppercase tracking-wider transition cursor-pointer"
-    >
-      Write Review
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="text-xs text-[#3B9EFF] hover:text-[#5AAFFF] font-semibold uppercase tracking-wider transition cursor-pointer"
+      >
+        {hasReview ? "Edit Review" : "Write Review"}
+      </button>
+
+      {isOpen && (
+        <ReviewModal
+          media={media}
+          initialLog={initialLog}
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          onSuccess={() => {
+            window.location.reload();
+          }}
+        />
+      )}
+    </>
   );
 }
 
@@ -38,13 +61,6 @@ export function MediaDetailsActions({
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
   const [log, setLog] = useState(initialLog);
-
-  // Listen for open-quick-add event from Write Review button
-  useEffect(() => {
-    const handleOpen = () => setIsQuickAddOpen(true);
-    window.addEventListener("open-quick-add", handleOpen);
-    return () => window.removeEventListener("open-quick-add", handleOpen);
-  }, []);
 
   // Lock background scroll when trailer cinema modal is open
   useScrollLock(isTrailerModalOpen);
