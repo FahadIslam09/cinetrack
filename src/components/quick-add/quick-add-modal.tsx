@@ -25,6 +25,7 @@ import {
   ArrowLeft,
   ChevronDown,
   Trash2,
+  AlertCircle,
 } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { upsertMediaLog, deleteMediaLog } from "@/actions/tracking";
@@ -149,6 +150,7 @@ export function QuickAddModal({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [ratingError, setRatingError] = useState<string | null>(null);
 
   // Delete confirmation state
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
@@ -178,6 +180,7 @@ export function QuickAddModal({
   useEffect(() => {
     if (isOpen) {
       setErrorMessage(null);
+      setRatingError(null);
       setSaveSuccess(false);
       setIsDeleteConfirmOpen(false);
       setIsDeleting(false);
@@ -187,11 +190,11 @@ export function QuickAddModal({
         // Pre-selected media (e.g. from card "+ Add") -> start directly at Step 2
         setSelectedMedia(media);
         setStep(2);
-        setStatus(
+        const resolvedStatus =
           (initialLog?.status as WatchStatus) ||
-            (media.mediaType === "movie" ? "completed" : "watching")
-        );
-        setRating(parseRating(initialLog?.rating));
+          (media.mediaType === "movie" ? "completed" : "watching");
+        setStatus(resolvedStatus);
+        setRating(resolvedStatus === "plan_to_watch" ? null : parseRating(initialLog?.rating));
         setEpisodes(initialLog?.episodesWatched || 0);
         setSelectedSeason(initialLog?.currentSeason || 1);
         setSelectedEpisode(initialLog?.currentEpisode || 1);
@@ -311,6 +314,10 @@ export function QuickAddModal({
   // Handle status changes with automatic completion logic
   const handleStatusChange = (newStatus: WatchStatus) => {
     setStatus(newStatus);
+    setRatingError(null);
+    if (newStatus === "plan_to_watch") {
+      setRating(null);
+    }
     if (newStatus === "completed" && selectedMedia?.mediaType !== "movie" && seasonsData.length > 0) {
       const lastSeason = seasonsData[seasonsData.length - 1];
       setSelectedSeason(lastSeason.seasonNumber);
@@ -467,6 +474,7 @@ export function QuickAddModal({
     setSelectedEpisode(1);
     setEpisodes(0);
     setRating(null);
+    setRatingError(null);
     setReview("");
     setContainsSpoilers(false);
     setErrorMessage(null);
@@ -476,6 +484,13 @@ export function QuickAddModal({
   // Submit to library in Step 3
   const handleSave = async () => {
     if (!selectedMedia) return;
+
+    if (status !== "plan_to_watch" && !rating) {
+      setErrorMessage("Please select a rating before saving.");
+      setRatingError("Please select a rating to continue.");
+      setStep(2);
+      return;
+    }
 
     setIsSubmitting(true);
     setErrorMessage(null);
@@ -1018,52 +1033,82 @@ export function QuickAddModal({
               {/* Personal Rating Category */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#A8B0BD]">
-                    Personal Rating
-                  </label>
+                  <div className="flex items-center gap-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-[#A8B0BD]">
+                      Personal Rating
+                    </label>
+                    {status !== "plan_to_watch" && (
+                      <span className="text-rose-400 text-xs font-bold" title="Required">*</span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold">
-                      {rating ? (
-                        <span className={RATING_CONFIG[rating].textColor}>
-                          {RATING_CONFIG[rating].label}
+                    {status === "plan_to_watch" ? (
+                      <span className="text-[11px] font-medium text-[#6F7886] italic">
+                        Not available for Want to Watch
+                      </span>
+                    ) : (
+                      <>
+                        <span className="text-xs font-semibold">
+                          {rating ? (
+                            <span className={RATING_CONFIG[rating].textColor}>
+                              {RATING_CONFIG[rating].label}
+                            </span>
+                          ) : (
+                            <span className="text-amber-400/90 text-[11px] font-semibold">
+                              Required
+                            </span>
+                          )}
                         </span>
-                      ) : (
-                        <span className="text-[#6F7886]">Unrated</span>
-                      )}
-                    </span>
-                    {rating && (
-                      <button
-                        type="button"
-                        onClick={() => setRating(null)}
-                        className="text-[11px] text-[#6F7886] hover:text-[#F5F7FA] underline transition-colors cursor-pointer"
-                      >
-                        Clear
-                      </button>
+                      </>
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#1D2734] p-1.5 rounded-xl border border-white/[0.06]">
-                  {(["poor", "average", "good", "masterpiece"] as const).map((catId) => {
-                    const isSelected = rating === catId;
-                    const def = RATING_CONFIG[catId];
-                    return (
-                      <button
-                        key={catId}
-                        type="button"
-                        onClick={() => setRating(isSelected ? null : catId)}
-                        className={`h-10 px-2 rounded-lg text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-1.5 min-w-0 active:scale-95 cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none ${
-                          isSelected
-                            ? `${def.activeBg} ${def.activeBorder} ${def.activeText} shadow-sm`
-                            : "bg-[#151C27] border-white/[0.06] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] hover:border-white/[0.14]"
-                        }`}
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full ${def.dotColor} shrink-0`} />
-                        <span>{def.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                {status === "plan_to_watch" ? (
+                  <div className="p-3.5 rounded-xl bg-[#1D2734]/50 border border-white/[0.04] text-center text-xs text-[#6F7886] select-none flex items-center justify-center gap-2">
+                    <Bookmark className="w-4 h-4 text-[#A855F7]/60 shrink-0" />
+                    <span>Rating disabled for &ldquo;Want to Watch&rdquo; titles.</span>
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      className={`grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#1D2734] p-1.5 rounded-xl border transition-all ${
+                        ratingError
+                          ? "border-rose-500/60 ring-1 ring-rose-500/30"
+                          : "border-white/[0.06]"
+                      }`}
+                    >
+                      {(["poor", "average", "good", "masterpiece"] as const).map((catId) => {
+                        const isSelected = rating === catId;
+                        const def = RATING_CONFIG[catId];
+                        return (
+                          <button
+                            key={catId}
+                            type="button"
+                            onClick={() => {
+                              setRating(catId);
+                              setRatingError(null);
+                            }}
+                            className={`h-10 px-2 rounded-lg text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-1.5 min-w-0 active:scale-95 cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none ${
+                              isSelected
+                                ? `${def.activeBg} ${def.activeBorder} ${def.activeText} shadow-sm`
+                                : "bg-[#151C27] border-white/[0.06] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] hover:border-white/[0.14]"
+                            }`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${def.dotColor} shrink-0`} />
+                            <span>{def.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {ratingError && (
+                      <p className="text-[11px] font-medium text-rose-400 mt-1.5 animate-in fade-in flex items-center gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{ratingError}</span>
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
 
               {/* Review Textarea (Optional) */}
@@ -1182,14 +1227,18 @@ export function QuickAddModal({
                         Personal Rating
                       </span>
                       <div className="mt-1">
-                        {rating ? (
+                        {status === "plan_to_watch" ? (
+                          <span className="text-xs font-medium text-[#6F7886] italic">
+                            Unrated (Want to Watch)
+                          </span>
+                        ) : rating ? (
                           <span className={`text-xs font-semibold inline-flex items-center gap-1.5 ${RATING_CONFIG[rating].textColor}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${RATING_CONFIG[rating].dotColor}`} />
                             <span>{RATING_CONFIG[rating].label}</span>
                           </span>
                         ) : (
-                          <span className="text-xs font-medium text-[#6F7886]">
-                            No rating provided
+                          <span className="text-xs font-medium text-rose-400">
+                            Rating required
                           </span>
                         )}
                       </div>
@@ -1293,7 +1342,14 @@ export function QuickAddModal({
 
               <button
                 type="button"
-                onClick={() => setStep(3)}
+                onClick={() => {
+                  if (status !== "plan_to_watch" && !rating) {
+                    setRatingError("Please select a rating to continue.");
+                    return;
+                  }
+                  setRatingError(null);
+                  setStep(3);
+                }}
                 className="h-10 px-4 sm:px-5 rounded-xl text-xs font-semibold bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white transition-all active:scale-95 shadow-md shadow-[#3B9EFF]/20 inline-flex items-center justify-center gap-1.5 cursor-pointer ml-auto shrink-0"
               >
                 <span className="sm:hidden">Continue</span>
