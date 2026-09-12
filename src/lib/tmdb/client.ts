@@ -90,13 +90,13 @@ export const tmdb = {
 
   getMovieDetails: async (id: number | string) => {
     return fetchTmdb<any>(`/movie/${id}`, {
-      append_to_response: "credits,watch/providers,similar",
+      append_to_response: "videos,credits,watch/providers,similar",
     });
   },
 
   getTVDetails: async (id: number | string) => {
     return fetchTmdb<any>(`/tv/${id}`, {
-      append_to_response: "credits,watch/providers,similar",
+      append_to_response: "videos,credits,watch/providers,similar",
     });
   },
 

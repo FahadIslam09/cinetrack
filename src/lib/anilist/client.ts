@@ -141,6 +141,10 @@ query ($id: Int) {
     averageScore
     description(asHtml: false)
     status
+    trailer {
+      id
+      site
+    }
     characters(sort: ROLE, perPage: 8) {
       edges {
         node {

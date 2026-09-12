@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Check, Edit3 } from "lucide-react";
+import { Plus, Check, Edit3, Play, X } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
 import { getRatingConfig } from "@/lib/rating";
@@ -9,13 +9,16 @@ import { getRatingConfig } from "@/lib/rating";
 interface MediaDetailsActionsProps {
   media: NormalizedMedia;
   initialLog?: any;
+  trailerKey?: string | null;
 }
 
 export function MediaDetailsActions({
   media,
   initialLog,
+  trailerKey,
 }: MediaDetailsActionsProps) {
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
   const [log, setLog] = useState(initialLog);
 
   const ratingConfig = getRatingConfig(log?.rating);
@@ -56,7 +59,8 @@ export function MediaDetailsActions({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 max-w-md w-full sm:w-auto">
+        <div className="flex items-center gap-2 max-w-lg w-full sm:w-auto flex-wrap sm:flex-nowrap">
+          {/* Add / Status Button */}
           <button
             type="button"
             onClick={() => setIsQuickAddOpen(true)}
@@ -75,20 +79,76 @@ export function MediaDetailsActions({
             )}
           </button>
 
+          {/* Watch Trailer Button (Hero) */}
+          {trailerKey && (
+            <button
+              type="button"
+              onClick={() => setIsTrailerModalOpen(true)}
+              className="h-10 px-3.5 rounded-lg bg-[#1A2330] hover:bg-[#253244] text-[#F5F7FA] border border-white/[0.1] hover:border-white/[0.2] text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer group shrink-0"
+              title="Watch Official Trailer"
+            >
+              <Play className="w-3.5 h-3.5 text-[#3B9EFF] fill-[#3B9EFF] group-hover:scale-110 transition-transform" />
+              <span>Trailer</span>
+            </button>
+          )}
+
+          {/* Rate Button */}
           <button
             type="button"
             onClick={() => setIsQuickAddOpen(true)}
-            className={`h-10 px-3.5 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 border active:scale-95 transition-all cursor-pointer ${
+            className={`h-10 px-3.5 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 border active:scale-95 transition-all cursor-pointer shrink-0 ${
               ratingConfig
                 ? `${ratingConfig.bgColor} ${ratingConfig.borderColor} ${ratingConfig.textColor} hover:brightness-110`
                 : "bg-[#1A2330] text-[#F5F7FA] border-white/[0.08] hover:bg-[#1D2734]"
             }`}
           >
             <Edit3 className="w-3.5 h-3.5" />
-            <span>{ratingConfig ? ratingConfig.label : "Rate this title"}</span>
+            <span>{ratingConfig ? ratingConfig.label : "Rate"}</span>
           </button>
         </div>
       </div>
+
+      {/* Cinema Mode Trailer Modal */}
+      {isTrailerModalOpen && trailerKey && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setIsTrailerModalOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl bg-[#151C27] rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-[#121824]">
+              <div className="flex items-center gap-2 min-w-0 pr-2">
+                <Play className="w-4 h-4 text-[#3B9EFF] fill-[#3B9EFF] shrink-0" />
+                <h3 className="text-xs sm:text-sm font-bold text-[#F5F7FA] truncate">
+                  {media.title} — Official Trailer
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsTrailerModalOpen(false)}
+                className="w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-[#A8B0BD] hover:text-white flex items-center justify-center transition cursor-pointer shrink-0"
+                title="Close Trailer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* 16:9 YouTube Player */}
+            <div className="relative w-full aspect-video bg-black">
+              <iframe
+                src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0`}
+                title={`${media.title} Official Trailer`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full border-0"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <QuickAddModal
         media={media}

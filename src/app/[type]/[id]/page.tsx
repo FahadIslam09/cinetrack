@@ -63,6 +63,33 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
 
   if (!media) notFound();
 
+  // Extract YouTube trailer key
+  let trailerKey: string | null = null;
+  if (type === "movie" || type === "series" || type === "tv") {
+    const videos = rawDetails?.videos?.results || [];
+    const officialTrailer = videos.find(
+      (v: any) =>
+        v.site === "YouTube" &&
+        v.type === "Trailer" &&
+        v.official === true &&
+        v.key
+    );
+    const anyTrailer = videos.find(
+      (v: any) => v.site === "YouTube" && v.type === "Trailer" && v.key
+    );
+    const anyTeaser = videos.find(
+      (v: any) =>
+        v.site === "YouTube" &&
+        (v.type === "Teaser" || v.type === "Clip") &&
+        v.key
+    );
+    trailerKey = officialTrailer?.key || anyTrailer?.key || anyTeaser?.key || null;
+  } else if (type === "anime") {
+    if (rawDetails?.trailer?.site === "youtube" && rawDetails?.trailer?.id) {
+      trailerKey = rawDetails.trailer.id;
+    }
+  }
+
   // Fetch user tracking log for this title if authenticated
   const userLog = await getUserMediaLog(media.id);
 
@@ -368,8 +395,8 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
               </div>
             </div>
 
-            {/* Client Interactive Action Buttons (Add to Library / Rate) */}
-            <MediaDetailsActions media={media} initialLog={userLog} />
+            {/* Client Interactive Action Buttons (Add to Library / Rate / Trailer) */}
+            <MediaDetailsActions media={media} initialLog={userLog} trailerKey={trailerKey} />
           </div>
         </div>
 
@@ -486,6 +513,27 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
               {media.synopsis || "No description provided."}
             </p>
           </section>
+
+          {/* Official Trailer */}
+          {trailerKey && (
+            <section id="official-trailer" className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-3.5 bg-[#3B9EFF] rounded-full" />
+                <h3 className="font-bold text-sm text-[#F5F7FA] uppercase tracking-wider">
+                  Official Trailer
+                </h3>
+              </div>
+              <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/[0.08] bg-black shadow-2xl">
+                <iframe
+                  src={`https://www.youtube.com/embed/${trailerKey}?rel=0`}
+                  title={`${media.title} Official Trailer`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="w-full h-full border-0"
+                />
+              </div>
+            </section>
+          )}
 
           {/* Cast */}
           {castList.length > 0 && (
