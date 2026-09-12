@@ -595,10 +595,10 @@ export function QuickAddModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="add-to-library-title"
-      className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
+      className="fixed inset-0 z-[80] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
     >
       <div
-        className="w-full max-w-lg bg-[#151C27] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90dvh] sm:h-[620px] max-h-[92dvh] sm:max-h-[88vh] animate-in zoom-in-95 duration-200"
+        className="w-full max-w-lg bg-[#151C27] border border-white/[0.08] rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90dvh] md:h-[620px] max-h-[92dvh] md:max-h-[88vh] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header & Step Indicator */}
@@ -1377,8 +1377,8 @@ export function QuickAddModal({
                     title="Remove from Library"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Remove from Library</span>
-                    <span className="sm:hidden">Remove</span>
+                    <span className="hidden md:inline">Remove from Library</span>
+                    <span className="md:hidden">Remove</span>
                   </button>
                 )}
               </div>
@@ -1395,8 +1395,8 @@ export function QuickAddModal({
                 }}
                 className="h-10 px-4 sm:px-5 rounded-xl text-xs font-semibold bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white transition-all active:scale-95 shadow-md shadow-[#3B9EFF]/20 inline-flex items-center justify-center gap-1.5 cursor-pointer ml-auto shrink-0"
               >
-                <span className="sm:hidden">Continue</span>
-                <span className="hidden sm:inline">Continue to Summary</span>
+                <span className="md:hidden">Continue</span>
+                <span className="hidden md:inline">Continue to Summary</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -1410,8 +1410,8 @@ export function QuickAddModal({
                   className="h-10 px-3 sm:px-4 rounded-xl text-xs font-semibold text-[#A8B0BD] hover:text-white hover:bg-white/[0.04] disabled:opacity-40 transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  <span className="hidden sm:inline">Back to Edit</span>
-                  <span className="sm:hidden">Back</span>
+                  <span className="hidden md:inline">Back to Edit</span>
+                  <span className="md:hidden">Back</span>
                 </button>
 
                 {initialLog?.status && (
@@ -1423,8 +1423,8 @@ export function QuickAddModal({
                     title="Remove from Library"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Remove from Library</span>
-                    <span className="sm:hidden">Remove</span>
+                    <span className="hidden md:inline">Remove from Library</span>
+                    <span className="md:hidden">Remove</span>
                   </button>
                 )}
               </div>

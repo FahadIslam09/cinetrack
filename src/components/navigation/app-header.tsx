@@ -94,12 +94,12 @@ export function AppHeader({ user }: AppHeaderProps) {
               onCloseMobile={() => setIsMobileSearchOpen(false)}
             />
 
-            {/* Quick Add Button - Hidden on mobile */}
+            {/* Quick Add Button - Hidden on mobile and iPad Mini */}
             <button
               type="button"
               suppressHydrationWarning
               onClick={() => setIsQuickAddOpen(true)}
-              className="hidden sm:inline-flex h-9 px-3 sm:px-3.5 rounded-lg bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs sm:text-[13px] items-center gap-1.5 transition-colors shadow-sm shrink-0 cursor-pointer"
+              className="hidden md:inline-flex h-9 px-3 sm:px-3.5 rounded-lg bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs sm:text-[13px] items-center gap-1.5 transition-colors shadow-sm shrink-0 cursor-pointer"
               title="Add to Library"
             >
               <Plus className="w-4 h-4" />
