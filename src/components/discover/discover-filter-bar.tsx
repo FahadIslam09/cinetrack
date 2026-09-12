@@ -239,6 +239,7 @@ export function DiscoverFilterBar({
               buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30] border-white/[0.08]"
               menuWidth="w-[210px]"
               ariaLabel="Filter by streaming platform"
+              isLoading={isPending}
             />
 
             {/* Genre */}
@@ -251,6 +252,7 @@ export function DiscoverFilterBar({
               buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30] border-white/[0.08]"
               menuWidth="w-[190px]"
               ariaLabel="Filter by genre"
+              isLoading={isPending}
             />
 
             {/* Rating */}
@@ -263,6 +265,7 @@ export function DiscoverFilterBar({
               buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30] border-white/[0.08]"
               menuWidth="w-[190px]"
               ariaLabel="Filter by rating"
+              isLoading={isPending}
             />
           </div>
         </div>

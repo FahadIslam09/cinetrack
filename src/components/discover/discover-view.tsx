@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Compass,
   Crown,
@@ -9,6 +9,7 @@ import {
   Flame,
   Clock,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
 import { DiscoverFilterBar } from "./discover-filter-bar";
 import { MediaCard } from "@/components/media/media-card";
@@ -34,6 +35,9 @@ export function DiscoverView({
   const [selectedGenre, setSelectedGenre] = useState(initialGenre || "all");
   const [selectedRating, setSelectedRating] = useState(initialRating || "all");
   const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
+  const [isFiltering, setIsFiltering] = useState(false);
+  const [loadingSectionId, setLoadingSectionId] = useState<string | null>(null);
+  const filterTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sync if initial props change (e.g. browser back/forward or navigation)
   useEffect(() => {
@@ -43,7 +47,30 @@ export function DiscoverView({
     if (initialRating) setSelectedRating(initialRating);
   }, [initialType, initialProvider, initialGenre, initialRating]);
 
+  useEffect(() => {
+    return () => {
+      if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
+    };
+  }, []);
+
   const updateFilter = (key: string, value: string) => {
+    const currentVal =
+      key === "type"
+        ? selectedType
+        : key === "provider"
+        ? selectedProvider
+        : key === "genre"
+        ? selectedGenre
+        : key === "rating"
+        ? selectedRating
+        : null;
+
+    if (currentVal?.toLowerCase() === value.toLowerCase()) return;
+
+    // Trigger loader IMMEDIATELY (0ms, synchronous in same event frame)
+    setIsFiltering(true);
+    if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
+
     if (key === "type") setSelectedType(value);
     if (key === "provider") setSelectedProvider(value);
     if (key === "genre") setSelectedGenre(value);
@@ -64,9 +91,17 @@ export function DiscoverView({
         qs ? `${window.location.pathname}?${qs}` : window.location.pathname
       );
     }
+
+    // Keep active for 280ms so the user sees the polished transition
+    filterTimerRef.current = setTimeout(() => {
+      setIsFiltering(false);
+    }, 280);
   };
 
   const resetFilters = () => {
+    setIsFiltering(true);
+    if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
+
     setSelectedType("all");
     setSelectedProvider("all");
     setSelectedGenre("all");
@@ -75,13 +110,21 @@ export function DiscoverView({
     if (typeof window !== "undefined") {
       window.history.replaceState(null, "", window.location.pathname);
     }
+
+    filterTimerRef.current = setTimeout(() => {
+      setIsFiltering(false);
+    }, 280);
   };
 
   const handleSeeMore = (catId: string) => {
-    setVisibleCounts((prev) => ({
-      ...prev,
-      [catId]: (prev[catId] ?? 12) + 12,
-    }));
+    setLoadingSectionId(catId);
+    setTimeout(() => {
+      setVisibleCounts((prev) => ({
+        ...prev,
+        [catId]: (prev[catId] ?? 12) + 12,
+      }));
+      setLoadingSectionId(null);
+    }, 280);
   };
 
   // Instant in-memory client-side filtering (0ms latency, zero network trips)
@@ -240,6 +283,7 @@ export function DiscoverView({
           currentGenre={selectedGenre}
           currentRating={selectedRating}
           totalResults={filteredItems.length}
+          isPending={isFiltering}
           onUpdateFilter={updateFilter}
           onResetFilters={resetFilters}
         />
@@ -247,99 +291,129 @@ export function DiscoverView({
 
       {/* Results Content Area */}
       <div className="relative min-h-[350px]">
-        {activeCategories.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-4 text-center rounded-2xl bg-[#151C27]/40 border border-white/[0.04] mt-2">
-            <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#6F7886] mb-3.5">
-              <Compass className="w-7 h-7" />
+        {/* Floating Loading Beacon Indicator */}
+        {isFiltering && (
+          <div className="absolute inset-x-0 top-12 sm:top-20 z-40 flex justify-center pointer-events-none animate-in fade-in duration-75">
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#121824]/95 backdrop-blur-xl border border-white/[0.12] shadow-2xl shadow-black/80 text-xs font-semibold text-[#F5F7FA]">
+              <div className="relative flex items-center justify-center">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#3B9EFF] animate-ping absolute opacity-60" />
+                <Loader2 className="w-3.5 h-3.5 text-[#3B9EFF] animate-spin relative" />
+              </div>
+              <span className="tracking-wide">Updating catalog...</span>
             </div>
-            <h3 className="text-base font-bold text-[#F5F7FA]">No titles match your filters</h3>
-            <p className="text-xs text-[#A8B0BD] max-w-xs sm:max-w-sm mt-1 leading-relaxed">
-              No user-added titles match the selected format, platform, genre, or rating.
-            </p>
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="mt-5 px-4 py-2 rounded-xl bg-[#3B9EFF] hover:bg-[#2F8EEA] text-white text-xs font-semibold transition-all shadow-md shadow-[#3B9EFF]/20 cursor-pointer"
-            >
-              Reset all filters
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-9 mt-1">
-            {activeCategories.map((cat) => {
-              const visibleCount = visibleCounts[cat.id] ?? 12;
-              const displayedItems = cat.items.slice(0, visibleCount);
-              const hasMore = cat.items.length > visibleCount;
-
-              return (
-                <section key={cat.id} className="flex flex-col gap-3.5">
-                  {/* Rating Category Header */}
-                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${cat.pillClass}`}
-                      >
-                        {cat.icon}
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <h2 className="text-base sm:text-lg font-bold text-[#F5F7FA] tracking-tight">
-                            {cat.title}
-                          </h2>
-                          <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${cat.pillClass}`}
-                          >
-                            {cat.items.length}
-                          </span>
-                        </div>
-                        <span className="text-[11px] sm:text-xs text-[#A8B0BD]">
-                          {cat.description}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Media Cards Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4">
-                    {displayedItems.map((item) => (
-                      <MediaCard
-                        key={item.id}
-                        media={item.media}
-                        status={item.status}
-                        userRating={item.userRating || undefined}
-                        userEpisodes={item.userEpisodes}
-                        currentSeason={item.currentSeason}
-                        currentEpisode={item.currentEpisode}
-                        seasons={item.seasons}
-                        reviewText={item.reviewText}
-                        containsSpoilers={item.containsSpoilers}
-                        readOnly={true}
-                        className="w-full"
-                      />
-                    ))}
-                  </div>
-
-                  {/* See More Button (adds 12 more) */}
-                  {hasMore && (
-                    <div className="flex justify-center pt-2">
-                      <button
-                        type="button"
-                        onClick={() => handleSeeMore(cat.id)}
-                        className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#141B26]/90 hover:bg-[#1A2434] border border-white/[0.08] hover:border-[#3B9EFF]/40 text-xs font-semibold text-[#F5F7FA] hover:text-white transition-all shadow-md hover:shadow-[0_0_16px_rgba(59,158,255,0.15)] cursor-pointer group active:scale-95 select-none"
-                      >
-                        <span>See More</span>
-                        <ChevronDown className="w-3.5 h-3.5 text-[#8E97A6] group-hover:text-[#3B9EFF] group-hover:translate-y-0.5 transition-all" />
-                        <span className="text-[11px] text-[#6F7886] font-normal">
-                          ({cat.items.length - visibleCount} more)
-                        </span>
-                      </button>
-                    </div>
-                  )}
-                </section>
-              );
-            })}
           </div>
         )}
+
+        {/* Content Container (Gracefully dims during filter update) */}
+        <div
+          className={`transition-all duration-150 ${
+            isFiltering ? "opacity-35 blur-[0.5px] scale-[0.995] pointer-events-none" : "opacity-100"
+          }`}
+        >
+          {activeCategories.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 px-4 text-center rounded-2xl bg-[#151C27]/40 border border-white/[0.04] mt-2">
+              <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#6F7886] mb-3.5">
+                <Compass className="w-7 h-7" />
+              </div>
+              <h3 className="text-base font-bold text-[#F5F7FA]">No titles match your filters</h3>
+              <p className="text-xs text-[#A8B0BD] max-w-xs sm:max-w-sm mt-1 leading-relaxed">
+                No user-added titles match the selected format, platform, genre, or rating.
+              </p>
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="mt-5 px-4 py-2 rounded-xl bg-[#3B9EFF] hover:bg-[#2F8EEA] text-white text-xs font-semibold transition-all shadow-md shadow-[#3B9EFF]/20 cursor-pointer"
+              >
+                Reset all filters
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-9 mt-1">
+              {activeCategories.map((cat) => {
+                const visibleCount = visibleCounts[cat.id] ?? 12;
+                const displayedItems = cat.items.slice(0, visibleCount);
+                const hasMore = cat.items.length > visibleCount;
+
+                return (
+                  <section key={cat.id} className="flex flex-col gap-3.5">
+                    {/* Rating Category Header */}
+                    <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${cat.pillClass}`}
+                        >
+                          {cat.icon}
+                        </div>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <h2 className="text-base sm:text-lg font-bold text-[#F5F7FA] tracking-tight">
+                              {cat.title}
+                            </h2>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${cat.pillClass}`}
+                            >
+                              {cat.items.length}
+                            </span>
+                          </div>
+                          <span className="text-[11px] sm:text-xs text-[#A8B0BD]">
+                            {cat.description}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Media Cards Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4">
+                      {displayedItems.map((item) => (
+                        <MediaCard
+                          key={item.id}
+                          media={item.media}
+                          status={item.status}
+                          userRating={item.userRating || undefined}
+                          userEpisodes={item.userEpisodes}
+                          currentSeason={item.currentSeason}
+                          currentEpisode={item.currentEpisode}
+                          seasons={item.seasons}
+                          reviewText={item.reviewText}
+                          containsSpoilers={item.containsSpoilers}
+                          readOnly={true}
+                          className="w-full"
+                        />
+                      ))}
+                    </div>
+
+                    {/* See More Button (adds 12 more) */}
+                    {hasMore && (
+                      <div className="flex justify-center pt-2">
+                        <button
+                          type="button"
+                          disabled={loadingSectionId === cat.id}
+                          onClick={() => handleSeeMore(cat.id)}
+                          className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#141B26]/90 hover:bg-[#1A2434] border border-white/[0.08] hover:border-[#3B9EFF]/40 text-xs font-semibold text-[#F5F7FA] hover:text-white transition-all shadow-md hover:shadow-[0_0_16px_rgba(59,158,255,0.15)] cursor-pointer group active:scale-95 select-none disabled:opacity-80 disabled:cursor-default"
+                        >
+                          {loadingSectionId === cat.id ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 text-[#3B9EFF] animate-spin shrink-0" />
+                              <span className="text-[#3B9EFF] font-medium">Loading titles...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>See More</span>
+                              <ChevronDown className="w-3.5 h-3.5 text-[#8E97A6] group-hover:text-[#3B9EFF] group-hover:translate-y-0.5 transition-all shrink-0" />
+                              <span className="text-[11px] text-[#6F7886] font-normal">
+                                ({cat.items.length - visibleCount} more)
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </section>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, ArrowUpDown, Check } from "lucide-react";
+import { ChevronDown, ArrowUpDown, Check, Loader2 } from "lucide-react";
 
 export interface DropdownOption {
   id: string;
@@ -25,6 +25,7 @@ export interface CustomDropdownProps {
   buttonClassName?: string;
   highlightActive?: boolean;
   dropDirection?: "up" | "down" | "auto";
+  isLoading?: boolean;
 }
 
 export function CustomDropdown({
@@ -40,6 +41,7 @@ export function CustomDropdown({
   buttonClassName,
   highlightActive,
   dropDirection = "auto",
+  isLoading = false,
 }: CustomDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [openUpward, setOpenUpward] = useState(dropDirection === "up");
@@ -148,7 +150,9 @@ export function CustomDropdown({
           <span className="truncate">{displayLabel}</span>
         </span>
 
-        {suffixIcon === "sort" ? (
+        {isLoading ? (
+          <Loader2 className="w-3.5 h-3.5 shrink-0 text-[#3B9EFF] animate-spin" />
+        ) : suffixIcon === "sort" ? (
           <ArrowUpDown
             className={`w-3.5 h-3.5 shrink-0 transition-colors ${
               isFiltered || isOpen ? "text-[#3B9EFF]" : "text-[#6F7886]"
