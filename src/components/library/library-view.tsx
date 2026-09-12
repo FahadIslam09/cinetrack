@@ -4,7 +4,6 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   Search,
-  Share2,
   Plus,
   Star,
   Clock,
@@ -110,7 +109,6 @@ export function LibraryView({
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recently_updated");
-  const [isCopied, setIsCopied] = useState(false);
   const [isUsernameCopied, setIsUsernameCopied] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -278,51 +276,6 @@ export function LibraryView({
     searchQuery,
     sortBy,
   ]);
-
-  // Copy Profile URL or trigger Web Share
-  const handleShareProfile = async () => {
-    const profileUrl =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/${currentUserState?.username || "library"}`
-        : "https://cinetrack.app";
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${currentUserState?.displayName || currentUserState?.username || "My"} CineTrack Library`,
-          text: `Check out what I've been watching and my top rated recommendations on CineTrack!`,
-          url: profileUrl,
-        });
-        return;
-      } catch {
-        // Fallback to clipboard
-      }
-    }
-
-    try {
-      if (
-        typeof navigator !== "undefined" &&
-        navigator.clipboard &&
-        navigator.clipboard.writeText
-      ) {
-        await navigator.clipboard.writeText(profileUrl);
-      } else {
-        const textArea = document.createElement("textarea");
-        textArea.value = profileUrl;
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-      }
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    } catch (err) {
-      console.error("Clipboard copy failed:", err);
-    }
-  };
 
   // Quick Copy @username Link
   const handleCopyUsernameLink = async (e: React.MouseEvent) => {
@@ -493,28 +446,6 @@ export function LibraryView({
             </button>
           )}
 
-          <button
-            type="button"
-            suppressHydrationWarning
-            onClick={handleShareProfile}
-            className={`h-10 px-4 rounded-xl text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 cursor-pointer border ${
-              isCopied
-                ? "bg-[#22C55E]/15 border-[#22C55E]/40 text-[#22C55E]"
-                : "bg-[#1D2734] hover:bg-[#253244] border-white/[0.08] text-[#F5F7FA]"
-            }`}
-          >
-            {isCopied ? (
-              <>
-                <Check className="w-4 h-4" />
-                <span>Link Copied!</span>
-              </>
-            ) : (
-              <>
-                <Share2 className="w-4 h-4 text-[#3B9EFF]" />
-                <span>Share Profile</span>
-              </>
-            )}
-          </button>
 
           {isOwner && (
             <button
