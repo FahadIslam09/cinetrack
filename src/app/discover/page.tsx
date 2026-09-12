@@ -307,13 +307,15 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
         </div>
 
         {/* Single Row Dropdown Filter Bar */}
-        <DiscoverFilterBar
-          currentType={type}
-          currentProvider={provider}
-          currentGenre={genre}
-          currentRating={rating}
-          totalResults={filteredItems.length}
-        />
+        <div className="relative z-30">
+          <DiscoverFilterBar
+            currentType={type}
+            currentProvider={provider}
+            currentGenre={genre}
+            currentRating={rating}
+            totalResults={filteredItems.length}
+          />
+        </div>
 
         {/* Results Categorized by Ratings (or Empty State) */}
         {activeCategories.length === 0 ? (

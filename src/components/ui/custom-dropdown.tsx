@@ -122,7 +122,7 @@ export function CustomDropdown({
   const displayLabel = triggerLabel || selectedOption?.label;
 
   return (
-    <div ref={dropdownRef} className={`relative ${isOpen ? "z-40" : ""} ${className}`}>
+    <div ref={dropdownRef} className={`relative ${isOpen ? "z-50" : "z-10"} ${className}`}>
       <button
         type="button"
         onClick={handleToggle}

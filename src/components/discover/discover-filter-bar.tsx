@@ -146,7 +146,7 @@ export function DiscoverFilterBar({
 
   return (
     <div
-      className={`w-full relative rounded-2xl bg-gradient-to-b from-[#141B26]/90 via-[#0F1420]/90 to-[#0A0E17]/95 backdrop-blur-xl border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.4)] p-2.5 sm:p-3 flex flex-col gap-3 transition-opacity duration-200 ${
+      className={`w-full relative z-30 rounded-2xl bg-gradient-to-b from-[#141B26]/90 via-[#0F1420]/90 to-[#0A0E17]/95 backdrop-blur-xl border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.4)] p-2.5 sm:p-3 flex flex-col gap-3 transition-opacity duration-200 ${
         isPending ? "opacity-75" : "opacity-100"
       }`}
     >
@@ -187,46 +187,40 @@ export function DiscoverFilterBar({
           {/* 2. Three Dropdowns (Platform, Genre, Rating) */}
           <div className="grid grid-cols-3 lg:flex lg:items-center gap-2 w-full lg:w-auto">
             {/* Streaming Platform */}
-            <div className="min-w-0 lg:w-[165px] xl:w-[185px]">
-              <CustomDropdown
-                value={currentProvider}
-                onChange={(val) => updateFilter("provider", val)}
-                options={streamingOptions}
-                align="left"
-                className="w-full"
-                buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30] border-white/[0.08]"
-                menuWidth="w-[210px]"
-                ariaLabel="Filter by streaming platform"
-              />
-            </div>
+            <CustomDropdown
+              value={currentProvider}
+              onChange={(val) => updateFilter("provider", val)}
+              options={streamingOptions}
+              align="left"
+              className="w-full lg:w-[165px] xl:w-[185px] shrink-0 min-w-0"
+              buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30] border-white/[0.08]"
+              menuWidth="w-[210px]"
+              ariaLabel="Filter by streaming platform"
+            />
 
             {/* Genre */}
-            <div className="min-w-0 lg:w-[150px] xl:w-[170px]">
-              <CustomDropdown
-                value={currentGenre}
-                onChange={(val) => updateFilter("genre", val)}
-                options={genreOptions}
-                align="left"
-                className="w-full"
-                buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30] border-white/[0.08]"
-                menuWidth="w-[190px]"
-                ariaLabel="Filter by genre"
-              />
-            </div>
+            <CustomDropdown
+              value={currentGenre}
+              onChange={(val) => updateFilter("genre", val)}
+              options={genreOptions}
+              align="left"
+              className="w-full lg:w-[150px] xl:w-[170px] shrink-0 min-w-0"
+              buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30] border-white/[0.08]"
+              menuWidth="w-[190px]"
+              ariaLabel="Filter by genre"
+            />
 
             {/* Rating */}
-            <div className="min-w-0 lg:w-[150px] xl:w-[170px]">
-              <CustomDropdown
-                value={currentRating}
-                onChange={(val) => updateFilter("rating", val)}
-                options={ratingOptions}
-                align="right"
-                className="w-full"
-                buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30] border-white/[0.08]"
-                menuWidth="w-[190px]"
-                ariaLabel="Filter by rating"
-              />
-            </div>
+            <CustomDropdown
+              value={currentRating}
+              onChange={(val) => updateFilter("rating", val)}
+              options={ratingOptions}
+              align="right"
+              className="w-full lg:w-[150px] xl:w-[170px] shrink-0 min-w-0"
+              buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30] border-white/[0.08]"
+              menuWidth="w-[190px]"
+              ariaLabel="Filter by rating"
+            />
           </div>
         </div>
 
