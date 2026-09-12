@@ -362,7 +362,6 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
                       seasons={item.seasons}
                       reviewText={item.reviewText}
                       containsSpoilers={item.containsSpoilers}
-                      fromUsername={item.fromUsername}
                       readOnly={true}
                       className="w-full"
                     />
