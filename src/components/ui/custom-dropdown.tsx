@@ -128,7 +128,7 @@ export function CustomDropdown({
         onClick={handleToggle}
         aria-label={ariaLabel}
         aria-expanded={isOpen}
-        className={`w-full px-3 rounded-lg text-xs font-medium flex items-center justify-between gap-1.5 transition-all duration-150 cursor-pointer border select-none ${
+        className={`w-full px-3 rounded-xl text-xs font-medium flex items-center justify-between gap-1.5 transition-all duration-150 cursor-pointer border select-none ${
           buttonClassName || "h-9"
         } ${
           isFiltered

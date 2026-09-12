@@ -3,7 +3,7 @@ import {
   Compass,
   Crown,
   CheckCircle2,
-  Star,
+  Award,
   Flame,
   Clock,
 } from "lucide-react";
@@ -256,7 +256,7 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
       title: "Average",
       label: "Average",
       description: "Solid entertainment with mixed community reception",
-      icon: <Star className="w-4 h-4 text-[#F59E0B]" />,
+      icon: <Award className="w-4 h-4 text-[#F59E0B]" />,
       pillClass: "bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/30",
       dotClass: "bg-[#F59E0B]",
       items: filteredItems.filter((i) => i.userRating === "average"),
@@ -298,11 +298,11 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
       <main className="flex-1 max-w-[834px] lg:max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-12 pt-20 sm:pt-24 flex flex-col gap-6">
         {/* Header Title & Subtitle */}
         <div className="flex flex-col gap-1">
-          <h1 className="font-black text-2xl sm:text-3xl text-[#F5F7FA] tracking-tight">
+          <h1 className="font-black text-2xl sm:text-3xl lg:text-4xl text-[#F5F7FA] tracking-tight">
             Discover
           </h1>
-          <p className="text-xs sm:text-sm text-[#A8B0BD]">
-            Explore movies, TV series, and anime added by users to CineTrack, categorized by rating.
+          <p className="text-xs sm:text-sm text-[#8E97A6] max-w-xl leading-relaxed">
+            Explore movies, TV series, and anime added by users across CineTrack, categorized by rating.
           </p>
         </div>
 
