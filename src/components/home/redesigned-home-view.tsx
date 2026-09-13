@@ -171,7 +171,7 @@ export function RedesignedHomeView({ user }: RedesignedHomeViewProps) {
                   Idea Received
                 </h3>
                 <p className="text-xs text-[#A8B0BD] max-w-xs">
-                  Thank you — your suggestion has been recorded for the next Home
+                  Thank you! Your suggestion has been recorded for the next Home
                   page design.
                 </p>
               </div>

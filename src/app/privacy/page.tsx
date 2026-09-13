@@ -73,9 +73,9 @@ export default async function PrivacyPage() {
           <section className="space-y-2">
             <h2 className="text-base font-bold text-[#F5F7FA]">5. Contact Regarding Privacy</h2>
             <p>
-              For questions or concerns regarding this Privacy Policy or your personal information, contact our team at{" "}
-              <a href="mailto:privacy@cinetrack.app" className="text-[#3B9EFF] hover:underline">
-                privacy@cinetrack.app
+              For questions or concerns regarding this Privacy Policy or your personal data, reach out directly at{" "}
+              <a href="mailto:fahadislam.fir@gmail.com" className="text-[#3B9EFF] hover:underline">
+                fahadislam.fir@gmail.com
               </a>
               .
             </p>

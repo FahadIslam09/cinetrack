@@ -19,7 +19,7 @@ const notoSansBengali = Noto_Sans_Bengali({
 
 export const metadata: Metadata = {
   referrer: "origin-when-cross-origin",
-  title: "CineTrack — Everything You Watch, In One Place",
+  title: "CineTrack · Everything You Watch, In One Place",
   description:
     "A fast, minimal, worldwide social tracking platform to discover, track, rate, review, and share movies, TV series, and anime.",
   icons: {

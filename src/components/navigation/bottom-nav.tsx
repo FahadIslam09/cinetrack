@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Info,
   Mail,
+  Lightbulb,
   FileText,
   Shield,
 } from "lucide-react";
@@ -66,7 +67,7 @@ function BottomNavContent() {
 
   const isMoreActive =
     isMoreOpen ||
-    ["/about", "/contact", "/terms", "/privacy"].includes(pathname);
+    ["/about", "/contact", "/feedback", "/terms", "/privacy"].includes(pathname);
 
   const navItems = [
     {
@@ -102,6 +103,7 @@ function BottomNavContent() {
           "/login",
           "/about",
           "/contact",
+          "/feedback",
           "/terms",
           "/privacy",
         ].includes(pathname) &&
@@ -146,6 +148,30 @@ function BottomNavContent() {
               <X className="w-4 h-4" />
             </button>
           </div>
+
+          {/* Eye-catching Highlighted Feature Request Card */}
+          <Link
+            href="/feedback"
+            onClick={() => setIsMoreOpen(false)}
+            className="flex items-center justify-between p-3.5 mb-3 rounded-2xl bg-gradient-to-r from-[#3B9EFF]/15 to-[#3B9EFF]/5 hover:from-[#3B9EFF]/20 hover:to-[#3B9EFF]/10 border border-[#3B9EFF]/30 transition-all cursor-pointer group shadow-[0_0_16px_rgba(59,158,255,0.08)]"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-[#3B9EFF]/20 border border-[#3B9EFF]/30 flex items-center justify-center text-[#3B9EFF] shrink-0">
+                <Lightbulb className="w-4 h-4" />
+              </div>
+              <div className="text-left">
+                <span className="text-sm font-semibold text-[#F5F7FA] block leading-tight">
+                  Need a New Feature?
+                </span>
+                <span className="text-[11px] text-[#3B9EFF] mt-0.5 block">
+                  Request a feature or report a bug
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#3B9EFF] text-white shrink-0">
+              Request
+            </span>
+          </Link>
 
           <div className="space-y-1">
             {moreLinks.map((link) => {

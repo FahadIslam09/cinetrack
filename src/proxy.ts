@@ -18,6 +18,7 @@ const RESERVED_ROUTES = new Set([
   "tv",
   "about",
   "contact",
+  "feedback",
   "terms",
   "privacy",
 ]);
