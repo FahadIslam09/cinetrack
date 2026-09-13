@@ -331,13 +331,13 @@ export function LandingView() {
                 <Search className="w-3.5 h-3.5" />
                 <span>Search</span>
               </Link>
-              <a href="#demo-section" className="hover:text-white transition-colors">
+              <a href="#demo-section" className="hover:text-white transition-colors cursor-pointer">
                 Trending
               </a>
-              <a href="#how-it-works" className="hover:text-white transition-colors">
+              <a href="#how-it-works" className="hover:text-white transition-colors cursor-pointer">
                 How It Works
               </a>
-              <a href="#curator-profile" className="hover:text-white transition-colors">
+              <a href="#curator-profile" className="hover:text-white transition-colors cursor-pointer">
                 Curator Identity
               </a>
             </nav>
@@ -930,8 +930,8 @@ export function LandingView() {
               <nav className="flex flex-col gap-2 text-xs text-[#A8B0BD]">
                 <Link href="/discover" className="hover:text-white transition-colors">Discover Catalog</Link>
                 <Link href="/search" className="hover:text-white transition-colors">Search Titles</Link>
-                <a href="#demo-section" className="hover:text-white transition-colors">This Week&apos;s Highlights</a>
-                <a href="#curator-profile" className="hover:text-white transition-colors">Public Profile Demo</a>
+                <a href="#demo-section" className="hover:text-white transition-colors cursor-pointer">This Week&apos;s Highlights</a>
+                <a href="#curator-profile" className="hover:text-white transition-colors cursor-pointer">Public Profile Demo</a>
               </nav>
             </div>
 
