@@ -18,6 +18,7 @@ import {
   Shield,
 } from "lucide-react";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 function BottomNavContent() {
   const pathname = usePathname();
@@ -25,6 +26,9 @@ function BottomNavContent() {
   const currentType = searchParams.get("type");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+
+  // Lock background scrolling when More sheet is open
+  useScrollLock(isMoreOpen);
 
   // Close sheet on route change
   useEffect(() => {
