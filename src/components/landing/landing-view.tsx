@@ -395,10 +395,10 @@ export function LandingView() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveCategory(tab.id)}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition-all cursor-pointer ${
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer select-none active:scale-95 outline-none focus:outline-none focus-visible:outline-none border ${
                       isSelected
-                        ? "bg-[#3B9EFF] text-white"
-                        : "bg-[#1A2330] hover:bg-[#1D2734] text-[#A8B0BD] hover:text-[#F5F7FA] border border-white/[0.06]"
+                        ? "bg-[#3B9EFF] text-white border-[#3B9EFF] shadow-sm shadow-[#3B9EFF]/20"
+                        : "bg-[#1A2330] hover:bg-[#1D2734] text-[#A8B0BD] hover:text-[#F5F7FA] border-white/[0.06] hover:border-white/[0.14]"
                     }`}
                   >
                     {tab.dot && <span className={`w-1.5 h-1.5 rounded-full ${tab.dot}`} />}
@@ -500,7 +500,7 @@ export function LandingView() {
               <button
                 type="button"
                 onClick={handleCopyShareList}
-                className="w-full sm:w-auto h-10 px-5 bg-[#1A2330] hover:bg-[#1D2734] text-[#F5F7FA] font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-white/[0.08] cursor-pointer"
+                className="w-full sm:w-auto h-10 px-5 bg-[#1A2330] hover:bg-[#1D2734] text-[#F5F7FA] font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all duration-150 border border-white/[0.08] hover:border-white/[0.14] select-none active:scale-95 outline-none focus:outline-none focus-visible:outline-none cursor-pointer"
               >
                 {copiedShareList ? (
                   <>
@@ -692,7 +692,7 @@ export function LandingView() {
                   <button
                     type="button"
                     onClick={handleCopyProfileLink}
-                    className="text-xs font-bold text-[#3B9EFF] hover:text-[#5AAFFF] cursor-pointer shrink-0 ml-2"
+                    className="text-xs font-bold text-[#3B9EFF] hover:text-[#5AAFFF] cursor-pointer shrink-0 ml-2 select-none outline-none focus:outline-none focus-visible:outline-none active:scale-95 transition-transform"
                   >
                     {copiedProfile ? "Copied!" : "Open"}
                   </button>
@@ -735,7 +735,7 @@ export function LandingView() {
                 </div>
                 <button
                   type="submit"
-                  className="h-11 px-6 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-bold text-xs sm:text-sm rounded-lg flex items-center justify-center gap-1.5 shadow-md shadow-[#3B9EFF]/20 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+                  className="h-11 px-6 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-bold text-xs sm:text-sm rounded-lg flex items-center justify-center gap-1.5 shadow-md shadow-[#3B9EFF]/20 transition-all cursor-pointer whitespace-nowrap active:scale-95 select-none outline-none focus:outline-none focus-visible:outline-none border border-[#3B9EFF]"
                 >
                   <span>Claim Your Profile</span>
                   <ArrowRight className="w-4 h-4" />

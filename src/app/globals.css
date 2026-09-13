@@ -70,13 +70,20 @@ button:active,
 select,
 select:focus,
 select:focus-visible,
+[role="button"],
 [role="button"]:focus,
 [role="button"]:focus-visible,
+[role="button"]:active,
 [tabindex]:focus,
 [tabindex]:focus-visible {
   outline: none !important;
+  outline-style: none !important;
   outline-color: transparent !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
   -webkit-tap-highlight-color: transparent !important;
+  -webkit-focus-ring-color: transparent !important;
 }
 
 /* Ensure pointer cursor for all interactive elements */
