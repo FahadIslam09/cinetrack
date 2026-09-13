@@ -117,36 +117,32 @@ function BottomNavContent() {
   return (
     <>
       {/* Backdrop for More Sheet */}
-      {isMoreOpen && (
-        <div
-          className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
-          onClick={() => setIsMoreOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      <div
+        className={`md:hidden fixed inset-0 z-30 bg-black/60 backdrop-blur-xs transition-opacity duration-300 ease-out ${
+          isMoreOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setIsMoreOpen(false)}
+        aria-hidden="true"
+      />
 
-      {/* Slide-up Sheet for More links */}
-      {isMoreOpen && (
-        <div
-          className="md:hidden fixed bottom-16 left-0 right-0 z-50 p-4 pb-6 bg-[#151C27] border-t border-white/10 rounded-t-2xl shadow-[0_-12px_32px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-200 ease-out"
-          role="dialog"
-          aria-label="More navigation links"
-        >
+      {/* Slide-up Sheet for More links (z-40, sits behind bottom nav bar z-50) */}
+      <div
+        className={`md:hidden fixed bottom-16 left-0 right-0 z-40 p-4 pb-6 bg-[#151C27] border-t border-white/10 rounded-t-2xl shadow-[0_-12px_32px_rgba(0,0,0,0.6)] transition-transform duration-300 ease-out will-change-transform ${
+          isMoreOpen
+            ? "translate-y-0 pointer-events-auto"
+            : "translate-y-full pointer-events-none"
+        }`}
+        role="dialog"
+        aria-label="More navigation links"
+        aria-hidden={!isMoreOpen}
+      >
           {/* Subtle drag indicator handle */}
           <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-3" />
 
-          <div className="flex items-center justify-between px-1 mb-2">
+          <div className="px-1 mb-2.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#6F7886]">
               More Links
             </span>
-            <button
-              type="button"
-              onClick={() => setIsMoreOpen(false)}
-              className="p-1 text-[#6F7886] hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors cursor-pointer"
-              aria-label="Close menu"
-            >
-              <X className="w-4 h-4" />
-            </button>
           </div>
 
           {/* Eye-catching Highlighted Feature Request Card */}
@@ -202,10 +198,9 @@ function BottomNavContent() {
             })}
           </div>
         </div>
-      )}
 
-      {/* Main Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 pb-safe bg-[#151C27]/95 backdrop-blur-xl border-t border-white/[0.06] shadow-2xl">
+      {/* Main Bottom Navigation Bar (z-50 solid background so sheet slides behind it) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe bg-[#151C27] border-t border-white/[0.06] shadow-2xl">
         <div className="h-16 flex items-center justify-around px-1 sm:px-2">
           {navItems.map((item) => {
             if (item.isPrimary) {
@@ -258,25 +253,40 @@ function BottomNavContent() {
             );
           })}
 
-          {/* Right Corner: "More" Button */}
+          {/* Right Corner: "More" / "Close" Animated Button */}
           <button
             type="button"
             onClick={() => setIsMoreOpen((prev) => !prev)}
             className={`flex flex-col items-center justify-center min-w-[44px] h-full py-1 gap-1 transition-colors cursor-pointer ${
-              isMoreActive
+              isMoreOpen || isMoreActive
                 ? "text-[#3B9EFF]"
                 : "text-[#A8B0BD] hover:text-[#F5F7FA]"
             }`}
             aria-expanded={isMoreOpen}
-            aria-label="More navigation links"
+            aria-label={isMoreOpen ? "Close menu" : "More navigation links"}
           >
-            <div className="relative">
-              <MoreHorizontal className="w-5 h-5" />
-              {isMoreActive && (
+            <div className="relative w-5 h-5 flex items-center justify-center">
+              <MoreHorizontal
+                className={`w-5 h-5 absolute inset-0 transition-all duration-300 transform ${
+                  isMoreOpen
+                    ? "opacity-0 rotate-90 scale-50"
+                    : "opacity-100 rotate-0 scale-100"
+                }`}
+              />
+              <X
+                className={`w-5 h-5 absolute inset-0 transition-all duration-300 transform ${
+                  isMoreOpen
+                    ? "opacity-100 rotate-0 scale-100"
+                    : "opacity-0 -rotate-90 scale-50"
+                }`}
+              />
+              {!isMoreOpen && isMoreActive && (
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#3B9EFF]" />
               )}
             </div>
-            <span className="text-[11px] font-medium tracking-tight">More</span>
+            <span className="text-[11px] font-medium tracking-tight transition-colors">
+              {isMoreOpen ? "Close" : "More"}
+            </span>
           </button>
         </div>
       </nav>
