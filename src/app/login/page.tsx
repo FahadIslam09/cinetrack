@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   Mail,
   Lock,
-  User,
   Eye,
   EyeOff,
   ArrowRight,
@@ -29,8 +28,6 @@ function LoginForm() {
   const [mode, setMode] = useState<"signin" | "signup">(initialMode);
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [username, setUsername] = useState(initialUsername);
   const [showPassword, setShowPassword] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
 
@@ -113,17 +110,10 @@ function LoginForm() {
         router.push(next);
         router.refresh();
       } else {
-        // Sign Up
-        const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+        // Sign Up (Profile setup follows in dedicated popup once authenticated)
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
-          options: {
-            data: {
-              full_name: fullName.trim() || undefined,
-              user_name: cleanUsername || undefined,
-            },
-          },
         });
 
         if (error) {
@@ -133,7 +123,7 @@ function LoginForm() {
         }
 
         if (data.session) {
-          // Instant sign in (email confirmation disabled in Supabase)
+          // Instant sign in - user will be greeted with Profile Setup popup
           router.push(next);
           router.refresh();
         } else {
@@ -346,41 +336,6 @@ function LoginForm() {
         ) : (
           /* Email / Password Main Form */
           <form onSubmit={handleEmailAuth} className="flex flex-col gap-3.5">
-            {mode === "signup" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-                <div>
-                  <label className="block text-[11px] font-semibold text-[#CBD5E1] mb-1">
-                    Display Name
-                  </label>
-                  <div className="relative">
-                    <User className="w-3.5 h-3.5 text-[#6F7886] absolute left-3 top-3.5" />
-                    <input
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Alex"
-                      className="w-full h-10 pl-8 pr-3 rounded-lg bg-[#0F141D] text-xs text-[#F5F7FA] placeholder-[#4B5563] border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-[#CBD5E1] mb-1">
-                    Username
-                  </label>
-                  <div className="relative">
-                    <span className="text-[11px] text-[#6F7886] absolute left-3 top-3">@</span>
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="alex_cine"
-                      className="w-full h-10 pl-7 pr-3 rounded-lg bg-[#0F141D] text-xs text-[#F5F7FA] placeholder-[#4B5563] border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="text-left">
               <label className="block text-xs font-semibold text-[#CBD5E1] mb-1.5">

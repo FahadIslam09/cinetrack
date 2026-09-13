@@ -4,6 +4,7 @@ import "lenis/dist/lenis.css";
 import "./globals.css";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { BackToTop } from "@/components/ui/back-to-top";
+import { ProfileSetupProvider } from "@/components/profile/profile-setup-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -51,6 +52,7 @@ export default function RootLayout({
         <SmoothScrollProvider>
           {children}
           <BackToTop />
+          <ProfileSetupProvider />
         </SmoothScrollProvider>
       </body>
     </html>
