@@ -10,11 +10,12 @@ import {
   Camera,
   AlignLeft,
   Check,
+  CheckCircle2,
   UploadCloud,
   AlertCircle,
   Film,
 } from "lucide-react";
-import { updateProfile } from "@/actions/profile";
+import { updateProfile, checkUsernameAvailability } from "@/actions/profile";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 const IMGBB_API_KEY = "991f94ae55c7ee215507ec80b51bfa5b";
@@ -67,8 +68,21 @@ export function EditProfileModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
+  type UsernameStatus =
+    | "idle"
+    | "checking"
+    | "available"
+    | "taken"
+    | "invalid"
+    | "reserved"
+    | "error";
+
   const [displayName, setDisplayName] = useState(initialData.displayName || "");
   const [username, setUsername] = useState(initialData.username || "");
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("available");
+  const [usernameMessage, setUsernameMessage] = useState<string>("");
+  const usernameDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
   const [bio, setBio] = useState(initialData.bio || "");
   const [avatarUrl, setAvatarUrl] = useState(initialData.avatarUrl || "");
   const [backdropUrl, setBackdropUrl] = useState(initialData.backdropUrl || "");
@@ -81,13 +95,80 @@ export function EditProfileModal({
   useEffect(() => {
     if (isOpen) {
       setDisplayName(initialData.displayName || "");
-      setUsername(initialData.username || "");
+      const initU = initialData.username || "";
+      setUsername(initU);
+      setUsernameStatus(initU ? "available" : "idle");
+      setUsernameMessage(initU ? "Current username" : "");
       setBio(initialData.bio || "");
       setAvatarUrl(initialData.avatarUrl || "");
       setBackdropUrl(initialData.backdropUrl || "");
       setError(null);
     }
   }, [isOpen, initialData]);
+
+  useEffect(() => {
+    return () => {
+      if (usernameDebounceRef.current) {
+        clearTimeout(usernameDebounceRef.current);
+      }
+    };
+  }, []);
+
+  const handleUsernameChange = (val: string) => {
+    const raw = val.toLowerCase().replace(/^@/, "").replace(/[^a-z0-9_]/g, "").slice(0, 20);
+    setUsername(raw);
+
+    if (usernameDebounceRef.current) {
+      clearTimeout(usernameDebounceRef.current);
+    }
+
+    const initialClean = (initialData.username || "").toLowerCase().replace(/^@/, "");
+
+    if (!raw) {
+      setUsernameStatus("invalid");
+      setUsernameMessage("Username is required");
+      return;
+    }
+
+    if (raw.length < 3) {
+      setUsernameStatus("invalid");
+      setUsernameMessage("Must be at least 3 characters");
+      return;
+    }
+
+    if (raw === initialClean) {
+      setUsernameStatus("available");
+      setUsernameMessage("Current username");
+      return;
+    }
+
+    setUsernameStatus("checking");
+    setUsernameMessage("Checking availability...");
+
+    usernameDebounceRef.current = setTimeout(async () => {
+      try {
+        const result = await checkUsernameAvailability(raw);
+        if (result.available) {
+          setUsernameStatus("available");
+          setUsernameMessage(`@${raw} is available`);
+        } else {
+          if (result.error?.includes("taken") || result.error?.includes("already taken")) {
+            setUsernameStatus("taken");
+            setUsernameMessage("Username already taken");
+          } else if (result.error?.includes("reserved")) {
+            setUsernameStatus("reserved");
+            setUsernameMessage(result.error);
+          } else {
+            setUsernameStatus("invalid");
+            setUsernameMessage(result.error || "Invalid username");
+          }
+        }
+      } catch {
+        setUsernameStatus("error");
+        setUsernameMessage("Unable to verify username right now");
+      }
+    }, 300);
+  };
 
   useScrollLock(isOpen);
 
@@ -143,6 +224,17 @@ export function EditProfileModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (usernameStatus === "checking") {
+      setError("Please wait while username is being verified.");
+      return;
+    }
+
+    if (usernameStatus !== "available" && usernameStatus !== "idle") {
+      setError(usernameMessage || "Please enter a valid, available username.");
+      return;
+    }
+
     setIsSaving(true);
     setError(null);
 
@@ -385,29 +477,72 @@ export function EditProfileModal({
 
           {/* 4. Username Handle */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-[#A8B0BD] flex items-center gap-1.5">
-              <AtSign className="w-3.5 h-3.5 text-[#3B9EFF]" />
-              <span>Username Handle</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-[#A8B0BD] flex items-center gap-1.5">
+                <AtSign className="w-3.5 h-3.5 text-[#3B9EFF]" />
+                <span>Username Handle</span>
+              </label>
+              {usernameStatus !== "idle" && usernameMessage && (
+                <span
+                  className={`text-[11px] font-medium flex items-center gap-1 transition-colors ${
+                    usernameStatus === "available"
+                      ? "text-[#22C55E]"
+                      : usernameStatus === "checking"
+                      ? "text-[#A8B0BD]"
+                      : "text-rose-400"
+                  }`}
+                >
+                  {usernameMessage}
+                </span>
+              )}
+            </div>
+
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#6F7886]">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#6F7886] pointer-events-none">
                 @
               </span>
               <input
                 type="text"
                 value={username}
-                onChange={(e) =>
-                  setUsername(
-                    e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20)
-                  )
-                }
+                onChange={(e) => handleUsernameChange(e.target.value)}
                 placeholder="fahadislam905"
                 maxLength={20}
-                className="w-full h-10 pl-7 pr-3 rounded-xl bg-[#1D2734] border border-white/[0.08] text-sm text-[#F5F7FA] placeholder-[#6F7886] focus:border-[#3B9EFF] focus:outline-none transition-colors font-mono"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                className={`w-full h-10 pl-7 pr-10 rounded-xl bg-[#1D2734] border text-sm text-[#F5F7FA] placeholder-[#6F7886] font-mono transition-all outline-none ${
+                  usernameStatus === "available"
+                    ? "border-emerald-500/40 focus:border-emerald-500 ring-1 ring-emerald-500/10"
+                    : usernameStatus === "checking"
+                    ? "border-white/[0.08] focus:border-[#3B9EFF]"
+                    : usernameStatus === "idle"
+                    ? "border-white/[0.08] focus:border-[#3B9EFF]"
+                    : "border-rose-500/50 focus:border-rose-500 ring-1 ring-rose-500/10"
+                }`}
               />
+
+              {/* Real-time Status Icon */}
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                {usernameStatus === "checking" && (
+                  <Loader2 className="w-4 h-4 animate-spin text-[#3B9EFF]" />
+                )}
+                {usernameStatus === "available" && (
+                  <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
+                )}
+                {(usernameStatus === "taken" ||
+                  usernameStatus === "invalid" ||
+                  usernameStatus === "reserved" ||
+                  usernameStatus === "error") && (
+                  <AlertCircle className="w-4 h-4 text-rose-400" />
+                )}
+              </div>
             </div>
+
             <p className="text-[11px] text-[#6F7886]">
-              Your public URL: <span className="text-[#3B9EFF]">cinetrack.com/{username || "username"}</span>
+              Your public URL:{" "}
+              <span className="text-[#3B9EFF]">
+                cinetrack.com/{username || "username"}
+              </span>
             </p>
           </div>
 
@@ -448,8 +583,17 @@ export function EditProfileModal({
             </button>
             <button
               type="submit"
-              disabled={isSaving || isUploadingImage || isUploadingCover}
-              className="px-4 py-2 rounded-xl bg-[#3B9EFF] hover:bg-[#5AAFFF] disabled:opacity-50 text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-all shadow-md shadow-[#3B9EFF]/20 cursor-pointer"
+              disabled={
+                isSaving ||
+                isUploadingImage ||
+                isUploadingCover ||
+                usernameStatus === "checking" ||
+                usernameStatus === "taken" ||
+                usernameStatus === "invalid" ||
+                usernameStatus === "reserved" ||
+                usernameStatus === "error"
+              }
+              className="px-4 py-2 rounded-xl bg-[#3B9EFF] hover:bg-[#5AAFFF] disabled:opacity-50 text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-all shadow-md shadow-[#3B9EFF]/20 cursor-pointer disabled:cursor-not-allowed"
             >
               {isSaving ? (
                 <>
