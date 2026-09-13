@@ -167,7 +167,7 @@ export function ReviewModal({
               )}
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 sm:gap-2">
               {(Object.keys(RATING_CONFIG) as RatingCategory[]).map((key) => {
                 const cfg = RATING_CONFIG[key];
                 const isSelected = rating === key;
@@ -176,7 +176,7 @@ export function ReviewModal({
                     key={key}
                     type="button"
                     onClick={() => setRating(isSelected ? null : key)}
-                    className={`py-2 px-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none ${
+                    className={`py-2 px-2 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none last:col-span-2 sm:last:col-span-1 ${
                       isSelected
                         ? `${cfg.activeBg} ${cfg.activeBorder} ${cfg.activeText} shadow-sm`
                         : "bg-[#1A2330] hover:bg-[#202C3D] border-white/[0.06] hover:border-white/[0.14] text-[#A8B0BD]"

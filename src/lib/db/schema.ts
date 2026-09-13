@@ -74,7 +74,7 @@ export const userMediaLogs = pgTable(
       .references(() => mediaItems.id, { onDelete: "cascade" })
       .notNull(),
     status: text("status").notNull(), // 'watching' | 'completed' | 'plan_to_watch' | 'on_hold' | 'dropped'
-    rating: text("rating"), // 'poor' | 'average' | 'good' | 'masterpiece' | null
+    rating: text("rating"), // 'poor' | 'average' | 'good' | 'great' | 'masterpiece' | null
     episodesWatched: integer("episodes_watched").default(0).notNull(),
     currentSeason: integer("current_season").default(1),
     currentEpisode: integer("current_episode").default(1),

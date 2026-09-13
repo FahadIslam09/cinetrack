@@ -538,7 +538,7 @@ export async function PreviousHomeView({ searchParams }: PreviousHomeViewProps) 
                 }}
                 mediaTitle="Anatomy of a Fall (2023)"
                 mediaHref="/movie/915935"
-                rating="good"
+                rating="great"
                 containsSpoilers={true}
                 reviewText="The pivotal recording played in the third act completely re-contextualizes the argument. Sandra Hüller's quiet realization that Daniel had memorized his mother's cadence gives the ending its heartbreaking ambiguity."
                 seriesTag="Palme d'Or Analysis"

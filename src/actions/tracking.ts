@@ -71,7 +71,7 @@ export async function upsertMediaLog(params: LogMediaParams) {
     } = params;
 
     if (rating !== undefined && rating !== null && !isValidRating(rating)) {
-      return { error: "Invalid rating. Allowed categories: poor, average, good, masterpiece." };
+      return { error: "Invalid rating. Allowed categories: poor, average, good, great, masterpiece." };
     }
     const finalRating =
       status === "plan_to_watch" ? null : rating ? parseRating(rating) : null;

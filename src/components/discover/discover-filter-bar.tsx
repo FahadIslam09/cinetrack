@@ -122,6 +122,11 @@ export function DiscoverFilterBar({
         dot: "bg-[#F5C84B]",
       },
       {
+        id: "great",
+        label: "Great",
+        dot: "bg-[#10B981]",
+      },
+      {
         id: "good",
         label: "Good",
         dot: "bg-[#3B9EFF]",

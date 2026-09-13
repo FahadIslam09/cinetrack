@@ -1083,13 +1083,13 @@ export function QuickAddModal({
                 ) : (
                   <>
                     <div
-                      className={`grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#1D2734] p-1.5 rounded-xl border transition-all ${
+                      className={`grid grid-cols-2 sm:grid-cols-5 gap-1.5 sm:gap-2 bg-[#1D2734] p-1.5 rounded-xl border transition-all ${
                         ratingError
                           ? "border-rose-500/60 ring-1 ring-rose-500/30"
                           : "border-white/[0.06]"
                       }`}
                     >
-                      {(["poor", "average", "good", "masterpiece"] as const).map((catId) => {
+                      {(["poor", "average", "good", "great", "masterpiece"] as const).map((catId) => {
                         const isSelected = rating === catId;
                         const def = RATING_CONFIG[catId];
                         return (
@@ -1100,7 +1100,7 @@ export function QuickAddModal({
                               setRating(catId);
                               setRatingError(null);
                             }}
-                            className={`h-10 px-2 rounded-lg text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-1.5 min-w-0 active:scale-95 cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none ${
+                            className={`h-10 px-2 rounded-lg text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-1.5 min-w-0 active:scale-95 cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none last:col-span-2 sm:last:col-span-1 ${
                               isSelected
                                 ? `${def.activeBg} ${def.activeBorder} ${def.activeText} shadow-sm`
                                 : "bg-[#151C27] border-white/[0.06] text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] hover:border-white/[0.14]"

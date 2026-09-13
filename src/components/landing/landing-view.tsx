@@ -627,7 +627,7 @@ export function LandingView() {
               >
                 <MediaCard
                   media={movie}
-                  userRating={movie.rating >= 8.8 ? "masterpiece" : "good"}
+                  userRating={movie.rating >= 8.9 ? "masterpiece" : movie.rating >= 8.2 ? "great" : "good"}
                   readOnly={true}
                   className="w-full h-full"
                 />

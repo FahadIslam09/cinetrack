@@ -231,6 +231,13 @@ export function MediaCard({
           isStar: true,
         };
       }
+      if (rConfig.id === "great") {
+        return {
+          label: "GREAT",
+          className: "bg-[#10B981]/10 border border-[#10B981]/25 text-[#34D399]",
+          dotColor: "bg-[#10B981]",
+        };
+      }
       if (rConfig.id === "good") {
         return {
           label: "GOOD",

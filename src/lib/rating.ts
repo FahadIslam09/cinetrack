@@ -1,4 +1,4 @@
-export type RatingCategory = "poor" | "average" | "good" | "masterpiece";
+export type RatingCategory = "poor" | "average" | "good" | "great" | "masterpiece";
 
 export interface RatingDefinition {
   id: RatingCategory;
@@ -54,10 +54,23 @@ export const RATING_CONFIG: Record<RatingCategory, RatingDefinition> = {
     badgeClass: "bg-[#3B9EFF]/15 text-[#3B9EFF] border-[#3B9EFF]/30",
     dotColor: "bg-[#3B9EFF]",
   },
+  great: {
+    id: "great",
+    label: "Great",
+    order: 4,
+    textColor: "text-[#10B981]",
+    bgColor: "bg-[#10B981]/10",
+    borderColor: "border-[#10B981]/30",
+    activeBg: "bg-[#10B981]/15",
+    activeBorder: "border-[#10B981]",
+    activeText: "text-[#10B981]",
+    badgeClass: "bg-[#10B981]/15 text-[#10B981] border-[#10B981]/30",
+    dotColor: "bg-[#10B981]",
+  },
   masterpiece: {
     id: "masterpiece",
     label: "Masterpiece",
-    order: 4,
+    order: 5,
     textColor: "text-[#F5C84B]",
     bgColor: "bg-[#F5C84B]/10",
     borderColor: "border-[#F5C84B]/30",
@@ -73,6 +86,7 @@ export const RATING_CATEGORIES: RatingCategory[] = [
   "poor",
   "average",
   "good",
+  "great",
   "masterpiece",
 ];
 
@@ -107,6 +121,7 @@ export function getConsensusRating(
     poor: 0,
     average: 0,
     good: 0,
+    great: 0,
     masterpiece: 0,
   };
   let hasValid = false;

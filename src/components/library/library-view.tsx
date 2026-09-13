@@ -90,6 +90,7 @@ const GENRES = [
 const SORT_OPTIONS = [
   { id: "recently_updated", label: "Recently Updated" },
   { id: "masterpiece_first", label: "My Rating (Masterpiece First)" },
+  { id: "great_first", label: "My Rating (Great First)" },
   { id: "good_first", label: "My Rating (Good First)" },
   { id: "poor_first", label: "My Rating (Poor First)" },
   { id: "release_year", label: "Release Year (Newest)" },
@@ -146,6 +147,7 @@ export function LibraryView({
   const tasteCounts = useMemo(() => {
     return {
       masterpiece: initialItems.filter((i) => i.userRating === "masterpiece").length,
+      great: initialItems.filter((i) => i.userRating === "great").length,
       good: initialItems.filter((i) => i.userRating === "good").length,
       average: initialItems.filter((i) => i.userRating === "average").length,
       poor: initialItems.filter((i) => i.userRating === "poor").length,
@@ -172,6 +174,7 @@ export function LibraryView({
   const ratingOptions = useMemo<DropdownOption[]>(() => [
     { id: "all", label: "All Ratings", count: initialItems.length },
     { id: "masterpiece", label: "Masterpiece", dot: "bg-[#F5C84B] shadow-[0_0_8px_rgba(245,200,75,0.7)]", count: tasteCounts.masterpiece, color: "text-[#F5C84B]" },
+    { id: "great", label: "Great", dot: "bg-[#10B981] shadow-[0_0_8px_rgba(16,185,129,0.7)]", count: tasteCounts.great, color: "text-[#10B981]" },
     { id: "good", label: "Good", dot: "bg-[#3B9EFF] shadow-[0_0_8px_rgba(59,158,255,0.7)]", count: tasteCounts.good, color: "text-[#3B9EFF]" },
     { id: "average", label: "Average", dot: "bg-[#F59E0B] shadow-[0_0_8px_rgba(245,158,11,0.7)]", count: tasteCounts.average, color: "text-[#F59E0B]" },
     { id: "poor", label: "Poor", dot: "bg-[#F43F5E] shadow-[0_0_8px_rgba(244,63,94,0.7)]", count: tasteCounts.poor, color: "text-[#F43F5E]" },
@@ -250,6 +253,17 @@ export function LibraryView({
         if (sortBy === "masterpiece_first") {
           const rA = getRatingRank(a.userRating);
           const rB = getRatingRank(b.userRating);
+          if (rB !== rA) return rB - rA;
+          return (
+            new Date(b.updatedAt || 0).getTime() -
+            new Date(a.updatedAt || 0).getTime()
+          );
+        }
+        if (sortBy === "great_first") {
+          // Items marked 'great' first, then masterpiece, good, average, poor
+          const rankGreat = (r: unknown) => (r === "great" ? 10 : getRatingRank(r));
+          const rA = rankGreat(a.userRating);
+          const rB = rankGreat(b.userRating);
           if (rB !== rA) return rB - rA;
           return (
             new Date(b.updatedAt || 0).getTime() -
