@@ -28,6 +28,7 @@ export interface NormalizedMedia {
       ads?: Array<{ provider_id: number; provider_name: string; logo_path: string }>;
     }
   >;
+  popularity?: number;
 }
 
 export const TMDB_GENRE_MAP: Record<number, string> = {
@@ -85,6 +86,7 @@ export function normalizeTmdbMovie(item: any): NormalizedMedia {
       [],
     synopsis: item.overview,
     streamingProviders: item["watch/providers"]?.results || {},
+    popularity: typeof item.popularity === "number" ? item.popularity : 0,
   };
 }
 
@@ -116,6 +118,7 @@ export function normalizeTmdbTV(item: any): NormalizedMedia {
       [],
     synopsis: item.overview,
     streamingProviders: item["watch/providers"]?.results || {},
+    popularity: typeof item.popularity === "number" ? item.popularity : 0,
   };
 }
 
@@ -140,5 +143,6 @@ export function normalizeAniListAnime(item: any): NormalizedMedia {
     runtime: item.duration || undefined,
     genres: item.genres || [],
     synopsis: item.description?.replace(/<[^>]*>/g, ""), // strip raw HTML tags
+    popularity: typeof item.popularity === "number" ? item.popularity : 0,
   };
 }

@@ -43,11 +43,48 @@ const fallbackDemoProfiles: ProfileSearchResult[] = [
   },
 ];
 
+function rankMediaResults(items: NormalizedMedia[], query: string): NormalizedMedia[] {
+  const qLower = query.toLowerCase().trim();
+  if (!qLower) return items;
+
+  return [...items].sort((a, b) => {
+    const aTitle = a.title.toLowerCase();
+    const bTitle = b.title.toLowerCase();
+
+    // 1. Exact title match
+    const aExact = aTitle === qLower;
+    const bExact = bTitle === qLower;
+    if (aExact !== bExact) return aExact ? -1 : 1;
+
+    // 2. Starts with query prefix
+    const aStarts = aTitle.startsWith(qLower);
+    const bStarts = bTitle.startsWith(qLower);
+    if (aStarts !== bStarts) return aStarts ? -1 : 1;
+
+    // 3. Word starts with query
+    const aWordStarts = aTitle.split(/\s+/).some((w) => w.startsWith(qLower));
+    const bWordStarts = bTitle.split(/\s+/).some((w) => w.startsWith(qLower));
+    if (aWordStarts !== bWordStarts) return aWordStarts ? -1 : 1;
+
+    // 4. Popularity (higher popularity first)
+    const aPop = a.popularity ?? 0;
+    const bPop = b.popularity ?? 0;
+    if (Math.abs(bPop - aPop) > 0.05) {
+      return bPop - aPop;
+    }
+
+    // 5. Rating as tie-breaker
+    return (b.rating || 0) - (a.rating || 0);
+  });
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const q = (searchParams.get("q") || "").trim();
   const type = searchParams.get("type") || "all";
   const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const limitParam = searchParams.get("limit");
+  const limit = limitParam ? parseInt(limitParam, 10) : undefined;
 
   if (!q) {
     return NextResponse.json({
@@ -116,7 +153,7 @@ export async function GET(req: NextRequest) {
     if (type !== "profiles") {
       if (type === "anime") {
         const animeResults = await anilist.searchAnime(q, 16);
-        mediaResults = animeResults.map(normalizeAniListAnime);
+        mediaResults = rankMediaResults(animeResults.map(normalizeAniListAnime), q);
         totalMedia = mediaResults.length;
         totalPages = Math.max(1, Math.ceil(totalMedia / 12));
       } else if (type === "movie") {
@@ -126,7 +163,7 @@ export async function GET(req: NextRequest) {
           total_pages: 1,
           total_results: 0,
         }));
-        mediaResults = (tmdbRes.results || []).map(normalizeTmdbMovie);
+        mediaResults = rankMediaResults((tmdbRes.results || []).map(normalizeTmdbMovie), q);
         totalPages = tmdbRes.total_pages || 1;
         totalMedia = tmdbRes.total_results || mediaResults.length;
       } else if (type === "series") {
@@ -136,13 +173,19 @@ export async function GET(req: NextRequest) {
           total_pages: 1,
           total_results: 0,
         }));
-        mediaResults = (tmdbRes.results || []).map(normalizeTmdbTV);
+        mediaResults = rankMediaResults((tmdbRes.results || []).map(normalizeTmdbTV), q);
         totalPages = tmdbRes.total_pages || 1;
         totalMedia = tmdbRes.total_results || mediaResults.length;
       } else {
-        // "all": query TMDb & AniList in parallel
-        const [tmdbRes, animeRes] = await Promise.all([
-          tmdb.searchMulti(q, page).catch(() => ({
+        // "all": query TMDb Movies, TMDb TV, and AniList Anime in parallel (avoids TMDb search/multi person pollution)
+        const [moviesRes, tvRes, animeRes] = await Promise.all([
+          tmdb.searchMovies(q, page).catch(() => ({
+            results: [],
+            page: 1,
+            total_pages: 1,
+            total_results: 0,
+          })),
+          tmdb.searchTV(q, page).catch(() => ({
             results: [],
             page: 1,
             total_pages: 1,
@@ -153,20 +196,23 @@ export async function GET(req: NextRequest) {
             : Promise.resolve([]),
         ]);
 
-        const tmdbNormalized = (tmdbRes.results || [])
-          .map((item) => {
-            if (item.media_type === "movie") return normalizeTmdbMovie(item);
-            if (item.media_type === "tv") return normalizeTmdbTV(item);
-            return null;
-          })
-          .filter(Boolean) as NormalizedMedia[];
-
+        const moviesNormalized = (moviesRes.results || []).map(normalizeTmdbMovie);
+        const tvNormalized = (tvRes.results || []).map(normalizeTmdbTV);
         const animeNormalized = (animeRes || []).map(normalizeAniListAnime);
 
-        // Interleave results naturally
-        mediaResults = [...tmdbNormalized, ...animeNormalized];
-        totalPages = tmdbRes.total_pages || 1;
-        totalMedia = (tmdbRes.total_results || 0) + animeNormalized.length;
+        mediaResults = rankMediaResults(
+          [...moviesNormalized, ...tvNormalized, ...animeNormalized],
+          q
+        );
+        totalPages = Math.max(moviesRes.total_pages || 1, tvRes.total_pages || 1);
+        totalMedia =
+          (moviesRes.total_results || 0) +
+          (tvRes.total_results || 0) +
+          animeNormalized.length;
+      }
+
+      if (limit && limit > 0) {
+        mediaResults = mediaResults.slice(0, limit);
       }
     }
 
@@ -175,7 +221,7 @@ export async function GET(req: NextRequest) {
       profiles: profileResults,
       pagination: {
         page,
-        totalPages: Math.min(totalPages, 50), // TMDb cap limit
+        totalPages: Math.min(totalPages, 50),
         totalMedia,
         totalProfiles: profileResults.length,
       },
