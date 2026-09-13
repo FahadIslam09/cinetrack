@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { RedesignedHomeView } from "@/components/home/redesigned-home-view";
 import { PreviousHomeView } from "@/components/home/previous-home-view";
+import { LandingView } from "@/components/landing/landing-view";
 
 export const revalidate = 1800; // 30 mins ISR
 
@@ -20,17 +21,19 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     return <PreviousHomeView searchParams={searchParams} />;
   }
 
+  // Unauthenticated visitors see the public Landing page
+  if (!user) {
+    return <LandingView />;
+  }
+
+  // Authenticated users see the Home page
   return (
     <RedesignedHomeView
-      user={
-        user
-          ? {
-              email: user.email,
-              avatarUrl: user.user_metadata?.avatar_url,
-              username: user.user_metadata?.user_name,
-            }
-          : null
-      }
+      user={{
+        email: user.email,
+        avatarUrl: user.user_metadata?.avatar_url,
+        username: user.user_metadata?.user_name,
+      }}
     />
   );
 }
