@@ -922,10 +922,6 @@ export function LandingView() {
               <p className="text-xs text-[#8B95A5] leading-relaxed max-w-xs">
                 A fast, minimal, worldwide social tracking platform to discover, track, rate, review, and share movies, TV series, and anime.
               </p>
-              <div className="flex items-center gap-2 text-[11px] text-[#22C55E] font-medium pt-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
-                <span>All systems operational</span>
-              </div>
             </div>
 
             {/* Col 2: Discover & Track */}
@@ -964,9 +960,14 @@ export function LandingView() {
             <span>
               &copy; {new Date().getFullYear()} CineTrack. All rights reserved.
             </span>
-            <span>
-              The modern cinematic watch library.
-            </span>
+            <a
+              href="https://fahadislam.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-[#3B9EFF] transition-colors"
+            >
+              Developer: Fahad Islam · fahadislam.com
+            </a>
           </div>
         </div>
       </footer>
