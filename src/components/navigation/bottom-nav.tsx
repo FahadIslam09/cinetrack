@@ -2,7 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import {
   Compass,
   Film,
@@ -21,11 +22,23 @@ import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 function BottomNavContent() {
+  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentType = searchParams.get("type");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+
+  const handleAddClick = async () => {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      const currentUrl = window.location.pathname + window.location.search;
+      router.push(`/login?next=${encodeURIComponent(currentUrl)}`);
+      return;
+    }
+    setIsAddOpen(true);
+  };
 
   // Lock background scrolling when More sheet is open
   useScrollLock(isMoreOpen);
@@ -213,7 +226,7 @@ function BottomNavContent() {
                   key={item.label}
                   type="button"
                   suppressHydrationWarning
-                  onClick={() => setIsAddOpen(true)}
+                  onClick={handleAddClick}
                   className="flex flex-col items-center justify-center min-w-[48px] h-full py-1 gap-0.5 group focus:outline-none cursor-pointer"
                   aria-label="Add to Library"
                 >

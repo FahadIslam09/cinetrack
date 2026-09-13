@@ -514,6 +514,11 @@ export function QuickAddModal({
       });
 
       if (res?.error) {
+        if (res.error.toLowerCase().includes("auth")) {
+          const currentUrl = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/library";
+          router.push(`/login?next=${encodeURIComponent(currentUrl)}`);
+          return;
+        }
         setErrorMessage(res.error);
         setIsSubmitting(false);
       } else {
@@ -547,6 +552,11 @@ export function QuickAddModal({
     try {
       const res = await deleteMediaLog(targetMedia.id);
       if (res?.error) {
+        if (res.error.toLowerCase().includes("auth")) {
+          const currentUrl = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/library";
+          router.push(`/login?next=${encodeURIComponent(currentUrl)}`);
+          return;
+        }
         setDeleteError(res.error);
         setIsDeleting(false);
       } else {
@@ -1328,7 +1338,7 @@ export function QuickAddModal({
                       <p>{errorMessage}</p>
                       {errorMessage.toLowerCase().includes("auth") && (
                         <Link
-                          href="/login"
+                          href={`/login?next=${encodeURIComponent(typeof window !== "undefined" ? window.location.pathname + window.location.search : "/library")}`}
                           className="text-xs font-bold text-white underline hover:no-underline"
                         >
                           Click here to sign in

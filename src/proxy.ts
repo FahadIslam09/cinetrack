@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
 const RESERVED_ROUTES = new Set([
   "api",
@@ -23,20 +24,61 @@ const RESERVED_ROUTES = new Set([
   "privacy",
 ]);
 
-export default function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+function copyCookies(from: NextResponse, to: NextResponse) {
+  from.cookies.getAll().forEach((cookie) => {
+    to.cookies.set(cookie.name, cookie.value, cookie);
+  });
+}
 
-  // 1. Rewrite /@username to /u/[username]
+export default async function proxy(request: NextRequest) {
+  const { supabaseResponse, user } = await updateSession(request);
+  const { pathname, search } = request.nextUrl;
+
+  // 1. Guarded routes: /library and /profile require authentication
+  if (!user) {
+    if (pathname === "/library" || pathname.startsWith("/library/")) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.search = `?next=${encodeURIComponent(pathname + search)}`;
+      const redirectResponse = NextResponse.redirect(loginUrl);
+      copyCookies(supabaseResponse, redirectResponse);
+      return redirectResponse;
+    }
+
+    if (pathname === "/profile" || pathname.startsWith("/profile/")) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.search = "?next=/profile";
+      const redirectResponse = NextResponse.redirect(loginUrl);
+      copyCookies(supabaseResponse, redirectResponse);
+      return redirectResponse;
+    }
+  } else {
+    // Authenticated users visiting /login get redirected to their library or next target
+    if (pathname === "/login") {
+      const nextTarget = request.nextUrl.searchParams.get("next") || "/library";
+      const targetUrl = new URL(nextTarget, request.url);
+      const redirectResponse = NextResponse.redirect(targetUrl);
+      copyCookies(supabaseResponse, redirectResponse);
+      return redirectResponse;
+    }
+  }
+
+  // 2. Rewrite /@username to /u/[username]
   if (pathname.startsWith("/@")) {
     const username = pathname.slice(2);
     if (username) {
       const url = request.nextUrl.clone();
       url.pathname = `/u/${username}`;
-      return NextResponse.rewrite(url);
+      const rewriteResponse = NextResponse.rewrite(url, {
+        request: { headers: request.headers },
+      });
+      copyCookies(supabaseResponse, rewriteResponse);
+      return rewriteResponse;
     }
   }
 
-  // 2. Check for root single-segment user handle: /username -> /u/username
+  // 3. Check for root single-segment user handle: /username -> /u/username
   const match = pathname.match(/^\/([a-zA-Z0-9_.-]+)$/);
   if (match) {
     const slug = match[1];
@@ -44,11 +86,15 @@ export default function proxy(request: NextRequest) {
     if (!RESERVED_ROUTES.has(slug.toLowerCase()) && !slug.includes(".")) {
       const url = request.nextUrl.clone();
       url.pathname = `/u/${slug}`;
-      return NextResponse.rewrite(url);
+      const rewriteResponse = NextResponse.rewrite(url, {
+        request: { headers: request.headers },
+      });
+      copyCookies(supabaseResponse, rewriteResponse);
+      return rewriteResponse;
     }
   }
 
-  return NextResponse.next();
+  return supabaseResponse;
 }
 
 export { proxy };

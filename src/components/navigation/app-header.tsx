@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, Bell, Film, Plus } from "lucide-react";
 import { QuickAddModal } from "../quick-add/quick-add-modal";
 import { LogoIcon } from "@/components/ui/logo-icon";
+import { createClient } from "@/lib/supabase/client";
 
 import { HeaderSearch } from "./header-search";
 
@@ -17,10 +18,56 @@ interface AppHeaderProps {
   } | null;
 }
 
-export function AppHeader({ user }: AppHeaderProps) {
+export function AppHeader({ user: initialUser }: AppHeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState(initialUser);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+
+  useEffect(() => {
+    if (initialUser !== undefined) {
+      setCurrentUser(initialUser);
+      return;
+    }
+
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setCurrentUser({
+          email: session.user.email,
+          avatarUrl: session.user.user_metadata?.avatar_url,
+          username: session.user.user_metadata?.user_name || session.user.email?.split("@")[0],
+        });
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUser({
+          email: session.user.email,
+          avatarUrl: session.user.user_metadata?.avatar_url,
+          username: session.user.user_metadata?.user_name || session.user.email?.split("@")[0],
+        });
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [initialUser]);
+
+  const handleQuickAdd = () => {
+    if (!currentUser) {
+      router.push(`/login?next=${encodeURIComponent(pathname)}`);
+      return;
+    }
+    setIsQuickAddOpen(true);
+  };
 
   return (
     <>
@@ -98,7 +145,7 @@ export function AppHeader({ user }: AppHeaderProps) {
             <button
               type="button"
               suppressHydrationWarning
-              onClick={() => setIsQuickAddOpen(true)}
+              onClick={handleQuickAdd}
               className="hidden md:inline-flex h-9 px-3 sm:px-3.5 rounded-lg bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs sm:text-[13px] items-center gap-1.5 transition-colors shadow-sm shrink-0 cursor-pointer"
               title="Add to Library"
             >
@@ -129,22 +176,22 @@ export function AppHeader({ user }: AppHeaderProps) {
             </button>
 
             {/* User Profile Avatar / Sign In */}
-            {user ? (
+            {currentUser ? (
               <Link
-                href={user.username ? `/${user.username}` : "/library"}
+                href={currentUser.username ? `/${currentUser.username}` : "/library"}
                 className="flex items-center shrink-0 pl-1"
                 title="User Profile"
               >
-                {user.avatarUrl ? (
+                {currentUser.avatarUrl ? (
                   <img
-                    src={user.avatarUrl}
+                    src={currentUser.avatarUrl}
                     alt="Profile"
                     referrerPolicy="no-referrer"
                     className="w-8 h-8 rounded-full object-cover border border-white/[0.06] hover:border-white/[0.16] ring-1 ring-white/[0.08] hover:ring-[#3B9EFF]/50 transition-all"
                   />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-[#3B9EFF]/20 border border-[#3B9EFF]/40 flex items-center justify-center text-xs font-semibold text-[#3B9EFF]">
-                    {user.email?.slice(0, 2).toUpperCase() || "U"}
+                    {currentUser.email?.slice(0, 2).toUpperCase() || "U"}
                   </div>
                 )}
               </Link>

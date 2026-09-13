@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 import { Plus, Check, Edit3, Play, X } from "lucide-react";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
@@ -9,6 +10,7 @@ import { ReviewModal } from "@/components/reviews/review-modal";
 import { getRatingConfig } from "@/lib/rating";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { TrailerPlayer, TrailerVideo } from "@/components/media/trailer-player";
+import { createClient } from "@/lib/supabase/client";
 
 interface MediaDetailsActionsProps {
   media: NormalizedMedia;
@@ -24,14 +26,26 @@ interface WriteReviewButtonProps {
 }
 
 export function WriteReviewButton({ media, initialLog }: WriteReviewButtonProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const hasReview = Boolean(initialLog?.reviewText && initialLog.reviewText.trim().length > 0);
+
+  const handleClick = async () => {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      const currentUrl = window.location.pathname + window.location.search;
+      router.push(`/login?next=${encodeURIComponent(currentUrl)}`);
+      return;
+    }
+    setIsOpen(true);
+  };
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={handleClick}
         className="text-xs text-[#3B9EFF] hover:text-[#5AAFFF] font-semibold uppercase tracking-wider transition cursor-pointer"
       >
         {hasReview ? "Edit Review" : "Write Review"}
@@ -59,10 +73,22 @@ export function MediaDetailsActions({
   trailerVideos = [],
   imdbId,
 }: MediaDetailsActionsProps) {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
   const [log, setLog] = useState(initialLog);
+
+  const requireAuthAndAct = async (action: () => void) => {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      const currentUrl = window.location.pathname + window.location.search;
+      router.push(`/login?next=${encodeURIComponent(currentUrl)}`);
+      return;
+    }
+    action();
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -122,7 +148,7 @@ export function MediaDetailsActions({
           {/* Add / Status Button */}
           <button
             type="button"
-            onClick={() => setIsQuickAddOpen(true)}
+            onClick={() => requireAuthAndAct(() => setIsQuickAddOpen(true))}
             className="flex-1 sm:flex-initial h-10 px-4 bg-[#3B9EFF] text-white rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-md hover:bg-[#5AAFFF] active:scale-95 transition-all cursor-pointer"
           >
             {log?.status ? (
@@ -154,7 +180,7 @@ export function MediaDetailsActions({
           {/* Rate Button */}
           <button
             type="button"
-            onClick={() => setIsQuickAddOpen(true)}
+            onClick={() => requireAuthAndAct(() => setIsQuickAddOpen(true))}
             className={`h-10 px-3.5 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 border active:scale-95 transition-all cursor-pointer shrink-0 ${
               ratingConfig
                 ? `${ratingConfig.bgColor} ${ratingConfig.borderColor} ${ratingConfig.textColor} hover:brightness-110`

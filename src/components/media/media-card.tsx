@@ -8,6 +8,7 @@ import { NormalizedMedia } from "@/lib/media/normalize";
 import { QuickAddModal } from "../quick-add/quick-add-modal";
 import { RatingCategory, getRatingConfig } from "@/lib/rating";
 import { upsertMediaLog } from "@/actions/tracking";
+import { createClient } from "@/lib/supabase/client";
 import { SeasonInfo } from "@/app/api/tv/[id]/seasons/route";
 import {
   calculateSeriesProgress,
@@ -327,10 +328,31 @@ export function MediaCard({
   const bottomRightText = getBottomRightText();
 
   // Fast episode progression (+1 EP) with season detection & double-click protection
+  const requireAuthAndAct = async (e: React.MouseEvent, action: () => void) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      const currentUrl = window.location.pathname + window.location.search;
+      router.push(`/login?next=${encodeURIComponent(currentUrl)}`);
+      return;
+    }
+    action();
+  };
+
   const handleAdvanceEpisode = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (isAdvancing) return;
+
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      const currentUrl = window.location.pathname + window.location.search;
+      router.push(`/login?next=${encodeURIComponent(currentUrl)}`);
+      return;
+    }
 
     setIsAdvancing(true);
 
@@ -503,11 +525,7 @@ export function MediaCard({
             <div className="hidden lg:flex absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none items-center justify-center p-3 z-10">
               <button
                 type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setIsQuickAddOpen(true);
-                }}
+                onClick={(e) => requireAuthAndAct(e, () => setIsQuickAddOpen(true))}
                 className={`pointer-events-auto px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 backdrop-blur-xl text-white text-xs font-semibold shadow-2xl transition-all duration-200 active:scale-95 flex items-center gap-2 cursor-pointer ${localStatus
                   ? "border border-white/20 hover:border-[#22C55E] hover:shadow-[0_0_16px_rgba(34,197,94,0.35)]"
                   : "border border-white/20 hover:border-[#3B9EFF] hover:shadow-[0_0_16px_rgba(59,158,255,0.35)]"
@@ -532,11 +550,7 @@ export function MediaCard({
           {!readOnly && localStatus && (
             <button
               type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsQuickAddOpen(true);
-              }}
+              onClick={(e) => requireAuthAndAct(e, () => setIsQuickAddOpen(true))}
               className="lg:hidden absolute bottom-2 left-2 w-8 h-8 rounded-full bg-[#121824]/90 hover:bg-[#1A2434] active:scale-90 backdrop-blur-md border border-white/20 text-[#A8B0BD] hover:text-white flex items-center justify-center shadow-lg z-20 cursor-pointer transition-all duration-150"
               title="Edit Log"
               aria-label="Edit Log"
@@ -571,11 +585,7 @@ export function MediaCard({
           ) : !localStatus ? (
             <button
               type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsQuickAddOpen(true);
-              }}
+              onClick={(e) => requireAuthAndAct(e, () => setIsQuickAddOpen(true))}
               className="lg:hidden absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#121824]/90 hover:bg-[#3B9EFF] active:scale-90 backdrop-blur-md border border-white/15 text-[#3B9EFF] hover:text-white flex items-center justify-center shadow-lg z-20 cursor-pointer transition-all duration-150"
               title="Add to Library"
               aria-label="Add to Library"
@@ -633,11 +643,7 @@ export function MediaCard({
             {bottomTag ? (
               <button
                 type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setIsQuickAddOpen(true);
-                }}
+                onClick={(e) => requireAuthAndAct(e, () => setIsQuickAddOpen(true))}
                 className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-80 active:scale-95 cursor-pointer shrink-0 whitespace-nowrap ${bottomTag.className}`}
                 title="Click to rate or edit"
               >
