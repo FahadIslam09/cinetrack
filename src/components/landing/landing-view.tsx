@@ -29,54 +29,244 @@ import {
 } from "lucide-react";
 import { LogoIcon } from "@/components/ui/logo-icon";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { MediaCard } from "@/components/media/media-card";
+import { NormalizedMedia } from "@/lib/media/normalize";
 
-// 4 Highlight Cinema Cards from Section 3 of mockup
-const HIGHLIGHT_MOVIES = [
-  {
-    title: "Dune: Part Two",
-    year: "2024",
-    genre: "Sci-Fi",
-    duration: "2h 46m",
-    rating: "8.9",
-    platform: "Max",
-    platformDot: "bg-[#3B9EFF]",
-    quote: "“A staggering cinematic spectacle of prophecy and power.”",
-    poster: "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
-  },
-  {
-    title: "Anatomy of a Fall",
-    year: "2023",
-    genre: "Thriller/Drama",
-    duration: "2h 31m",
-    rating: "8.8",
-    platform: "Hulu",
-    platformDot: "bg-[#22C55E]",
-    quote: "“Ruthlessly gripping dissection of truth and domestic intimacy.”",
-    poster: "https://image.tmdb.org/t/p/w500/1ho0d4LNZw3Y0voeKmSvPSgJOJ2.jpg",
-  },
-  {
-    title: "The Zone of Interest",
-    year: "2023",
-    genre: "Drama/History",
-    duration: "1h 45m",
-    rating: "8.7",
-    platform: "Max",
-    platformDot: "bg-[#3B9EFF]",
-    quote: "“Chilling, unforgettable sound design and structural precision.”",
-    poster: "https://image.tmdb.org/t/p/w500/hUu9zyZmDd8VZegKi1iK1Vk0RYS.jpg",
-  },
-  {
-    title: "Past Lives",
-    year: "2023",
-    genre: "Romance/Drama",
-    duration: "1h 46m",
-    rating: "8.9",
-    platform: "Netflix",
-    platformDot: "bg-[#F43F5E]",
-    quote: "“A bittersweet, tender portrait of destiny and quiet longing.”",
-    poster: "https://image.tmdb.org/t/p/w500/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg",
-  },
-];
+// Highlights catalog organized by category matching Discover page design
+const HIGHLIGHT_MOVIES_BY_CATEGORY: Record<string, NormalizedMedia[]> = {
+  all: [
+    {
+      id: "tmdb:movie:693134",
+      source: "tmdb",
+      sourceId: "693134",
+      mediaType: "movie",
+      title: "Dune: Part Two",
+      year: "2024",
+      rating: 8.9,
+      posterPath: "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 166,
+      genres: ["Sci-Fi", "Adventure"],
+    },
+    {
+      id: "tmdb:movie:915935",
+      source: "tmdb",
+      sourceId: "915935",
+      mediaType: "movie",
+      title: "Anatomy of a Fall",
+      year: "2023",
+      rating: 8.8,
+      posterPath: "https://image.tmdb.org/t/p/w500/1ho0d4LNZw3Y0voeKmSvPSgJOJ2.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 151,
+      genres: ["Thriller", "Drama"],
+    },
+    {
+      id: "tmdb:movie:467244",
+      source: "tmdb",
+      sourceId: "467244",
+      mediaType: "movie",
+      title: "The Zone of Interest",
+      year: "2023",
+      rating: 8.7,
+      posterPath: "https://image.tmdb.org/t/p/w500/hUu9zyZmDd8VZegKi1iK1Vk0RYS.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 105,
+      genres: ["Drama", "History"],
+    },
+    {
+      id: "tmdb:movie:666277",
+      source: "tmdb",
+      sourceId: "666277",
+      mediaType: "movie",
+      title: "Past Lives",
+      year: "2023",
+      rating: 8.9,
+      posterPath: "https://image.tmdb.org/t/p/w500/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 106,
+      genres: ["Romance", "Drama"],
+    },
+  ],
+  theaters: [
+    {
+      id: "tmdb:movie:693134",
+      source: "tmdb",
+      sourceId: "693134",
+      mediaType: "movie",
+      title: "Dune: Part Two",
+      year: "2024",
+      rating: 8.9,
+      posterPath: "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 166,
+      genres: ["Sci-Fi", "Adventure"],
+    },
+    {
+      id: "tmdb:movie:786892",
+      source: "tmdb",
+      sourceId: "786892",
+      mediaType: "movie",
+      title: "Furiosa: A Mad Max Saga",
+      year: "2024",
+      rating: 8.6,
+      posterPath: "https://image.tmdb.org/t/p/w500/iADOJ8Zymht2JPMoy3R7xUMZ51f.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 148,
+      genres: ["Action", "Sci-Fi"],
+    },
+    {
+      id: "tmdb:movie:937287",
+      source: "tmdb",
+      sourceId: "937287",
+      mediaType: "movie",
+      title: "Challengers",
+      year: "2024",
+      rating: 8.4,
+      posterPath: "https://image.tmdb.org/t/p/w500/H6vke7zGiuL7zVg3CYHu9IW40Q.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 131,
+      genres: ["Drama", "Romance"],
+    },
+    {
+      id: "tmdb:movie:929590",
+      source: "tmdb",
+      sourceId: "929590",
+      mediaType: "movie",
+      title: "Civil War",
+      year: "2024",
+      rating: 8.5,
+      posterPath: "https://image.tmdb.org/t/p/w500/sh7Rg8Er3tFcN9BpKIPOMvALgZd.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 109,
+      genres: ["War", "Action"],
+    },
+  ],
+  netflix: [
+    {
+      id: "tmdb:movie:666277",
+      source: "tmdb",
+      sourceId: "666277",
+      mediaType: "movie",
+      title: "Past Lives",
+      year: "2023",
+      rating: 8.9,
+      posterPath: "https://image.tmdb.org/t/p/w500/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 106,
+      genres: ["Romance", "Drama"],
+    },
+    {
+      id: "tmdb:movie:906121",
+      source: "tmdb",
+      sourceId: "906121",
+      mediaType: "movie",
+      title: "Society of the Snow",
+      year: "2023",
+      rating: 8.7,
+      posterPath: "https://image.tmdb.org/t/p/w500/2AFlKwF81kC48WnI6Wspz2oVzV5.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 144,
+      genres: ["Adventure", "Drama"],
+    },
+    {
+      id: "tmdb:movie:974635",
+      source: "tmdb",
+      sourceId: "974635",
+      mediaType: "movie",
+      title: "Hit Man",
+      year: "2023",
+      rating: 8.5,
+      posterPath: "https://image.tmdb.org/t/p/w500/51tqzRkhn5nQ27dI7vK0k1gLp3G.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 115,
+      genres: ["Comedy", "Romance"],
+    },
+    {
+      id: "tmdb:movie:661374",
+      source: "tmdb",
+      sourceId: "661374",
+      mediaType: "movie",
+      title: "Glass Onion",
+      year: "2022",
+      rating: 8.6,
+      posterPath: "https://image.tmdb.org/t/p/w500/vDGr1YdrlfbU9wxTOdpf3zChmv9.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 139,
+      genres: ["Mystery", "Comedy"],
+    },
+  ],
+  critics: [
+    {
+      id: "tmdb:movie:915935",
+      source: "tmdb",
+      sourceId: "915935",
+      mediaType: "movie",
+      title: "Anatomy of a Fall",
+      year: "2023",
+      rating: 8.8,
+      posterPath: "https://image.tmdb.org/t/p/w500/1ho0d4LNZw3Y0voeKmSvPSgJOJ2.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 151,
+      genres: ["Thriller", "Drama"],
+    },
+    {
+      id: "tmdb:movie:467244",
+      source: "tmdb",
+      sourceId: "467244",
+      mediaType: "movie",
+      title: "The Zone of Interest",
+      year: "2023",
+      rating: 8.7,
+      posterPath: "https://image.tmdb.org/t/p/w500/hUu9zyZmDd8VZegKi1iK1Vk0RYS.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 105,
+      genres: ["Drama", "History"],
+    },
+    {
+      id: "tmdb:movie:666277",
+      source: "tmdb",
+      sourceId: "666277",
+      mediaType: "movie",
+      title: "Past Lives",
+      year: "2023",
+      rating: 8.9,
+      posterPath: "https://image.tmdb.org/t/p/w500/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 106,
+      genres: ["Romance", "Drama"],
+    },
+    {
+      id: "tmdb:movie:872585",
+      source: "tmdb",
+      sourceId: "872585",
+      mediaType: "movie",
+      title: "Oppenheimer",
+      year: "2023",
+      rating: 8.9,
+      posterPath: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+      backdropPath: null,
+      totalEpisodes: 1,
+      runtime: 180,
+      genres: ["History", "Drama"],
+    },
+  ],
+};
 
 export function LandingView() {
   const router = useRouter();
@@ -84,14 +274,19 @@ export function LandingView() {
   const [claimUsername, setClaimUsername] = useState("");
   const [copiedProfile, setCopiedProfile] = useState(false);
   const [copiedShareList, setCopiedShareList] = useState(false);
-  const [addedVault, setAddedVault] = useState<Record<string, boolean>>({});
+
+  const currentCategoryMovies =
+    HIGHLIGHT_MOVIES_BY_CATEGORY[activeCategory] || HIGHLIGHT_MOVIES_BY_CATEGORY.all;
 
   const handleCopyShareList = () => {
     const text =
       `This Week's CineTrack Highlights:\n` +
-      HIGHLIGHT_MOVIES.map(
-        (m, idx) => `${idx + 1}. ${m.title} (${m.year}) ★ ${m.rating} [${m.platform}] - ${m.quote}`
-      ).join("\n") +
+      currentCategoryMovies
+        .map(
+          (m, idx) =>
+            `${idx + 1}. ${m.title} (${m.year}) ★ ${m.rating.toFixed(1)} - ${m.genres.join(", ")}`
+        )
+        .join("\n") +
       `\n\nMore at cinetrack.app`;
 
     navigator.clipboard.writeText(text);
@@ -112,10 +307,6 @@ export function LandingView() {
     } else {
       router.push("/login");
     }
-  };
-
-  const toggleVault = (title: string) => {
-    setAddedVault((prev) => ({ ...prev, [title]: !prev[title] }));
   };
 
   return (
@@ -410,80 +601,23 @@ export function LandingView() {
             </div>
           </ScrollReveal>
 
-          {/* 4 Featured Movie Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-5 mb-8">
-            {HIGHLIGHT_MOVIES.map((movie, idx) => {
-              const isAdded = addedVault[movie.title];
-              return (
-                <ScrollReveal key={movie.title} delay={idx * 100} distance={28} className="h-full">
-                  <div className="flex flex-col bg-[#1D2734] rounded-xl overflow-hidden shadow-md group hover:-translate-y-1 transition-transform border border-white/[0.06] h-full">
-                    {/* Poster Area */}
-                    <div className="relative w-full aspect-[2/3] bg-[#1B2029] overflow-hidden">
-                      <img
-                        src={movie.poster}
-                        alt={movie.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 px-1.5 sm:px-2 py-0.5 rounded bg-[#0F141D]/85 backdrop-blur text-[9px] sm:text-[10px] font-bold text-[#F5F7FA] flex items-center gap-1 border border-white/[0.06]">
-                        <span className={`w-1.5 h-1.5 rounded-full ${movie.platformDot}`} />
-                        <span>{movie.platform}</span>
-                      </div>
-                      <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 px-1.5 sm:px-2 py-0.5 rounded bg-[#0F141D]/85 backdrop-blur text-[10px] sm:text-[11px] font-bold text-[#F5C84B] flex items-center gap-0.5 border border-white/[0.06]">
-                        <Star className="w-3 h-3 fill-[#F5C84B]" />
-                        <span>{movie.rating}</span>
-                      </div>
-                    </div>
-
-                    {/* Card Body */}
-                    <div className="p-2.5 sm:p-4 flex flex-col flex-1 justify-between bg-[#1D2734]">
-                      <div>
-                        <h3 className="font-bold text-xs sm:text-sm text-[#F5F7FA] truncate">
-                          {movie.title}
-                        </h3>
-                        <div className="text-[10px] sm:text-[11px] text-[#6F7886] mb-1.5 font-medium truncate">
-                          {movie.year} • {movie.genre} • {movie.duration}
-                        </div>
-                        <p className="text-[11px] sm:text-[12px] text-[#A8B0BD] italic border-l-2 border-[#3B9EFF]/40 pl-2 leading-snug mb-2.5 line-clamp-2">
-                          {movie.quote}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 sm:gap-2 pt-2 border-t border-white/[0.06]">
-                        <button
-                          type="button"
-                          onClick={() => toggleVault(movie.title)}
-                          className={`flex-1 h-7 sm:h-8 text-[10px] sm:text-[11px] font-semibold rounded flex items-center justify-center gap-1 transition-colors cursor-pointer ${
-                            isAdded
-                              ? "bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
-                              : "bg-[#1A2330] hover:bg-[#253244] text-[#F5F7FA] border border-white/[0.06]"
-                          }`}
-                        >
-                          {isAdded ? (
-                            <>
-                              <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                              <span>Vaulted</span>
-                            </>
-                          ) : (
-                            <>
-                              <BookmarkPlus className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#3B9EFF]" />
-                              <span>Vault</span>
-                            </>
-                          )}
-                        </button>
-                        <Link
-                          href="/login"
-                          className="h-7 sm:h-8 px-2 sm:px-2.5 bg-[#1A2330] hover:bg-[#253244] text-[#F5C84B] font-semibold text-[10px] sm:text-[11px] rounded flex items-center justify-center gap-0.5 transition-colors border border-white/[0.06]"
-                          title="Rate this movie"
-                        >
-                          <Star className="w-3 h-3 fill-[#F5C84B]" />
-                          <span>Rate</span>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </ScrollReveal>
-              );
-            })}
+          {/* 4 Featured Movie Cards matching Discover page design */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-5 mb-8">
+            {currentCategoryMovies.map((movie, idx) => (
+              <ScrollReveal
+                key={`${activeCategory}-${movie.id}`}
+                delay={idx * 80}
+                distance={24}
+                className="h-full"
+              >
+                <MediaCard
+                  media={movie}
+                  userRating={movie.rating >= 8.8 ? "masterpiece" : "good"}
+                  readOnly={true}
+                  className="w-full h-full"
+                />
+              </ScrollReveal>
+            ))}
           </div>
 
           {/* Action Row */}
