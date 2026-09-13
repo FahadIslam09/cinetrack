@@ -22,6 +22,7 @@ import { db } from "@/lib/db";
 import { mediaItems, profiles, userMediaLogs } from "@/lib/db/schema";
 import { eq, and, ne, isNotNull, desc, count } from "drizzle-orm";
 import { getConsensusRating, RatingCategory } from "@/lib/rating";
+import { getImdbGenres } from "@/lib/imdb/client";
 
 interface PageProps {
   params: Promise<{
@@ -68,6 +69,24 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
   // Extract IMDb ID for unrestricted trailer / video gallery fallback
   const imdbId: string | null =
     rawDetails?.imdb_id || rawDetails?.external_ids?.imdb_id || null;
+
+  // Enrich genres with IMDb genres if available
+  if (imdbId) {
+    try {
+      const imdbGenres = await getImdbGenres(imdbId);
+      if (imdbGenres.length > 0) {
+        const existingLower = new Set(media.genres.map((g) => g.toLowerCase()));
+        for (const ig of imdbGenres) {
+          if (!existingLower.has(ig.toLowerCase())) {
+            media.genres.push(ig);
+            existingLower.add(ig.toLowerCase());
+          }
+        }
+      }
+    } catch (err) {
+      console.error("IMDb genres enrichment error:", err);
+    }
+  }
 
   // Extract YouTube trailers & clips
   let trailerVideos: TrailerVideo[] = [];
@@ -549,9 +568,11 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
                       <span className="text-[#4B5563]">•</span>
                     </>
                   )}
-                  <span className="text-[#A8B0BD] font-medium">
-                    {media.genres.slice(0, 2).join(", ")}
-                  </span>
+                  {media.genres && media.genres.length > 0 && (
+                    <span className="text-[#A8B0BD] font-medium">
+                      {media.genres.join(", ")}
+                    </span>
+                  )}
                 </div>
 
                 <h1 className="font-extrabold text-xl sm:text-3xl text-[#F5F7FA] tracking-tight">

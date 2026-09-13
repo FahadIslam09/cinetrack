@@ -80,10 +80,12 @@ export function normalizeTmdbMovie(item: any): NormalizedMedia {
     rating,
     totalEpisodes: 1,
     runtime: item.runtime || undefined,
-    genres:
-      item.genres?.map((g: any) => g.name) ||
-      item.genre_ids?.map((id: number) => TMDB_GENRE_MAP[id]).filter(Boolean) ||
-      [],
+    genres: Array.from(
+      new Set([
+        ...(item.genres?.map((g: any) => g.name) || []),
+        ...(item.genre_ids?.map((id: number) => TMDB_GENRE_MAP[id]).filter(Boolean) || []),
+      ])
+    ),
     synopsis: item.overview,
     streamingProviders: item["watch/providers"]?.results || {},
     popularity: typeof item.popularity === "number" ? item.popularity : 0,
@@ -111,11 +113,13 @@ export function normalizeTmdbTV(item: any): NormalizedMedia {
     status: item.status,
     rating,
     totalEpisodes: item.number_of_episodes || 1,
-    runtime: item.episode_run_time?.[0] || undefined,
-    genres:
-      item.genres?.map((g: any) => g.name) ||
-      item.genre_ids?.map((id: number) => TMDB_GENRE_MAP[id]).filter(Boolean) ||
-      [],
+    runtime: item.episode_run_time?.[0] || item.last_episode_to_air?.runtime || 45,
+    genres: Array.from(
+      new Set([
+        ...(item.genres?.map((g: any) => g.name) || []),
+        ...(item.genre_ids?.map((id: number) => TMDB_GENRE_MAP[id]).filter(Boolean) || []),
+      ])
+    ),
     synopsis: item.overview,
     streamingProviders: item["watch/providers"]?.results || {},
     popularity: typeof item.popularity === "number" ? item.popularity : 0,
