@@ -28,6 +28,7 @@ import {
   Compass,
 } from "lucide-react";
 import { LogoIcon } from "@/components/ui/logo-icon";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 // 4 Highlight Cinema Cards from Section 3 of mockup
 const HIGHLIGHT_MOVIES = [
@@ -179,37 +180,43 @@ export function LandingView() {
 
           <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 flex flex-col items-center">
             {/* Main CineTrack Headline (Option 1) */}
-            <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-[54px] xl:text-6xl font-black tracking-tight text-white leading-[1.12] mb-3 sm:mb-4 drop-shadow-md text-center">
-              <span className="sm:whitespace-nowrap">Track what you watch.</span>{" "}
-              <br className="hidden sm:inline" />
-              <span className="text-[#3B9EFF] sm:whitespace-nowrap">
-                Recommend what they&apos;ll love.
-              </span>
-            </h1>
+            <ScrollReveal delay={80} distance={20}>
+              <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-[54px] xl:text-6xl font-black tracking-tight text-white leading-[1.12] mb-3 sm:mb-4 drop-shadow-md text-center">
+                <span className="sm:whitespace-nowrap">Track what you watch.</span>{" "}
+                <br className="hidden sm:inline" />
+                <span className="text-[#3B9EFF] sm:whitespace-nowrap">
+                  Recommend what they&apos;ll love.
+                </span>
+              </h1>
+            </ScrollReveal>
 
             {/* Subtitle (Option 1) */}
-            <p className="text-sm sm:text-lg text-[#CBD5E1] max-w-2xl mx-auto mb-6 sm:mb-8 font-normal leading-relaxed drop-shadow">
-              CineTrack organizes every movie, series, and anime you&apos;ve ever experienced. When friends ask for a recommendation, send tailored picks by vibe or share your profile link instantly.
-            </p>
+            <ScrollReveal delay={200} distance={20}>
+              <p className="text-sm sm:text-lg text-[#CBD5E1] max-w-2xl mx-auto mb-6 sm:mb-8 font-normal leading-relaxed drop-shadow">
+                CineTrack organizes every movie, series, and anime you&apos;ve ever experienced. When friends ask for a recommendation, send tailored picks by vibe or share your profile link instantly.
+              </p>
+            </ScrollReveal>
 
             {/* Dual Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
-              <Link
-                href="/login"
-                className="w-full sm:w-auto h-12 sm:h-13 px-7 sm:px-8 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#3B9EFF]/25 transition-all active:scale-95 cursor-pointer"
-              >
-                <span>Get Started</span>
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Link>
+            <ScrollReveal delay={320} distance={20}>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <Link
+                  href="/login"
+                  className="w-full sm:w-auto h-12 sm:h-13 px-7 sm:px-8 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#3B9EFF]/25 transition-all active:scale-95 cursor-pointer"
+                >
+                  <span>Get Started</span>
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Link>
 
-              <Link
-                href="/discover"
-                className="w-full sm:w-auto h-12 sm:h-13 px-6 sm:px-7 bg-[#1A2330]/80 hover:bg-[#253244] border border-white/[0.12] hover:border-white/[0.24] text-[#F5F7FA] font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 transition-all backdrop-blur-sm active:scale-95 shadow-sm"
-              >
-                <Compass className="w-4 h-4 sm:w-5 sm:h-5 text-[#3B9EFF]" />
-                <span>Explore Discover</span>
-              </Link>
-            </div>
+                <Link
+                  href="/discover"
+                  className="w-full sm:w-auto h-12 sm:h-13 px-6 sm:px-7 bg-[#1A2330]/80 hover:bg-[#253244] border border-white/[0.12] hover:border-white/[0.24] text-[#F5F7FA] font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 transition-all backdrop-blur-sm active:scale-95 shadow-sm"
+                >
+                  <Compass className="w-4 h-4 sm:w-5 sm:h-5 text-[#3B9EFF]" />
+                  <span>Explore Discover</span>
+                </Link>
+              </div>
+            </ScrollReveal>
           </div>
 
           {/* Netflix Signature Curved Bottom Arch Separator */}
@@ -219,126 +226,134 @@ export function LandingView() {
         {/* 2. "HOW IT WORKS IN 3 SIMPLE STEPS" */}
         <section id="how-it-works" className="w-full bg-[#171C25] py-16 lg:py-20 border-y border-white/[0.06]">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-3">
-              <div>
-                <div className="text-[#3B9EFF] text-[11px] font-bold tracking-wider uppercase mb-1">
-                  Architecture
+            <ScrollReveal distance={24}>
+              <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-3">
+                <div>
+                  <div className="text-[#3B9EFF] text-[11px] font-bold tracking-wider uppercase mb-1">
+                    Architecture
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA]">
+                    How It Works in 3 Simple Steps
+                  </h2>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA]">
-                  How It Works in 3 Simple Steps
-                </h2>
+                <p className="text-xs sm:text-sm text-[#A8B0BD] max-w-md leading-relaxed">
+                  Built for film lovers who take pride in their watchlists and want zero friction
+                  when recommending to others.
+                </p>
               </div>
-              <p className="text-xs sm:text-sm text-[#A8B0BD] max-w-md leading-relaxed">
-                Built for film lovers who take pride in their watchlists and want zero friction
-                when recommending to others.
-              </p>
-            </div>
+            </ScrollReveal>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {/* Step 01 */}
-              <div className="bg-[#1D2734] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06]">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-bold text-sm text-[#F5F7FA]">1. Log What You Watch</h3>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1B2029] text-[#A8B0BD]">
-                      01
-                    </span>
+              <ScrollReveal delay={100} distance={28} className="h-full">
+                <div className="bg-[#1D2734] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06] h-full">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold text-sm text-[#F5F7FA]">1. Log What You Watch</h3>
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1B2029] text-[#A8B0BD]">
+                        01
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#A8B0BD] mb-5 leading-relaxed">
+                      Rate titles 1–10, tag by emotional vibe (Hilarious, Mind-Bending, Cozy), and
+                      jot 1-line spoiler-free curator notes.
+                    </p>
                   </div>
-                  <p className="text-xs text-[#A8B0BD] mb-5 leading-relaxed">
-                    Rate titles 1–10, tag by emotional vibe (Hilarious, Mind-Bending, Cozy), and
-                    jot 1-line spoiler-free curator notes.
-                  </p>
-                </div>
 
-                {/* Mini Mock Log */}
-                <div className="bg-[#090E17] p-3.5 rounded-lg border border-white/[0.06]">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-semibold text-[#F5F7FA] truncate">
-                      Superbad (2007)
-                    </span>
-                    <span className="text-xs font-bold text-[#F5C84B] flex items-center gap-0.5">
-                      <Star className="w-3 h-3 fill-[#F5C84B]" />
-                      <span>8.8</span>
-                    </span>
+                  {/* Mini Mock Log */}
+                  <div className="bg-[#090E17] p-3.5 rounded-lg border border-white/[0.06]">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-semibold text-[#F5F7FA] truncate">
+                        Superbad (2007)
+                      </span>
+                      <span className="text-xs font-bold text-[#F5C84B] flex items-center gap-0.5">
+                        <Star className="w-3 h-3 fill-[#F5C84B]" />
+                        <span>8.8</span>
+                      </span>
+                    </div>
+                    <div className="inline-flex items-center px-2 py-0.5 rounded bg-[#1B2029] text-[10px] font-semibold text-[#3B9EFF] mb-1.5">
+                      😂 Hilarious &amp; Feel-Good
+                    </div>
+                    <p className="text-[11px] text-[#A8B0BD] italic">
+                      &ldquo;Funniest high-school chaos ever written.&rdquo;
+                    </p>
                   </div>
-                  <div className="inline-flex items-center px-2 py-0.5 rounded bg-[#1B2029] text-[10px] font-semibold text-[#3B9EFF] mb-1.5">
-                    😂 Hilarious &amp; Feel-Good
-                  </div>
-                  <p className="text-[11px] text-[#A8B0BD] italic">
-                    &ldquo;Funniest high-school chaos ever written.&rdquo;
-                  </p>
                 </div>
-              </div>
+              </ScrollReveal>
 
               {/* Step 02 */}
-              <div className="bg-[#1D2734] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06]">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-bold text-sm text-[#F5F7FA]">2. Friend Asks for a Pick</h3>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1B2029] text-[#A8B0BD]">
-                      02
-                    </span>
+              <ScrollReveal delay={200} distance={28} className="h-full">
+                <div className="bg-[#1D2734] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06] h-full">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold text-sm text-[#F5F7FA]">2. Friend Asks for a Pick</h3>
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1B2029] text-[#A8B0BD]">
+                        02
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#A8B0BD] mb-5 leading-relaxed">
+                      Friend asks: &ldquo;Got any funny movie for tonight?&rdquo; Filter your catalog
+                      by vibe &amp; their streaming apps in 2 clicks.
+                    </p>
                   </div>
-                  <p className="text-xs text-[#A8B0BD] mb-5 leading-relaxed">
-                    Friend asks: &ldquo;Got any funny movie for tonight?&rdquo; Filter your catalog
-                    by vibe &amp; their streaming apps in 2 clicks.
-                  </p>
-                </div>
 
-                {/* Mini Mock Vibe Toggle */}
-                <div className="bg-[#090E17] p-3.5 rounded-lg border border-white/[0.06]">
-                  <div className="flex items-center justify-between text-[10px] font-bold text-[#6F7886] mb-2 uppercase tracking-wide">
-                    <span>Filter Query</span>
-                    <span className="text-[#22C55E]">4 Matched</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mb-2">
-                    <span className="inline-flex items-center gap-1 bg-[#3B9EFF]/20 text-[#3B9EFF] px-2 py-0.5 rounded text-[11px] font-semibold">
-                      <span>😂</span>
-                      <span>Hilarious</span>
-                    </span>
-                    <span className="inline-flex items-center gap-1 bg-[#1B2029] text-[#A8B0BD] px-2 py-0.5 rounded text-[11px] font-semibold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#F43F5E]" />
-                      <span>Netflix</span>
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-[#6F7886] flex items-center gap-1 font-medium">
-                    <Zap className="w-3 h-3 text-[#F5C84B]" />
-                    <span>Ready to dispatch instantly</span>
+                  {/* Mini Mock Vibe Toggle */}
+                  <div className="bg-[#090E17] p-3.5 rounded-lg border border-white/[0.06]">
+                    <div className="flex items-center justify-between text-[10px] font-bold text-[#6F7886] mb-2 uppercase tracking-wide">
+                      <span>Filter Query</span>
+                      <span className="text-[#22C55E]">4 Matched</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      <span className="inline-flex items-center gap-1 bg-[#3B9EFF]/20 text-[#3B9EFF] px-2 py-0.5 rounded text-[11px] font-semibold">
+                        <span>😂</span>
+                        <span>Hilarious</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 bg-[#1B2029] text-[#A8B0BD] px-2 py-0.5 rounded text-[11px] font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#F43F5E]" />
+                        <span>Netflix</span>
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-[#6F7886] flex items-center gap-1 font-medium">
+                      <Zap className="w-3 h-3 text-[#F5C84B]" />
+                      <span>Ready to dispatch instantly</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </ScrollReveal>
 
               {/* Step 03 */}
-              <div className="bg-[#1D2734] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06]">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-bold text-sm text-[#F5F7FA]">3. Share Instantly</h3>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1B2029] text-[#A8B0BD]">
-                      03
-                    </span>
-                  </div>
-                  <p className="text-xs text-[#A8B0BD] mb-5 leading-relaxed">
-                    Copy a formatted text bundle directly into WhatsApp/iMessage, or send your
-                    clean public profile link{" "}
-                    <code className="text-[#3B9EFF] font-mono text-[11px]">cinetrack.app/@you</code>.
-                  </p>
-                </div>
-
-                {/* Mini Mock Message Preview */}
-                <div className="bg-[#090E17] p-3.5 rounded-lg border border-white/[0.06]">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#6F7886] mb-1.5 uppercase">
-                    <Send className="w-3 h-3 text-[#22C55E]" />
-                    <span>WhatsApp Preview</span>
-                  </div>
-                  <div className="bg-[#1A2330] p-2.5 rounded text-[11px] text-[#A8B0BD] leading-snug">
-                    <p className="text-[#F5F7FA] font-bold mb-1">
-                      Hey! 3 funny movie picks from my CineTrack:
+              <ScrollReveal delay={300} distance={28} className="h-full">
+                <div className="bg-[#1D2734] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06] h-full">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold text-sm text-[#F5F7FA]">3. Share Instantly</h3>
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1B2029] text-[#A8B0BD]">
+                        03
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#A8B0BD] mb-5 leading-relaxed">
+                      Copy a formatted text bundle directly into WhatsApp/iMessage, or send your
+                      clean public profile link{" "}
+                      <code className="text-[#3B9EFF] font-mono text-[11px]">cinetrack.app/@you</code>.
                     </p>
-                    <p className="truncate">1. Superbad (★ 8.8) • Netflix</p>
-                    <p className="truncate">2. What We Do in the Shadows (★ 8.8)...</p>
+                  </div>
+
+                  {/* Mini Mock Message Preview */}
+                  <div className="bg-[#090E17] p-3.5 rounded-lg border border-white/[0.06]">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#6F7886] mb-1.5 uppercase">
+                      <Send className="w-3 h-3 text-[#22C55E]" />
+                      <span>WhatsApp Preview</span>
+                    </div>
+                    <div className="bg-[#1A2330] p-2.5 rounded text-[11px] text-[#A8B0BD] leading-snug">
+                      <p className="text-[#F5F7FA] font-bold mb-1">
+                        Hey! 3 funny movie picks from my CineTrack:
+                      </p>
+                      <p className="truncate">1. Superbad (★ 8.8) • Netflix</p>
+                      <p className="truncate">2. What We Do in the Shadows (★ 8.8)...</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </ScrollReveal>
             </div>
           </div>
         </section>
@@ -348,154 +363,159 @@ export function LandingView() {
           id="demo-section"
           className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-16 lg:py-20"
         >
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1B2029] text-[#A1C9FF] text-[11px] font-semibold tracking-widest uppercase mb-3 shadow-sm border border-white/[0.06]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#3B9EFF] animate-pulse" />
-              THIS WEEK&apos;S HIGHLIGHTS
+          <ScrollReveal distance={24}>
+            <div className="text-center max-w-2xl mx-auto mb-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1B2029] text-[#A1C9FF] text-[11px] font-semibold tracking-widest uppercase mb-3 shadow-sm border border-white/[0.06]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3B9EFF] animate-pulse" />
+                THIS WEEK&apos;S HIGHLIGHTS
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA] mb-2">
+                See the best movies of this week
+              </h2>
+              <p className="text-xs sm:text-sm text-[#A8B0BD]">
+                The highest-rated cinema currently trending across streaming services, curated from
+                CineTrack members&apos; logs.
+              </p>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA] mb-2">
-              See the best movies of this week
-            </h2>
-            <p className="text-xs sm:text-sm text-[#A8B0BD]">
-              The highest-rated cinema currently trending across streaming services, curated from
-              CineTrack members&apos; logs.
-            </p>
-          </div>
+          </ScrollReveal>
 
           {/* Filter Category Chips */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
-            {[
-              { id: "all", label: "All Top Rated", icon: Star },
-              { id: "theaters", label: "In Theaters & Digital", icon: Film },
-              { id: "netflix", label: "Trending on Netflix", dot: "bg-[#F43F5E]" },
-              { id: "critics", label: "Critically Acclaimed", icon: Award },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              const isSelected = activeCategory === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveCategory(tab.id)}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition-all cursor-pointer ${
-                    isSelected
-                      ? "bg-[#3B9EFF] text-white"
-                      : "bg-[#1A2330] hover:bg-[#1D2734] text-[#A8B0BD] hover:text-[#F5F7FA] border border-white/[0.06]"
-                  }`}
-                >
-                  {tab.dot && <span className={`w-1.5 h-1.5 rounded-full ${tab.dot}`} />}
-                  {Icon && <Icon className="w-3.5 h-3.5" />}
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
+          <ScrollReveal delay={100} distance={20}>
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+              {[
+                { id: "all", label: "All Top Rated", icon: Star },
+                { id: "theaters", label: "In Theaters & Digital", icon: Film },
+                { id: "netflix", label: "Trending on Netflix", dot: "bg-[#F43F5E]" },
+                { id: "critics", label: "Critically Acclaimed", icon: Award },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isSelected = activeCategory === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveCategory(tab.id)}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-[#3B9EFF] text-white"
+                        : "bg-[#1A2330] hover:bg-[#1D2734] text-[#A8B0BD] hover:text-[#F5F7FA] border border-white/[0.06]"
+                    }`}
+                  >
+                    {tab.dot && <span className={`w-1.5 h-1.5 rounded-full ${tab.dot}`} />}
+                    {Icon && <Icon className="w-3.5 h-3.5" />}
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </ScrollReveal>
 
           {/* 4 Featured Movie Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-5 mb-8">
-            {HIGHLIGHT_MOVIES.map((movie) => {
+            {HIGHLIGHT_MOVIES.map((movie, idx) => {
               const isAdded = addedVault[movie.title];
               return (
-                <div
-                  key={movie.title}
-                  className="flex flex-col bg-[#1D2734] rounded-xl overflow-hidden shadow-md group hover:-translate-y-1 transition-transform border border-white/[0.06]"
-                >
-                  {/* Poster Area */}
-                  <div className="relative w-full aspect-[2/3] bg-[#1B2029] overflow-hidden">
-                    <img
-                      src={movie.poster}
-                      alt={movie.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 px-1.5 sm:px-2 py-0.5 rounded bg-[#0F141D]/85 backdrop-blur text-[9px] sm:text-[10px] font-bold text-[#F5F7FA] flex items-center gap-1 border border-white/[0.06]">
-                      <span className={`w-1.5 h-1.5 rounded-full ${movie.platformDot}`} />
-                      <span>{movie.platform}</span>
-                    </div>
-                    <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 px-1.5 sm:px-2 py-0.5 rounded bg-[#0F141D]/85 backdrop-blur text-[10px] sm:text-[11px] font-bold text-[#F5C84B] flex items-center gap-0.5 border border-white/[0.06]">
-                      <Star className="w-3 h-3 fill-[#F5C84B]" />
-                      <span>{movie.rating}</span>
-                    </div>
-                  </div>
-
-                  {/* Card Body */}
-                  <div className="p-2.5 sm:p-4 flex flex-col flex-1 justify-between bg-[#1D2734]">
-                    <div>
-                      <h3 className="font-bold text-xs sm:text-sm text-[#F5F7FA] truncate">
-                        {movie.title}
-                      </h3>
-                      <div className="text-[10px] sm:text-[11px] text-[#6F7886] mb-1.5 font-medium truncate">
-                        {movie.year} • {movie.genre} • {movie.duration}
+                <ScrollReveal key={movie.title} delay={idx * 100} distance={28} className="h-full">
+                  <div className="flex flex-col bg-[#1D2734] rounded-xl overflow-hidden shadow-md group hover:-translate-y-1 transition-transform border border-white/[0.06] h-full">
+                    {/* Poster Area */}
+                    <div className="relative w-full aspect-[2/3] bg-[#1B2029] overflow-hidden">
+                      <img
+                        src={movie.poster}
+                        alt={movie.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 px-1.5 sm:px-2 py-0.5 rounded bg-[#0F141D]/85 backdrop-blur text-[9px] sm:text-[10px] font-bold text-[#F5F7FA] flex items-center gap-1 border border-white/[0.06]">
+                        <span className={`w-1.5 h-1.5 rounded-full ${movie.platformDot}`} />
+                        <span>{movie.platform}</span>
                       </div>
-                      <p className="text-[11px] sm:text-[12px] text-[#A8B0BD] italic border-l-2 border-[#3B9EFF]/40 pl-2 leading-snug mb-2.5 line-clamp-2">
-                        {movie.quote}
-                      </p>
+                      <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 px-1.5 sm:px-2 py-0.5 rounded bg-[#0F141D]/85 backdrop-blur text-[10px] sm:text-[11px] font-bold text-[#F5C84B] flex items-center gap-0.5 border border-white/[0.06]">
+                        <Star className="w-3 h-3 fill-[#F5C84B]" />
+                        <span>{movie.rating}</span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 sm:gap-2 pt-2 border-t border-white/[0.06]">
-                      <button
-                        type="button"
-                        onClick={() => toggleVault(movie.title)}
-                        className={`flex-1 h-7 sm:h-8 text-[10px] sm:text-[11px] font-semibold rounded flex items-center justify-center gap-1 transition-colors cursor-pointer ${
-                          isAdded
-                            ? "bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
-                            : "bg-[#1A2330] hover:bg-[#253244] text-[#F5F7FA] border border-white/[0.06]"
-                        }`}
-                      >
-                        {isAdded ? (
-                          <>
-                            <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                            <span>Vaulted</span>
-                          </>
-                        ) : (
-                          <>
-                            <BookmarkPlus className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#3B9EFF]" />
-                            <span>Vault</span>
-                          </>
-                        )}
-                      </button>
-                      <Link
-                        href="/login"
-                        className="h-7 sm:h-8 px-2 sm:px-2.5 bg-[#1A2330] hover:bg-[#253244] text-[#F5C84B] font-semibold text-[10px] sm:text-[11px] rounded flex items-center justify-center gap-0.5 transition-colors border border-white/[0.06]"
-                        title="Rate this movie"
-                      >
-                        <Star className="w-3 h-3 fill-[#F5C84B]" />
-                        <span>Rate</span>
-                      </Link>
+                    {/* Card Body */}
+                    <div className="p-2.5 sm:p-4 flex flex-col flex-1 justify-between bg-[#1D2734]">
+                      <div>
+                        <h3 className="font-bold text-xs sm:text-sm text-[#F5F7FA] truncate">
+                          {movie.title}
+                        </h3>
+                        <div className="text-[10px] sm:text-[11px] text-[#6F7886] mb-1.5 font-medium truncate">
+                          {movie.year} • {movie.genre} • {movie.duration}
+                        </div>
+                        <p className="text-[11px] sm:text-[12px] text-[#A8B0BD] italic border-l-2 border-[#3B9EFF]/40 pl-2 leading-snug mb-2.5 line-clamp-2">
+                          {movie.quote}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 sm:gap-2 pt-2 border-t border-white/[0.06]">
+                        <button
+                          type="button"
+                          onClick={() => toggleVault(movie.title)}
+                          className={`flex-1 h-7 sm:h-8 text-[10px] sm:text-[11px] font-semibold rounded flex items-center justify-center gap-1 transition-colors cursor-pointer ${
+                            isAdded
+                              ? "bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30"
+                              : "bg-[#1A2330] hover:bg-[#253244] text-[#F5F7FA] border border-white/[0.06]"
+                          }`}
+                        >
+                          {isAdded ? (
+                            <>
+                              <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                              <span>Vaulted</span>
+                            </>
+                          ) : (
+                            <>
+                              <BookmarkPlus className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#3B9EFF]" />
+                              <span>Vault</span>
+                            </>
+                          )}
+                        </button>
+                        <Link
+                          href="/login"
+                          className="h-7 sm:h-8 px-2 sm:px-2.5 bg-[#1A2330] hover:bg-[#253244] text-[#F5C84B] font-semibold text-[10px] sm:text-[11px] rounded flex items-center justify-center gap-0.5 transition-colors border border-white/[0.06]"
+                          title="Rate this movie"
+                        >
+                          <Star className="w-3 h-3 fill-[#F5C84B]" />
+                          <span>Rate</span>
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </ScrollReveal>
               );
             })}
           </div>
 
           {/* Action Row */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 p-3.5 bg-[#1B2029] rounded-xl shadow-sm border border-white/[0.06]">
-            <Link
-              href="/search"
-              className="w-full sm:w-auto h-10 px-5 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-sm"
-            >
-              <Search className="w-4 h-4" />
-              <span>Explore Full Weekly Top 50</span>
-            </Link>
+          <ScrollReveal delay={150} distance={20}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 p-3.5 bg-[#1B2029] rounded-xl shadow-sm border border-white/[0.06]">
+              <Link
+                href="/search"
+                className="w-full sm:w-auto h-10 px-5 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+              >
+                <Search className="w-4 h-4" />
+                <span>Explore Full Weekly Top 50</span>
+              </Link>
 
-            <button
-              type="button"
-              onClick={handleCopyShareList}
-              className="w-full sm:w-auto h-10 px-5 bg-[#1A2330] hover:bg-[#1D2734] text-[#F5F7FA] font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-white/[0.08] cursor-pointer"
-            >
-              {copiedShareList ? (
-                <>
-                  <Check className="w-4 h-4 text-[#22C55E]" />
-                  <span className="text-[#22C55E]">List Copied to Clipboard!</span>
-                </>
-              ) : (
-                <>
-                  <Share2 className="w-4 h-4 text-[#3B9EFF]" />
-                  <span>Share This Week&apos;s List</span>
-                </>
-              )}
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={handleCopyShareList}
+                className="w-full sm:w-auto h-10 px-5 bg-[#1A2330] hover:bg-[#1D2734] text-[#F5F7FA] font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-white/[0.08] cursor-pointer"
+              >
+                {copiedShareList ? (
+                  <>
+                    <Check className="w-4 h-4 text-[#22C55E]" />
+                    <span className="text-[#22C55E]">List Copied to Clipboard!</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-4 h-4 text-[#3B9EFF]" />
+                    <span>Share This Week&apos;s List</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </ScrollReveal>
         </section>
 
 
@@ -507,7 +527,7 @@ export function LandingView() {
         >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left Column */}
-            <div className="lg:col-span-6 flex flex-col gap-4">
+            <ScrollReveal delay={100} distance={28} className="lg:col-span-6 flex flex-col gap-4">
               <div className="text-[#3B9EFF] text-[11px] font-bold tracking-widest uppercase">
                 Identity &amp; Taste
               </div>
@@ -578,10 +598,10 @@ export function LandingView() {
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Right Column: Clean Preview Card */}
-            <div className="lg:col-span-6">
+            <ScrollReveal delay={220} distance={28} className="lg:col-span-6">
               <div className="bg-[#1D2734] p-5 sm:p-7 rounded-2xl shadow-xl max-w-lg mx-auto border border-white/[0.08]">
                 {/* Profile header inside preview */}
                 <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.06]">
@@ -678,61 +698,63 @@ export function LandingView() {
                   </button>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
 
         {/* 5. BOTTOM MINIMAL CALL-TO-ACTION */}
         <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-16 lg:py-24 border-t border-white/[0.06]">
-          <div className="bg-[#1D2734] rounded-2xl p-8 sm:p-12 md:p-16 flex flex-col items-center text-center shadow-xl border border-white/[0.08] relative overflow-hidden">
-            <div className="w-12 h-12 rounded-full bg-[#1A2330] flex items-center justify-center text-[#3B9EFF] mb-4 shadow-sm border border-white/[0.06]">
-              <Film className="w-6 h-6" />
-            </div>
-
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-[#F5F7FA] mb-2 max-w-xl">
-              Ready to stop forgetting what you watched?
-            </h2>
-            <p className="text-xs sm:text-sm text-[#A8B0BD] max-w-lg mb-8 leading-relaxed">
-              Build your vault in minutes. Free forever. No ads. Full data export anytime.
-            </p>
-
-            {/* Input Field Claim Form */}
-            <form
-              onSubmit={handleClaimSubmit}
-              className="w-full max-w-md flex flex-col sm:flex-row gap-2.5 mb-5"
-            >
-              <div className="relative flex-1">
-                <span className="absolute left-3.5 top-2.5 text-[#6F7886] font-mono text-sm">@</span>
-                <input
-                  type="text"
-                  value={claimUsername}
-                  onChange={(e) => setClaimUsername(e.target.value)}
-                  placeholder="yourname"
-                  required
-                  className="w-full h-11 pl-8 pr-3.5 bg-[#1B2029] rounded-lg text-[#F5F7FA] placeholder-[#4B5563] text-xs sm:text-sm border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] shadow-inner transition-colors"
-                />
+          <ScrollReveal distance={32}>
+            <div className="bg-[#1D2734] rounded-2xl p-8 sm:p-12 md:p-16 flex flex-col items-center text-center shadow-xl border border-white/[0.08] relative overflow-hidden">
+              <div className="w-12 h-12 rounded-full bg-[#1A2330] flex items-center justify-center text-[#3B9EFF] mb-4 shadow-sm border border-white/[0.06]">
+                <Film className="w-6 h-6" />
               </div>
-              <button
-                type="submit"
-                className="h-11 px-6 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-bold text-xs sm:text-sm rounded-lg flex items-center justify-center gap-1.5 shadow-md shadow-[#3B9EFF]/20 transition-all cursor-pointer whitespace-nowrap active:scale-95"
-              >
-                <span>Claim Your Profile</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </form>
 
-            {/* Discreet Status & Privacy Notes */}
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] font-semibold text-[#6F7886] uppercase tracking-wider">
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-                Instant Setup
-              </span>
-              <span>•</span>
-              <span>Letterboxd / IMDb CSV Import Ready</span>
-              <span>•</span>
-              <span>No Credit Card Required</span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-[#F5F7FA] mb-2 max-w-xl">
+                Ready to stop forgetting what you watched?
+              </h2>
+              <p className="text-xs sm:text-sm text-[#A8B0BD] max-w-lg mb-8 leading-relaxed">
+                Build your vault in minutes. Free forever. No ads. Full data export anytime.
+              </p>
+
+              {/* Input Field Claim Form */}
+              <form
+                onSubmit={handleClaimSubmit}
+                className="w-full max-w-md flex flex-col sm:flex-row gap-2.5 mb-5"
+              >
+                <div className="relative flex-1">
+                  <span className="absolute left-3.5 top-2.5 text-[#6F7886] font-mono text-sm">@</span>
+                  <input
+                    type="text"
+                    value={claimUsername}
+                    onChange={(e) => setClaimUsername(e.target.value)}
+                    placeholder="yourname"
+                    required
+                    className="w-full h-11 pl-8 pr-3.5 bg-[#1B2029] rounded-lg text-[#F5F7FA] placeholder-[#4B5563] text-xs sm:text-sm border border-white/[0.08] focus:outline-none focus:border-[#3B9EFF] shadow-inner transition-colors"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="h-11 px-6 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-bold text-xs sm:text-sm rounded-lg flex items-center justify-center gap-1.5 shadow-md shadow-[#3B9EFF]/20 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+                >
+                  <span>Claim Your Profile</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </form>
+
+              {/* Discreet Status & Privacy Notes */}
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] font-semibold text-[#6F7886] uppercase tracking-wider">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                  Instant Setup
+                </span>
+                <span>•</span>
+                <span>Letterboxd / IMDb CSV Import Ready</span>
+                <span>•</span>
+                <span>No Credit Card Required</span>
+              </div>
             </div>
-          </div>
+          </ScrollReveal>
         </section>
       </main>
 
