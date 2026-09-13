@@ -303,26 +303,34 @@ export function LandingView() {
   const handleClaimSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (claimUsername.trim()) {
-      router.push(`/login?username=${encodeURIComponent(claimUsername.trim())}`);
+      router.push(`/login?username=${encodeURIComponent(claimUsername.trim())}&mode=signup`);
     } else {
-      router.push("/login");
+      router.push("/login?mode=signup");
     }
   };
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-[#0F141D] text-[#F5F7FA] selection:bg-[#3B9EFF]/30 selection:text-white antialiased">
       {/* 0. FIXED TOP NAVIGATION BAR */}
-      <header className="fixed top-0 left-0 right-0 w-full z-50 bg-[#151C27]/95 backdrop-blur-md border-b border-white/[0.06]">
+      <header className="fixed top-0 left-0 right-0 w-full z-50 bg-[#0F141D]/90 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="h-16 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 lg:gap-8">
             <Link href="/" className="flex items-center gap-2.5 group">
               <LogoIcon className="w-8 h-8" size={32} priority />
-              <span className="font-bold text-lg text-white tracking-tight group-hover:text-[#3B9EFF] transition-colors">
-                CineTrack
+              <span className="font-bold text-lg text-[#F5F7FA] tracking-tight group-hover:text-[#3B9EFF] transition-colors">
+                Cine<span className="text-[#3B9EFF]">Track</span>
               </span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-[#A8B0BD]">
+            <nav className="hidden md:flex items-center gap-5 lg:gap-6 text-xs font-semibold text-[#A8B0BD]">
+              <Link href="/discover" className="hover:text-white transition-colors flex items-center gap-1.5">
+                <Compass className="w-3.5 h-3.5 text-[#3B9EFF]" />
+                <span>Discover</span>
+              </Link>
+              <Link href="/search" className="hover:text-white transition-colors flex items-center gap-1.5">
+                <Search className="w-3.5 h-3.5" />
+                <span>Search</span>
+              </Link>
               <a href="#demo-section" className="hover:text-white transition-colors">
                 Trending
               </a>
@@ -336,7 +344,6 @@ export function LandingView() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:block h-6 w-[1px] bg-white/[0.08]" />
             <Link
               href="/login"
               className="px-3 py-1.5 text-xs font-semibold text-[#A8B0BD] hover:text-white transition-colors"
@@ -344,8 +351,8 @@ export function LandingView() {
               Sign In
             </Link>
             <Link
-              href="/login"
-              className="px-4 py-2 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs rounded-lg shadow-sm transition-all active:scale-95 flex items-center justify-center"
+              href="/login?mode=signup"
+              className="px-4 py-2 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs rounded-lg shadow-sm transition-all active:scale-95 flex items-center justify-center cursor-pointer"
             >
               Get Started
             </Link>
@@ -392,10 +399,10 @@ export function LandingView() {
             <ScrollReveal delay={320} distance={20}>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
                 <Link
-                  href="/login"
+                  href="/login?mode=signup"
                   className="w-full sm:w-auto h-12 sm:h-13 px-7 sm:px-8 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#3B9EFF]/25 transition-all active:scale-95 cursor-pointer"
                 >
-                  <span>Get Started</span>
+                  <span>Get Started Free</span>
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Link>
 
@@ -648,6 +655,14 @@ export function LandingView() {
                   </>
                 )}
               </button>
+
+              <Link
+                href="/discover"
+                className="w-full sm:w-auto h-10 px-5 bg-[#1A2330] hover:bg-[#1D2734] text-[#3B9EFF] hover:text-[#5AAFFF] font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all duration-150 border border-white/[0.08] hover:border-[#3B9EFF]/30 select-none active:scale-95 cursor-pointer"
+              >
+                <Compass className="w-4 h-4" />
+                <span>Explore All on Discover</span>
+              </Link>
             </div>
           </ScrollReveal>
         </section>
@@ -883,7 +898,7 @@ export function LandingView() {
                   Instant Setup
                 </span>
                 <span>•</span>
-                <span>Letterboxd / IMDb CSV Import Ready</span>
+                <span>Custom CSV Import Ready</span>
                 <span>•</span>
                 <span>No Credit Card Required</span>
               </div>
@@ -893,36 +908,66 @@ export function LandingView() {
       </main>
 
       {/* 6. FOOTER */}
-      <footer className="w-full bg-[#151C27] border-t border-white/[0.06] mt-auto">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#A8B0BD]">
-          <div className="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
-            <div className="flex items-center gap-2">
-              <LogoIcon className="w-6 h-6" size={24} />
-              <span className="font-bold text-sm text-[#F5F7FA] tracking-tight">CineTrack</span>
+      <footer className="w-full bg-[#121824] border-t border-white/[0.06] mt-auto">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-12 lg:py-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+            {/* Col 1: Brand & Tagline */}
+            <div className="col-span-2 md:col-span-1 flex flex-col gap-3">
+              <Link href="/" className="flex items-center gap-2.5 group">
+                <LogoIcon className="w-7 h-7" size={28} />
+                <span className="font-bold text-lg text-[#F5F7FA] tracking-tight group-hover:text-[#3B9EFF] transition-colors">
+                  Cine<span className="text-[#3B9EFF]">Track</span>
+                </span>
+              </Link>
+              <p className="text-xs text-[#8B95A5] leading-relaxed max-w-xs">
+                A fast, minimal, worldwide social tracking platform to discover, track, rate, review, and share movies, TV series, and anime.
+              </p>
+              <div className="flex items-center gap-2 text-[11px] text-[#22C55E] font-medium pt-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
+                <span>All systems operational</span>
+              </div>
             </div>
-            <span className="hidden sm:inline text-[#4B5563]">•</span>
-            <span className="text-[12px] text-[#6F7886]">
-              © {new Date().getFullYear()} CineTrack Systems. All rights reserved.
-            </span>
+
+            {/* Col 2: Discover & Track */}
+            <div className="flex flex-col gap-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#F5F7FA]">Explore</h3>
+              <nav className="flex flex-col gap-2 text-xs text-[#A8B0BD]">
+                <Link href="/discover" className="hover:text-white transition-colors">Discover Catalog</Link>
+                <Link href="/search" className="hover:text-white transition-colors">Search Titles</Link>
+                <a href="#demo-section" className="hover:text-white transition-colors">This Week&apos;s Highlights</a>
+                <a href="#curator-profile" className="hover:text-white transition-colors">Public Profile Demo</a>
+              </nav>
+            </div>
+
+            {/* Col 3: Product & Community */}
+            <div className="flex flex-col gap-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#F5F7FA]">Community & Info</h3>
+              <nav className="flex flex-col gap-2 text-xs text-[#A8B0BD]">
+                <Link href="/about" className="hover:text-white transition-colors">About CineTrack</Link>
+                <Link href="/contact" className="hover:text-white transition-colors">Contact Support</Link>
+                <Link href="/feedback" className="hover:text-white transition-colors text-[#3B9EFF] hover:text-[#5AAFFF] font-semibold">Need a New Feature?</Link>
+              </nav>
+            </div>
+
+            {/* Col 4: Legal */}
+            <div className="flex flex-col gap-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#F5F7FA]">Legal & Policy</h3>
+              <nav className="flex flex-col gap-2 text-xs text-[#A8B0BD]">
+                <Link href="/terms" className="hover:text-white transition-colors">Terms and Conditions</Link>
+                <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+              </nav>
+            </div>
           </div>
 
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] font-medium text-[#A8B0BD]">
-            <a href="#demo-section" className="hover:text-white transition-colors">
-              Trending
-            </a>
-            <Link href="/library" className="hover:text-white transition-colors">
-              Library Matrices
-            </Link>
-            <Link href="/search" className="hover:text-white transition-colors">
-              Editorial Archive
-            </Link>
-            <Link href="/login" className="hover:text-white transition-colors">
-              Terms
-            </Link>
-            <Link href="/login" className="hover:text-white transition-colors">
-              Privacy
-            </Link>
-          </nav>
+          {/* Bottom Row */}
+          <div className="pt-6 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#6F7886]">
+            <span>
+              &copy; {new Date().getFullYear()} CineTrack. All rights reserved.
+            </span>
+            <span>
+              The modern cinematic watch library.
+            </span>
+          </div>
         </div>
       </footer>
     </div>

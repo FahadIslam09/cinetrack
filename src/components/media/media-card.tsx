@@ -516,7 +516,7 @@ export function MediaCard({
           ) : (
             <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-[#0B0F17]/80 backdrop-blur-md border border-white/10 text-[11px] font-bold text-[#F5F7FA] flex items-center gap-1 shadow-lg pointer-events-none z-10">
               <Star className="w-3 h-3 fill-[#F5C84B] text-[#F5C84B]" />
-              <span>{media.rating ? media.rating.toFixed(1) : "—"}</span>
+              <span>{media.rating ? media.rating.toFixed(1) : "N/A"}</span>
             </div>
           )}
 

@@ -34,29 +34,29 @@ export function TrailerPlayer({
         <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/[0.08] bg-black shadow-2xl">
           <iframe
             src={`https://www.youtube.com/embed/${currentVideo.key}?rel=0${autoPlay ? "&autoplay=1" : ""}`}
-            title={`${title} — ${currentVideo.name}`}
+            title={`${title}: ${currentVideo.name}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
             referrerPolicy="strict-origin-when-cross-origin"
             className="w-full h-full border-0"
           />
         </div>
-      ) : imdbId ? (
+      ) : (
         <a
-          href={`https://www.imdb.com/title/${imdbId}/videogallery/`}
+          href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${title} official trailer`)}`}
           target="_blank"
           rel="noopener noreferrer"
           className="aspect-video w-full rounded-2xl border border-white/[0.08] bg-[#101622] hover:bg-[#151C27] flex flex-col items-center justify-center p-6 text-center gap-2 transition group"
         >
           <Film className="w-10 h-10 text-[#F5C84B] group-hover:scale-110 transition-transform" />
           <div>
-            <p className="text-sm font-bold text-[#F5F7FA]">Watch Trailer on IMDb</p>
+            <p className="text-sm font-bold text-[#F5F7FA]">Watch Official Trailer</p>
             <p className="text-xs text-[#A8B0BD] mt-0.5">
-              Click to watch trailer on IMDb
+              Watch trailer on YouTube
             </p>
           </div>
         </a>
-      ) : null}
+      )}
     </div>
   );
 }

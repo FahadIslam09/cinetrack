@@ -57,9 +57,9 @@ export default async function PrivacyPage() {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-base font-bold text-[#F5F7FA]">3. Third-Party Services &amp; APIs</h2>
+            <h2 className="text-base font-bold text-[#F5F7FA]">3. External Services</h2>
             <p>
-              We integrate with entertainment metadata services (such as TMDb and AniList) to fetch movie, series, and anime information. These requests do not transmit your private tracking logs or personal identifiers to third parties.
+              CineTrack retrieves public entertainment metadata to display show information and artwork. These requests do not transmit your private tracking logs, account passwords, or personal identifiers.
             </p>
           </section>
 

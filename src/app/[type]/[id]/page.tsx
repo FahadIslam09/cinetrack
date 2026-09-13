@@ -506,9 +506,8 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
                   </div>
                 )}
                 <span className="absolute top-1.5 left-1.5 bg-[#0F141D]/90 backdrop-blur-sm text-[#F5C84B] px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide flex items-center gap-1 border border-white/[0.08] z-10">
-                  <span className="text-[#A8B0BD] text-[9px] font-semibold">IMDb</span>
                   <Star className="w-3 h-3 fill-[#F5C84B]" />
-                  <span>{media.rating ? media.rating.toFixed(1) : "—"}</span>
+                  <span>{media.rating ? media.rating.toFixed(1) : "N/A"}</span>
                 </span>
               </div>
 

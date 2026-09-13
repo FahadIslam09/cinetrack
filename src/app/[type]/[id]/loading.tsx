@@ -50,7 +50,7 @@ export default function MediaDetailsLoading() {
 
             {/* Ratings & Action Bar Skeleton */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-              {/* IMDb & Personal rating pill placeholders */}
+              {/* Rating pill placeholders */}
               <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap">
                 <div className="w-24 h-8 rounded-lg bg-[#151C27] border border-white/[0.06] skeleton-shimmer" />
                 <div className="w-28 h-8 rounded-lg bg-[#151C27] border border-white/[0.06] skeleton-shimmer" />

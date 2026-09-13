@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: ProfilePageProps) {
   const { username } = await params;
   const decoded = decodeURIComponent(username);
   return {
-    title: `@${decoded}'s Library — CineTrack`,
+    title: `@${decoded}'s Library · CineTrack`,
     description: `Explore movies, series, and anime tracked by @${decoded} on CineTrack.`,
   };
 }

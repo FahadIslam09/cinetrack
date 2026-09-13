@@ -57,9 +57,9 @@ export default async function TermsPage() {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-base font-bold text-[#F5F7FA]">3. Content &amp; Media Attribution</h2>
+            <h2 className="text-base font-bold text-[#F5F7FA]">3. Content &amp; Media Catalog</h2>
             <p>
-              CineTrack provides media indexing, personal progress tracking, and community critique features. Movie, television, and anime metadata, titles, artwork, and character information are sourced via open entertainment APIs (including TMDb and AniList). CineTrack does not stream or host unauthorized media files.
+              CineTrack provides media indexing, personal progress tracking, and community critique features. All titles, artwork, and metadata are indexed for personal cataloging and review purposes. CineTrack does not stream or host video files.
             </p>
           </section>
 

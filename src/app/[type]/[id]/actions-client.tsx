@@ -111,16 +111,16 @@ export function MediaDetailsActions({
   return (
     <>
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-        {/* Ratings Comparison Bar: IMDb vs CineTrack Personal Rating */}
+        {/* Ratings Comparison Bar: Global Score vs CineTrack Personal Rating */}
         <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap">
-          {/* External IMDb Rating */}
+          {/* Global Score */}
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#151C27] border border-white/[0.06]">
             <span className="text-[10px] uppercase font-bold tracking-wider text-[#6F7886]">
-              IMDb
+              Score
             </span>
             <span className="text-xs font-bold text-[#F5F7FA] flex items-center gap-1">
               <span className="text-[#F5C84B]">★</span>
-              {media.rating ? media.rating.toFixed(1) : "—"}
+              {media.rating ? media.rating.toFixed(1) : "N/A"}
             </span>
           </div>
 
@@ -209,7 +209,7 @@ export function MediaDetailsActions({
                 <div className="flex items-center gap-2 min-w-0 pr-2">
                   <Play className="w-4 h-4 text-[#3B9EFF] fill-[#3B9EFF] shrink-0" />
                   <h3 className="text-xs sm:text-sm font-bold text-[#F5F7FA] truncate">
-                    {media.title} — Official Trailer & Clips
+                    {media.title} · Official Trailer & Clips
                   </h3>
                 </div>
                 <button

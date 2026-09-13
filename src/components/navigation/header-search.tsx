@@ -321,7 +321,7 @@ export function HeaderSearch({ isMobileOpen, onCloseMobile }: HeaderSearchProps)
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-[9px] text-[#6F7886]">
-                          —
+                          N/A
                         </div>
                       )}
                     </div>
