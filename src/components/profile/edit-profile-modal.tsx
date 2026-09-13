@@ -130,10 +130,10 @@ export function EditProfileModal({
           setBackdropUrl(uploadedUrl);
         }
       } else {
-        setError(json.error?.message || "Failed to upload image to ImgBB.");
+        setError(json.error?.message || "Failed to upload image.");
       }
     } catch (uploadErr) {
-      console.error("ImgBB upload error:", uploadErr);
+      console.error("Image upload error:", uploadErr);
       setError("Failed to upload image. Please check your internet connection.");
     } finally {
       if (target === "avatar") setIsUploadingImage(false);
@@ -226,7 +226,7 @@ export function EditProfileModal({
                 <Film className="w-3.5 h-3.5 text-[#3B9EFF]" />
                 <span>Cinematic Cover Backdrop</span>
               </span>
-              <span className="text-[10px] text-[#6F7886]">Uploaded to ImgBB</span>
+              <span className="text-[10px] text-[#6F7886]">Recommended: 1200×400</span>
             </label>
 
             {/* Cover Preview & Trigger */}
@@ -334,7 +334,7 @@ export function EditProfileModal({
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-[#F5F7FA]">Profile Picture</p>
               <p className="text-[11px] text-[#A8B0BD] mt-0.5">
-                Stored permanently on ImgBB.
+                JPG, PNG or WebP
               </p>
               <input
                 ref={fileInputRef}
