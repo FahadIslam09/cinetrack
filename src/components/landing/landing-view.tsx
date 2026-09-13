@@ -274,26 +274,9 @@ export function LandingView() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [claimUsername, setClaimUsername] = useState("");
   const [copiedProfile, setCopiedProfile] = useState(false);
-  const [copiedShareList, setCopiedShareList] = useState(false);
 
   const currentCategoryMovies =
     HIGHLIGHT_MOVIES_BY_CATEGORY[activeCategory] || HIGHLIGHT_MOVIES_BY_CATEGORY.all;
-
-  const handleCopyShareList = () => {
-    const text =
-      `This Week's CineTrack Highlights:\n` +
-      currentCategoryMovies
-        .map(
-          (m, idx) =>
-            `${idx + 1}. ${m.title} (${m.year}) ★ ${m.rating.toFixed(1)} - ${m.genres.join(", ")}`
-        )
-        .join("\n") +
-      `\n\nMore at cinetrack.app`;
-
-    navigator.clipboard.writeText(text);
-    setCopiedShareList(true);
-    setTimeout(() => setCopiedShareList(false), 2500);
-  };
 
   const handleCopyProfileLink = () => {
     navigator.clipboard.writeText("https://cinetrack.app/@rifat");
@@ -662,24 +645,6 @@ export function LandingView() {
                 <Search className="w-4 h-4" />
                 <span>Explore Full Weekly Top 50</span>
               </Link>
-
-              <button
-                type="button"
-                onClick={handleCopyShareList}
-                className="w-full sm:w-auto h-10 px-5 bg-[#1A2330] hover:bg-[#1D2734] text-[#F5F7FA] font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-all duration-150 border border-white/[0.08] hover:border-white/[0.14] select-none active:scale-95 outline-none focus:outline-none focus-visible:outline-none cursor-pointer"
-              >
-                {copiedShareList ? (
-                  <>
-                    <Check className="w-4 h-4 text-[#22C55E]" />
-                    <span className="text-[#22C55E]">List Copied to Clipboard!</span>
-                  </>
-                ) : (
-                  <>
-                    <Share2 className="w-4 h-4 text-[#3B9EFF]" />
-                    <span>Share This Week&apos;s List</span>
-                  </>
-                )}
-              </button>
 
               <Link
                 href="/discover"
