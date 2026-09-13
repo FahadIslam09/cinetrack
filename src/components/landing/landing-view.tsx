@@ -26,6 +26,7 @@ import {
   ShieldCheck,
   ChevronRight,
   Compass,
+  ArrowUpRight,
 } from "lucide-react";
 import { LogoIcon } from "@/components/ui/logo-icon";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
@@ -377,20 +378,30 @@ export function LandingView() {
           </div>
 
           <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 flex flex-col items-center">
-            {/* Main CineTrack Headline (Option 1) */}
-            <ScrollReveal delay={80} distance={20}>
-              <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-[54px] xl:text-6xl font-black tracking-tight text-white leading-[1.12] mb-3 sm:mb-4 drop-shadow-md text-center">
+            {/* Top Pill Badge */}
+            <ScrollReveal delay={40} distance={15}>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.1] backdrop-blur-md mb-6 shadow-lg shadow-black/20 hover:border-[#3B9EFF]/40 transition-colors cursor-default select-none">
+                <span className="w-2 h-2 rounded-full bg-[#3B9EFF] animate-pulse" />
+                <span className="text-xs font-semibold text-[#E2E8F0] tracking-wide">
+                  The Modern Cinematic Watch Library
+                </span>
+              </div>
+            </ScrollReveal>
+
+            {/* Main CineTrack Headline */}
+            <ScrollReveal delay={100} distance={20}>
+              <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-[56px] xl:text-[62px] font-black tracking-tight text-white leading-[1.12] mb-3 sm:mb-4 drop-shadow-md text-center">
                 <span className="sm:whitespace-nowrap">Track what you watch.</span>{" "}
                 <br className="hidden sm:inline" />
-                <span className="text-[#3B9EFF] sm:whitespace-nowrap">
+                <span className="bg-gradient-to-r from-[#3B9EFF] via-[#60A5FA] to-[#93C5FD] bg-clip-text text-transparent sm:whitespace-nowrap">
                   Recommend what they&apos;ll love.
                 </span>
               </h1>
             </ScrollReveal>
 
-            {/* Subtitle (Option 1) */}
+            {/* Subtitle */}
             <ScrollReveal delay={200} distance={20}>
-              <p className="text-sm sm:text-lg text-[#CBD5E1] max-w-2xl mx-auto mb-6 sm:mb-8 font-normal leading-relaxed drop-shadow">
+              <p className="text-sm sm:text-base lg:text-lg text-[#CBD5E1] max-w-2xl mx-auto mb-6 sm:mb-8 font-normal leading-relaxed drop-shadow">
                 CineTrack organizes every movie, series, and anime you&apos;ve ever experienced. When friends ask for a recommendation, send tailored picks by vibe or share your profile link instantly.
               </p>
             </ScrollReveal>
@@ -400,7 +411,7 @@ export function LandingView() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
                 <Link
                   href="/login?mode=signup"
-                  className="w-full sm:w-auto h-12 sm:h-13 px-7 sm:px-8 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#3B9EFF]/25 transition-all active:scale-95 cursor-pointer"
+                  className="w-full sm:w-auto h-12 sm:h-13 px-8 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(59,158,255,0.35)] hover:shadow-[0_0_32px_rgba(59,158,255,0.5)] transition-all active:scale-95 cursor-pointer"
                 >
                   <span>Get Started Free</span>
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -413,6 +424,20 @@ export function LandingView() {
                   <Compass className="w-4 h-4 sm:w-5 sm:h-5 text-[#3B9EFF]" />
                   <span>Explore Discover</span>
                 </Link>
+              </div>
+            </ScrollReveal>
+
+            {/* Trust / Benefit micro indicators */}
+            <ScrollReveal delay={380} distance={15}>
+              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 mt-8 text-[11px] sm:text-xs text-[#8B95A5] font-medium select-none">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                  Free Forever
+                </span>
+                <span className="text-white/20">•</span>
+                <span>No Credit Card</span>
+                <span className="text-white/20">•</span>
+                <span>Instant Setup</span>
               </div>
             </ScrollReveal>
           </div>
@@ -444,7 +469,7 @@ export function LandingView() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {/* Step 01 */}
               <ScrollReveal delay={100} distance={28} className="h-full">
-                <div className="bg-[#1D2734] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06] h-full">
+                <div className="bg-gradient-to-b from-[#1D2734] to-[#151D28] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06] hover:border-[#3B9EFF]/30 hover:shadow-[0_8px_30px_rgba(59,158,255,0.08)] transition-all duration-300 h-full">
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-bold text-sm text-[#F5F7FA]">1. Log What You Watch</h3>
@@ -453,7 +478,7 @@ export function LandingView() {
                       </span>
                     </div>
                     <p className="text-xs text-[#A8B0BD] mb-5 leading-relaxed">
-                      Rate titles 1–10, tag by emotional vibe (Hilarious, Mind-Bending, Cozy), and
+                      Rate titles 1-10, tag by emotional vibe (Hilarious, Mind-Bending, Cozy), and
                       jot 1-line spoiler-free curator notes.
                     </p>
                   </div>
@@ -481,7 +506,7 @@ export function LandingView() {
 
               {/* Step 02 */}
               <ScrollReveal delay={200} distance={28} className="h-full">
-                <div className="bg-[#1D2734] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06] h-full">
+                <div className="bg-gradient-to-b from-[#1D2734] to-[#151D28] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06] hover:border-[#3B9EFF]/30 hover:shadow-[0_8px_30px_rgba(59,158,255,0.08)] transition-all duration-300 h-full">
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-bold text-sm text-[#F5F7FA]">2. Friend Asks for a Pick</h3>
@@ -521,7 +546,7 @@ export function LandingView() {
 
               {/* Step 03 */}
               <ScrollReveal delay={300} distance={28} className="h-full">
-                <div className="bg-[#1D2734] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06] h-full">
+                <div className="bg-gradient-to-b from-[#1D2734] to-[#151D28] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06] hover:border-[#3B9EFF]/30 hover:shadow-[0_8px_30px_rgba(59,158,255,0.08)] transition-all duration-300 h-full">
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-bold text-sm text-[#F5F7FA]">3. Share Instantly</h3>
@@ -956,18 +981,25 @@ export function LandingView() {
           </div>
 
           {/* Bottom Row */}
-          <div className="pt-6 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#6F7886]">
+          <div className="pt-6 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#6F7886]">
             <span>
               &copy; {new Date().getFullYear()} CineTrack. All rights reserved.
             </span>
-            <a
-              href="https://fahadislam.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-[#3B9EFF] transition-colors"
-            >
-              Developer: Fahad Islam · fahadislam.com
-            </a>
+            <div className="flex items-center gap-1.5 text-xs text-[#6F7886]">
+              <span>Built by</span>
+              <a
+                href="https://fahadislam.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 font-semibold text-[#CBD5E1] hover:text-[#3B9EFF] transition-colors group"
+              >
+                <span className="relative">
+                  Fahad Islam
+                  <span className="absolute left-0 -bottom-0.5 w-0 h-[1px] bg-[#3B9EFF] transition-all duration-200 group-hover:w-full" />
+                </span>
+                <ArrowUpRight className="w-3.5 h-3.5 text-[#3B9EFF] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </a>
+            </div>
           </div>
         </div>
       </footer>

@@ -1,19 +1,30 @@
 import Link from "next/link";
 import { LogoIcon } from "@/components/ui/logo-icon";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, ArrowUpRight } from "lucide-react";
 
 export function Footer() {
   return (
     <footer className="w-full bg-[#0F141D] border-t border-white/[0.06] py-6 md:py-8 pb-24 md:pb-8">
       <div className="w-full max-w-[834px] lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-5 text-xs text-[#6F7886]">
-        {/* Brand & Copyright */}
-        <div className="flex items-center gap-2">
+        {/* Brand, Copyright & Developer Signature */}
+        <div className="flex items-center gap-2 flex-wrap">
           <LogoIcon className="w-5 h-5" size={20} />
           <span className="font-semibold text-[#F5F7FA]">
             Cine<span className="text-[#3B9EFF]">Track</span>
           </span>
           <span className="text-white/20">•</span>
-          <span>© {new Date().getFullYear()}</span>
+          <span>&copy; {new Date().getFullYear()}</span>
+          <span className="text-white/20">•</span>
+          <span className="text-[#6F7886]">Built by</span>
+          <a
+            href="https://fahadislam.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-0.5 font-semibold text-[#CBD5E1] hover:text-[#3B9EFF] transition-colors group"
+          >
+            <span>Fahad Islam</span>
+            <ArrowUpRight className="w-3 h-3 text-[#3B9EFF] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </a>
         </div>
 
         {/* Highlighted Feature Request Link (Separated to catch eyes) */}
