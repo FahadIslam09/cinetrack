@@ -78,15 +78,29 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
     );
 
     // Prioritize actual Trailers first, then Teasers, then other clips
+    const origLang = rawDetails?.original_language;
     ytVideos.sort((a, b) => {
       const getScore = (v: any) => {
-        const isTrailer = v.type === "Trailer" || v.name?.toLowerCase().includes("trailer");
-        const isTeaser = v.type === "Teaser" || v.name?.toLowerCase().includes("teaser");
-        if (isTrailer && v.official) return 1;
-        if (isTrailer) return 2;
-        if (isTeaser && v.official) return 3;
-        if (isTeaser) return 4;
-        return 10;
+        const nameLower = (v.name || "").toLowerCase();
+        const isOfficialTrailer = nameLower.includes("official trailer");
+        const hasTrailerInName = nameLower.includes("trailer");
+        const isTrailer = v.type === "Trailer" || hasTrailerInName;
+        const isTeaser = v.type === "Teaser" || nameLower.includes("teaser");
+
+        let typeScore = 10;
+        if (isOfficialTrailer && v.official) typeScore = 1;
+        else if (isOfficialTrailer) typeScore = 2;
+        else if (isTrailer && v.official && hasTrailerInName) typeScore = 3;
+        else if (isTrailer && v.official) typeScore = 4;
+        else if (isTrailer) typeScore = 5;
+        else if (isTeaser && v.official) typeScore = 6;
+        else if (isTeaser) typeScore = 7;
+
+        let langScore = 2;
+        if (v.iso_639_1 === "en") langScore = 0;
+        else if (origLang && v.iso_639_1 === origLang) langScore = 1;
+
+        return typeScore * 10 + langScore;
       };
       return getScore(a) - getScore(b);
     });

@@ -75,6 +75,9 @@ export interface TmdbWatchProvider {
   logo_path: string;
 }
 
+const TMDB_VIDEO_LANGUAGES =
+  "en,ta,te,hi,ml,kn,bn,mr,pa,gu,ja,ko,zh,cn,yue,th,vi,id,ms,tl,es,fr,de,it,pt,ru,uk,pl,nl,sv,no,da,fi,el,tr,ar,he,fa,ur,ro,hu,cs,sk,sl,bg,hr,sr,is,et,lt,lv,ca,null";
+
 export const tmdb = {
   getTrendingMovies: async (timeWindow: "day" | "week" = "week") => {
     return fetchTmdb<{ results: TmdbMovieItem[] }>(`/trending/movie/${timeWindow}`);
@@ -91,12 +94,14 @@ export const tmdb = {
   getMovieDetails: async (id: number | string) => {
     return fetchTmdb<any>(`/movie/${id}`, {
       append_to_response: "videos,credits,watch/providers,similar,external_ids",
+      include_video_language: TMDB_VIDEO_LANGUAGES,
     });
   },
 
   getTVDetails: async (id: number | string) => {
     return fetchTmdb<any>(`/tv/${id}`, {
       append_to_response: "videos,credits,watch/providers,similar,external_ids",
+      include_video_language: TMDB_VIDEO_LANGUAGES,
     });
   },
 
