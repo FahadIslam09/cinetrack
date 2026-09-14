@@ -3,10 +3,10 @@ import { BottomNav } from "@/components/navigation/bottom-nav";
 
 export default function DiscoverLoading() {
   return (
-    <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] pb-24 md:pb-12 select-none">
+    <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] select-none">
       <AppHeader />
 
-      <main className="flex-1 max-w-[834px] lg:max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-12 pt-20 sm:pt-24 flex flex-col gap-6">
+      <main className="flex-1 max-w-[834px] lg:max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-12 pt-20 sm:pt-24 pb-24 md:pb-12 flex flex-col gap-6">
         {/* Header Title & Subtitle Skeleton */}
         <div className="flex flex-col gap-2">
           <div className="h-8 sm:h-10 w-48 rounded-xl bg-white/[0.08] skeleton-shimmer" />

@@ -199,10 +199,10 @@ function SearchPageContent() {
   const showMedia = activeTab !== "profiles" && mediaList.length > 0;
 
   return (
-    <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] pb-24 md:pb-14">
+    <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D]">
       <AppHeader />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 flex flex-col gap-6">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-24 md:pb-14 flex flex-col gap-6">
         {/* Search Header Bar */}
         <div className="flex flex-col gap-3">
           <div className="relative w-full">
@@ -568,9 +568,9 @@ export default function SearchPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] pb-24 md:pb-14">
+        <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D]">
           <AppHeader />
-          <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 flex flex-col gap-6">
+          <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-24 md:pb-14 flex flex-col gap-6">
             <div className="w-full h-14 rounded-2xl bg-[#151C27] border border-white/[0.08] skeleton-shimmer" />
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((i) => (

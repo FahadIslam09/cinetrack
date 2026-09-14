@@ -494,10 +494,10 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
   }
 
   return (
-    <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] pb-24 md:pb-12">
+    <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D]">
       <AppHeader />
 
-      <main className="flex-1 flex flex-col w-full pt-16">
+      <main className="flex-1 flex flex-col w-full pt-16 pb-24 md:pb-12">
         {/* Backdrop & Header Hero */}
         <div className="relative w-full overflow-hidden bg-[#151C27] border-b border-white/[0.06]">
           {/* Back Button (Desktop, Tablet & Mobile) */}

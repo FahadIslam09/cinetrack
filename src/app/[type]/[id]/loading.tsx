@@ -3,14 +3,14 @@ import { BottomNav } from "@/components/navigation/bottom-nav";
 
 export default function MediaDetailsLoading() {
   return (
-    <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] pb-24 md:pb-12 select-none">
+    <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] select-none">
       <AppHeader />
 
-      <main className="flex-1 flex flex-col w-full pt-16">
+      <main className="flex-1 flex flex-col w-full pt-16 pb-24 md:pb-12">
         {/* Backdrop & Header Hero Skeleton */}
         <div className="relative w-full overflow-hidden bg-[#151C27] border-b border-white/[0.06]">
-          {/* Mobile & Tablet Back Button Skeleton */}
-          <div className="lg:hidden absolute top-3.5 left-4 sm:top-5 sm:left-6 z-20">
+          {/* Back Button Skeleton */}
+          <div className="absolute top-3.5 left-4 sm:top-5 sm:left-6 lg:left-8 z-20">
             <div className="w-16 h-7 rounded-full bg-[#0F141D]/80 border border-white/10 backdrop-blur-md skeleton-shimmer" />
           </div>
 
