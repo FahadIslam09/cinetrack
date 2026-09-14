@@ -303,25 +303,40 @@ export function NotificationDropdown({
         )}
       </button>
 
-      {isOpen && (
-        <>
-          {/* Mobile Screen: Centered modal below header with backdrop */}
-          <div className="sm:hidden">
-            <div
-              className="fixed inset-x-0 top-16 bottom-0 z-40 bg-black/60 backdrop-blur-xs"
-              onClick={() => setIsOpen(false)}
-            />
-            <div className="fixed inset-x-3 top-[72px] z-50 max-w-sm mx-auto rounded-2xl border border-white/[0.12] bg-[#121824]/98 backdrop-blur-2xl shadow-2xl shadow-black/90 overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150">
-              {panelContent}
-            </div>
-          </div>
+      {/* Mobile Screen: Centered modal below header with smooth backdrop and panel animation */}
+      <div
+        className={`sm:hidden fixed inset-x-0 top-16 bottom-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity duration-300 ease-out ${
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setIsOpen(false)}
+        aria-hidden="true"
+      />
+      <div
+        className={`sm:hidden fixed inset-x-3 top-[72px] z-50 max-w-sm mx-auto rounded-2xl border border-white/[0.12] bg-[#121824]/98 backdrop-blur-2xl shadow-2xl shadow-black/90 overflow-hidden transition-all duration-300 ease-out origin-top will-change-transform ${
+          isOpen
+            ? "opacity-100 scale-100 translate-y-0 pointer-events-auto visible"
+            : "opacity-0 scale-95 -translate-y-3 pointer-events-none invisible"
+        }`}
+        role="dialog"
+        aria-label="Notifications"
+        aria-hidden={!isOpen}
+      >
+        {panelContent}
+      </div>
 
-          {/* Desktop Screen: Anchored directly below the bell icon */}
-          <div className="hidden sm:block absolute right-0 top-full mt-2 w-96 rounded-2xl border border-white/[0.12] bg-[#121824]/95 backdrop-blur-xl shadow-2xl shadow-black/80 overflow-hidden z-50 animate-in fade-in-50 zoom-in-95 duration-150">
-            {panelContent}
-          </div>
-        </>
-      )}
+      {/* Desktop Screen: Anchored directly below the bell icon with smooth scale/fade animation */}
+      <div
+        className={`hidden sm:block absolute right-0 top-full mt-2 w-96 rounded-2xl border border-white/[0.12] bg-[#121824]/95 backdrop-blur-xl shadow-2xl shadow-black/80 overflow-hidden z-50 transition-all duration-300 ease-out origin-top-right will-change-transform ${
+          isOpen
+            ? "opacity-100 scale-100 translate-y-0 pointer-events-auto visible"
+            : "opacity-0 scale-95 -translate-y-2 pointer-events-none invisible"
+        }`}
+        role="dialog"
+        aria-label="Notifications"
+        aria-hidden={!isOpen}
+      >
+        {panelContent}
+      </div>
     </div>
   );
 }
