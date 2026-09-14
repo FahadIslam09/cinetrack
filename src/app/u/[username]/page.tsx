@@ -23,10 +23,28 @@ interface ProfilePageProps {
 
 export async function generateMetadata({ params }: ProfilePageProps) {
   const { username } = await params;
-  const decoded = decodeURIComponent(username);
+  const decoded = decodeURIComponent(username).replace(/^@/, "");
+  const title = `@${decoded}'s Library`;
+  const description = `Explore movies, series, and anime tracked by @${decoded} on CineTrack.`;
+  const url = `/u/${decoded}`;
+
   return {
-    title: `@${decoded}'s Library · CineTrack`,
-    description: `Explore movies, series, and anime tracked by @${decoded} on CineTrack.`,
+    title,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: `${title} · CineTrack`,
+      description,
+      url,
+      type: "profile",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} · CineTrack`,
+      description,
+    },
   };
 }
 

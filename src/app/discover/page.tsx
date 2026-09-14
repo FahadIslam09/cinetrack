@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { Footer } from "@/components/navigation/footer";
@@ -9,6 +10,21 @@ import { userMediaLogs, mediaItems, profiles } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { parseRating, getConsensusRating } from "@/lib/rating";
 import { demoLibraryItems } from "@/lib/demo-library";
+
+export const metadata: Metadata = {
+  title: "Discover Movies, Series & Anime",
+  description:
+    "Explore top-rated movies, trending television series, and popular anime with streaming availability and community consensus ratings.",
+  alternates: {
+    canonical: "/discover",
+  },
+  openGraph: {
+    title: "Discover Movies, Series & Anime · CineTrack",
+    description:
+      "Explore top-rated movies, trending television series, and popular anime with streaming availability and community consensus ratings.",
+    url: "/discover",
+  },
+};
 
 interface DiscoverPageProps {
   searchParams: Promise<{

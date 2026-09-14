@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Star, Plus, Film, Tv, Check, Bookmark, ChevronRight } from "lucide-react";
@@ -34,6 +35,76 @@ interface PageProps {
     from?: string;
     ref?: string;
   }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { type, id } = await params;
+  let media: NormalizedMedia | null = null;
+
+  try {
+    if (type === "movie") {
+      const raw = await tmdb.getMovieDetails(id);
+      media = normalizeTmdbMovie(raw);
+    } else if (type === "series" || type === "tv") {
+      const raw = await tmdb.getTVDetails(id);
+      media = normalizeTmdbTV(raw);
+    } else if (type === "anime") {
+      const raw = await anilist.getAnimeDetails(id);
+      media = normalizeAniListAnime(raw);
+    }
+  } catch {
+    return {
+      title: "Title Not Found",
+    };
+  }
+
+  if (!media) {
+    return {
+      title: "Title Not Found",
+    };
+  }
+
+  const releaseYear = media.releaseDate
+    ? new Date(media.releaseDate).getFullYear()
+    : null;
+  const title = releaseYear ? `${media.title} (${releaseYear})` : media.title;
+
+  const description =
+    media.synopsis?.slice(0, 160) ||
+    `Discover ratings, reviews, streaming providers, and tracking details for ${media.title} on CineTrack.`;
+
+  const ogImage = media.backdropPath || media.posterPath;
+  const canonicalPath = `/${type === "tv" ? "series" : type}/${id}`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      title: `${title} · CineTrack`,
+      description,
+      url: canonicalPath,
+      type: type === "movie" ? "video.movie" : "video.tv_show",
+      images: ogImage
+        ? [
+            {
+              url: ogImage,
+              width: 1280,
+              height: 720,
+              alt: media.title,
+            },
+          ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} · CineTrack`,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+    },
+  };
 }
 
 export default async function MediaDetailsPage({ params, searchParams }: PageProps) {
@@ -530,8 +601,24 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
     console.error("Related platform media query error:", err);
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cinetrack.app";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": type === "movie" ? "Movie" : "TVSeries",
+    name: media.title,
+    description: media.synopsis,
+    image: media.backdropPath || media.posterPath,
+    datePublished: media.releaseDate,
+    genre: media.genres,
+    url: `${siteUrl}/${type === "tv" ? "series" : type}/${id}`,
+  };
+
   return (
     <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <AppHeader />
 
       <main className="flex-1 flex flex-col w-full pt-16 pb-24 md:pb-12">

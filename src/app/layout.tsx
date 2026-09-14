@@ -18,11 +18,59 @@ const notoSansBengali = Noto_Sans_Bengali({
   display: "swap",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cinetrack.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   referrer: "origin-when-cross-origin",
-  title: "CineTrack · Everything You Watch, In One Place",
+  title: {
+    default: "CineTrack · Everything You Watch, In One Place",
+    template: "%s · CineTrack",
+  },
   description:
     "A fast, minimal, worldwide social tracking platform to discover, track, rate, review, and share movies, TV series, and anime.",
+  keywords: [
+    "movie tracker",
+    "tv series tracker",
+    "anime tracker",
+    "watchlist app",
+    "cinetrack",
+    "letterboxd alternative",
+    "film reviews",
+    "track cinema",
+  ],
+  authors: [{ name: "CineTrack" }],
+  creator: "CineTrack",
+  publisher: "CineTrack",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: "CineTrack",
+    title: "CineTrack · Everything You Watch, In One Place",
+    description:
+      "A fast, minimal, worldwide social tracking platform to discover, track, rate, review, and share movies, TV series, and anime.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CineTrack · Everything You Watch, In One Place",
+    description:
+      "A fast, minimal, worldwide social tracking platform to discover, track, rate, review, and share movies, TV series, and anime.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: [
       { url: "/icon.png", type: "image/png" },
