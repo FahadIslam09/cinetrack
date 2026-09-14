@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Compass, Library, X, Send, CheckCircle2 } from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
+import { Footer } from "@/components/navigation/footer";
 
 interface RedesignedHomeViewProps {
   user: {
@@ -217,6 +218,9 @@ export function RedesignedHomeView({ user }: RedesignedHomeViewProps) {
           </div>
         </div>
       )}
+
+      {/* Footer for Desktop & Mobile */}
+      <Footer />
 
       {/* Mobile Bottom Navigation */}
       <BottomNav />

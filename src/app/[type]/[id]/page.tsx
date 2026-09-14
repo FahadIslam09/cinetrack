@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Star, Plus, Film, Tv, Check, Bookmark, ChevronRight } from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
+import { Footer } from "@/components/navigation/footer";
 import { ReviewCard } from "@/components/reviews/review-card";
 import { MediaCard } from "@/components/media/media-card";
 import { tmdb } from "@/lib/tmdb/client";
@@ -849,6 +850,7 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
         </div>
       </main>
 
+      <Footer />
       <BottomNav />
     </div>
   );

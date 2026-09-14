@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
+import { Footer } from "@/components/navigation/footer";
 import { LibraryView, LibraryItem } from "@/components/library/library-view";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
@@ -183,6 +184,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
         />
       </main>
 
+      <Footer />
       <BottomNav />
     </div>
   );

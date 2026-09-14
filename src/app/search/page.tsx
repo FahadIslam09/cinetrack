@@ -19,6 +19,7 @@ import {
 import { useLenis } from "lenis/react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
+import { Footer } from "@/components/navigation/footer";
 import { MediaCard } from "@/components/media/media-card";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { ProfileSearchResult } from "@/app/api/search/route";
@@ -557,6 +558,7 @@ function SearchPageContent() {
         )}
       </main>
 
+      <Footer />
       <BottomNav />
     </div>
   );
@@ -584,6 +586,7 @@ export default function SearchPage() {
               ))}
             </div>
           </main>
+          <Footer />
           <BottomNav />
         </div>
       }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
+import { Footer } from "@/components/navigation/footer";
 import { SettingsNav } from "@/components/settings/settings-nav";
 import { createClient } from "@/lib/supabase/server";
 
@@ -26,7 +27,7 @@ export default async function SettingsLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#0F141D] text-[#F5F7FA] pb-24 md:pb-12">
+    <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] text-[#F5F7FA]">
       <AppHeader
         user={{
           email: user.email,
@@ -35,7 +36,7 @@ export default async function SettingsLayout({
         }}
       />
 
-      <main className="w-full max-w-[860px] mx-auto px-4 sm:px-6 pt-24 sm:pt-28">
+      <main className="flex-1 w-full max-w-[860px] mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-12">
         {/* Back Link */}
         <div className="mb-4">
           <Link
@@ -60,6 +61,7 @@ export default async function SettingsLayout({
         {children}
       </main>
 
+      <Footer />
       <BottomNav />
     </div>
   );

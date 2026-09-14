@@ -1,9 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, Bell, Film, Plus, Settings } from "lucide-react";
+import {
+  Search,
+  Bell,
+  Film,
+  Plus,
+  Settings,
+  ChevronDown,
+  Info,
+  Mail,
+  Lightbulb,
+  FileText,
+  Shield,
+} from "lucide-react";
 import { QuickAddModal } from "../quick-add/quick-add-modal";
 import { LogoIcon } from "@/components/ui/logo-icon";
 import { createClient } from "@/lib/supabase/client";
@@ -24,6 +36,65 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
   const [currentUser, setCurrentUser] = useState(initialUser);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
+  const moreDropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const isMoreActive = ["/about", "/contact", "/feedback", "/terms", "/privacy"].includes(pathname);
+
+  const handleDropdownMouseEnter = () => {
+    if (dropdownTimerRef.current) {
+      clearTimeout(dropdownTimerRef.current);
+      dropdownTimerRef.current = null;
+    }
+    setIsMoreDropdownOpen(true);
+  };
+
+  const handleDropdownMouseLeave = () => {
+    if (dropdownTimerRef.current) {
+      clearTimeout(dropdownTimerRef.current);
+    }
+    dropdownTimerRef.current = setTimeout(() => {
+      setIsMoreDropdownOpen(false);
+    }, 240);
+  };
+
+  // Close dropdown on route change
+  useEffect(() => {
+    if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
+    setIsMoreDropdownOpen(false);
+  }, [pathname]);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
+    };
+  }, []);
+
+  // Close dropdown on click outside or escape key
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        moreDropdownRef.current &&
+        !moreDropdownRef.current.contains(e.target as Node)
+      ) {
+        setIsMoreDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsMoreDropdownOpen(false);
+    };
+
+    if (isMoreDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isMoreDropdownOpen]);
 
   useEffect(() => {
     if (initialUser !== undefined) {
@@ -130,6 +201,143 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
                 )}
               </Link>
+
+              {/* More Dropdown (Desktop) */}
+              <div
+                className="relative"
+                ref={moreDropdownRef}
+                onMouseEnter={handleDropdownMouseEnter}
+                onMouseLeave={handleDropdownMouseLeave}
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsMoreDropdownOpen((prev) => !prev)}
+                  className={`relative py-2 font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group cursor-pointer ${
+                    isMoreActive
+                      ? "text-[#F5F7FA]"
+                      : "text-[#A8B0BD] hover:text-[#F5F7FA]"
+                  }`}
+                  aria-expanded={isMoreDropdownOpen}
+                  aria-haspopup="true"
+                >
+                  <span>More</span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-300 ease-out ${
+                      isMoreDropdownOpen ? "rotate-180 text-[#3B9EFF]" : "text-[#A8B0BD] group-hover:text-[#F5F7FA]"
+                    }`}
+                  />
+                  {isMoreActive && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
+                  )}
+                </button>
+
+                {/* Dropdown Menu Container with seamless hover bridge & smooth slow animation */}
+                <div
+                  className={`absolute top-full left-0 pt-2 w-64 z-50 transition-all duration-300 ease-out origin-top-left ${
+                    isMoreDropdownOpen
+                      ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+                      : "opacity-0 scale-[0.96] -translate-y-2 pointer-events-none"
+                  }`}
+                >
+                  <div className="p-2 rounded-2xl bg-[#151C27]/95 border border-white/[0.12] shadow-[0_20px_45px_rgba(0,0,0,0.65)] backdrop-blur-2xl ring-1 ring-black/40 flex flex-col gap-1">
+                    <Link
+                      href="/about"
+                      onClick={() => setIsMoreDropdownOpen(false)}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                        pathname === "/about"
+                          ? "bg-[#3B9EFF]/15 text-[#3B9EFF]"
+                          : "text-[#A8B0BD] hover:text-white hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <div className="w-6 h-6 rounded-lg bg-[#3B9EFF]/10 border border-[#3B9EFF]/20 text-[#3B9EFF] flex items-center justify-center shrink-0">
+                        <Info className="w-3.5 h-3.5" />
+                      </div>
+                      <span>About</span>
+                    </Link>
+
+                    <Link
+                      href="/contact"
+                      onClick={() => setIsMoreDropdownOpen(false)}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                        pathname === "/contact"
+                          ? "bg-[#3B9EFF]/15 text-[#3B9EFF]"
+                          : "text-[#A8B0BD] hover:text-white hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <div className="w-6 h-6 rounded-lg bg-[#3B9EFF]/10 border border-[#3B9EFF]/20 text-[#3B9EFF] flex items-center justify-center shrink-0">
+                        <Mail className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Contact</span>
+                    </Link>
+
+                    {/* Focused & Highlighted Feature Request Card */}
+                    <div className="my-1">
+                      <Link
+                        href="/feedback"
+                        onClick={() => setIsMoreDropdownOpen(false)}
+                        className={`relative p-2.5 rounded-xl border transition-all duration-250 flex items-center justify-between group/feat overflow-hidden cursor-pointer ${
+                          pathname === "/feedback"
+                            ? "bg-[#3B9EFF]/20 border-[#3B9EFF] shadow-[0_0_20px_rgba(59,158,255,0.25)]"
+                            : "bg-gradient-to-r from-[#3B9EFF]/15 via-[#3B9EFF]/8 to-amber-500/10 hover:from-[#3B9EFF]/25 hover:via-[#3B9EFF]/15 hover:to-amber-500/15 border-[#3B9EFF]/30 hover:border-[#3B9EFF]/60 shadow-[0_0_14px_rgba(59,158,255,0.1)] hover:shadow-[0_0_22px_rgba(59,158,255,0.22)] active:scale-[0.98]"
+                        }`}
+                      >
+                        {/* Ambient subtle glow background */}
+                        <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-[#3B9EFF]/20 rounded-full blur-xl pointer-events-none group-hover/feat:bg-[#3B9EFF]/30 transition-colors" />
+
+                        <div className="flex items-center gap-2.5 relative z-10 min-w-0">
+                          <div className="w-7 h-7 rounded-lg bg-amber-400/20 border border-amber-400/35 text-amber-300 flex items-center justify-center shrink-0 shadow-sm group-hover/feat:scale-105 group-hover/feat:bg-amber-400/30 transition-all">
+                            <Lightbulb className="w-4 h-4 text-amber-300" />
+                          </div>
+                          <div className="flex flex-col text-left min-w-0">
+                            <span className="font-bold text-xs text-[#F5F7FA] group-hover/feat:text-white leading-tight">
+                              Request Feature
+                            </span>
+                            <span className="text-[10px] text-[#A8B0BD] group-hover/feat:text-[#E2E8F0] leading-tight mt-0.5 truncate">
+                              Suggest ideas &amp; improvements
+                            </span>
+                          </div>
+                        </div>
+
+                        <span className="relative z-10 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[#3B9EFF]/20 text-[#3B9EFF] border border-[#3B9EFF]/30 group-hover/feat:bg-[#3B9EFF] group-hover/feat:text-white transition-colors shrink-0 ml-2">
+                          New
+                        </span>
+                      </Link>
+                    </div>
+
+                    <div className="my-0.5 border-t border-white/[0.08]" />
+
+                    <Link
+                      href="/terms"
+                      onClick={() => setIsMoreDropdownOpen(false)}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                        pathname === "/terms"
+                          ? "bg-[#3B9EFF]/15 text-[#3B9EFF]"
+                          : "text-[#A8B0BD] hover:text-white hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <div className="w-6 h-6 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[#A8B0BD] flex items-center justify-center shrink-0">
+                        <FileText className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Terms and Conditions</span>
+                    </Link>
+
+                    <Link
+                      href="/privacy"
+                      onClick={() => setIsMoreDropdownOpen(false)}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                        pathname === "/privacy"
+                          ? "bg-[#3B9EFF]/15 text-[#3B9EFF]"
+                          : "text-[#A8B0BD] hover:text-white hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <div className="w-6 h-6 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[#A8B0BD] flex items-center justify-center shrink-0">
+                        <Shield className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Privacy Policy</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </nav>
           </div>
 
