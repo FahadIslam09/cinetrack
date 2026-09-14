@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, Bell, Film, Plus } from "lucide-react";
+import { Search, Bell, Film, Plus, Settings } from "lucide-react";
 import { QuickAddModal } from "../quick-add/quick-add-modal";
 import { LogoIcon } from "@/components/ui/logo-icon";
 import { createClient } from "@/lib/supabase/client";
@@ -174,6 +174,22 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
               <Bell className="w-5 h-5 block" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#3B9EFF] ring-2 ring-[#0F141D]" />
             </button>
+
+            {/* Settings Link */}
+            {currentUser && (
+              <Link
+                href="/settings"
+                aria-label="Settings"
+                title="Settings"
+                className={`p-2 rounded-lg transition-colors shrink-0 cursor-pointer ${
+                  pathname.startsWith("/settings")
+                    ? "text-[#3B9EFF] bg-[#1A2330]"
+                    : "text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330]"
+                }`}
+              >
+                <Settings className="w-5 h-5 block" />
+              </Link>
+            )}
 
             {/* User Profile Avatar / Sign In */}
             {currentUser ? (

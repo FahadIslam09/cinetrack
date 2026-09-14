@@ -17,6 +17,7 @@ import {
   Lightbulb,
   FileText,
   Shield,
+  Settings as SettingsIcon,
 } from "lucide-react";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
@@ -61,6 +62,11 @@ function BottomNavContent() {
 
   const moreLinks = [
     {
+      label: "Settings",
+      href: "/settings",
+      icon: SettingsIcon,
+    },
+    {
       label: "About",
       href: "/about",
       icon: Info,
@@ -84,6 +90,7 @@ function BottomNavContent() {
 
   const isMoreActive =
     isMoreOpen ||
+    pathname.startsWith("/settings") ||
     ["/about", "/contact", "/feedback", "/terms", "/privacy"].includes(pathname);
 
   const navItems = [
@@ -124,6 +131,7 @@ function BottomNavContent() {
           "/terms",
           "/privacy",
         ].includes(pathname) &&
+          !pathname.startsWith("/settings") &&
           !pathname.startsWith("/movie") &&
           !pathname.startsWith("/series") &&
           !pathname.startsWith("/anime") &&

@@ -20,6 +20,7 @@ import {
   X,
   RotateCcw,
   Loader2,
+  Settings,
 } from "lucide-react";
 import { MediaCard } from "@/components/media/media-card";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
@@ -499,7 +500,7 @@ export function LibraryView({
 
           {/* 4. Action Buttons (Owner Only) */}
           {isOwner && (
-            <div className="flex items-center justify-center gap-2.5 mt-5">
+            <div className="flex items-center justify-center gap-2.5 mt-5 flex-wrap">
               <button
                 type="button"
                 onClick={() => setIsEditProfileOpen(true)}
@@ -508,6 +509,15 @@ export function LibraryView({
                 <Pencil className="w-3.5 h-3.5 text-[#A8B0BD]" />
                 <span>Edit Profile</span>
               </button>
+
+              <Link
+                href="/settings"
+                className="h-10 px-4 rounded-full bg-[#1D2734] hover:bg-[#253244] border border-white/[0.08] hover:border-white/[0.15] text-[#A8B0BD] hover:text-[#F5F7FA] text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer"
+                title="Settings"
+              >
+                <Settings className="w-3.5 h-3.5" />
+                <span>Settings</span>
+              </Link>
 
               <button
                 type="button"
