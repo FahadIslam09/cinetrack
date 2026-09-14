@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { Footer } from "@/components/navigation/footer";
+import { BackButton } from "@/components/ui/back-button";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -31,6 +32,10 @@ export default async function PrivacyPage() {
       />
 
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 pt-24 pb-20 md:pb-12">
+        <div className="mb-6">
+          <BackButton fallbackUrl="/" label="Back" />
+        </div>
+
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] font-medium text-[#22C55E] tracking-wider uppercase mb-4">
             Data &amp; Privacy

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Film, Library, MessageSquare, Star, Calendar, CheckCircle2, PlayCircle, Clock, PauseCircle, XCircle } from "lucide-react";
+import { Film, Library, MessageSquare, Star, Calendar, CheckCircle2, PlayCircle, Clock, PauseCircle, XCircle } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 import { db } from "@/lib/db";
 import { profiles, userMediaLogs, mediaItems } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -83,13 +84,11 @@ export default async function AdminUserDetail({ params }: Props) {
 
   return (
     <div className="space-y-6">
-      <Link
-        href="/admin/users"
-        className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" />
-        Back to Users
-      </Link>
+      <BackButton
+        fallbackUrl="/admin/users"
+        label="Back to Users"
+        className="text-slate-500 hover:text-slate-800"
+      />
 
       <PageHeader title="User Detail" />
 

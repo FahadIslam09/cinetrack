@@ -5,7 +5,8 @@ import { BottomNav } from "@/components/navigation/bottom-nav";
 import { Footer } from "@/components/navigation/footer";
 import { FeedbackForm } from "@/components/feedback/feedback-form";
 import { createClient } from "@/lib/supabase/server";
-import { Mail, ArrowLeft } from "lucide-react";
+import { Mail } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export const metadata: Metadata = {
   title: "Need a Feature? Request Here · CineTrack",
@@ -36,13 +37,7 @@ export default async function FeedbackPage() {
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 pt-24 pb-20 md:pb-12">
         {/* Navigation Breadcrumb */}
         <div className="mb-6">
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#A8B0BD] hover:text-white transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Contact &amp; Support</span>
-          </Link>
+          <BackButton fallbackUrl="/" label="Back" />
         </div>
 
         {/* Header Cluster */}
