@@ -2,8 +2,24 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Pencil } from "lucide-react";
+import { Loader2, Pencil, X } from "lucide-react";
 import { updateFeatureRequest } from "@/actions/admin";
+import { CustomDropdown, type DropdownOption } from "@/components/ui/custom-dropdown";
+
+const STATUS_OPTIONS: DropdownOption[] = [
+  { id: "new", label: "New", dot: "bg-blue-500" },
+  { id: "under_review", label: "Under Review", dot: "bg-amber-500" },
+  { id: "planned", label: "Planned", dot: "bg-violet-500" },
+  { id: "in_progress", label: "In Progress", dot: "bg-sky-500" },
+  { id: "completed", label: "Completed", dot: "bg-emerald-500" },
+  { id: "declined", label: "Declined", dot: "bg-slate-400" },
+];
+
+const PRIORITY_OPTIONS: DropdownOption[] = [
+  { id: "low", label: "Low", dot: "bg-slate-400" },
+  { id: "medium", label: "Medium", dot: "bg-amber-500" },
+  { id: "high", label: "High", dot: "bg-rose-500" },
+];
 
 export function RequestEditDialog({
   id,
@@ -70,70 +86,62 @@ export function RequestEditDialog({
       {open && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <div className="relative w-full max-w-md rounded-xl bg-white border border-slate-200 shadow-xl p-5 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-sm font-semibold text-slate-900">Update request</h3>
+          <div className="relative w-full max-w-md rounded-2xl bg-white border border-slate-200/90 shadow-2xl p-6">
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+              <h3 className="text-base font-semibold text-slate-900">Update request</h3>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
             <div className="space-y-4 mt-4">
               <div>
-                <label className="text-xs font-medium text-slate-500 block mb-1.5">Status</label>
-                <select
+                <label className="text-xs font-semibold text-slate-600 block mb-1.5">Status</label>
+                <CustomDropdown
+                  variant="light"
                   value={sStatus}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="w-full h-9 px-3 rounded-lg border border-slate-200 text-sm text-slate-700 focus:outline-none focus:border-blue-400 cursor-pointer"
-                >
-                  {[
-                    ["new", "New"],
-                    ["under_review", "Under Review"],
-                    ["planned", "Planned"],
-                    ["in_progress", "In Progress"],
-                    ["completed", "Completed"],
-                    ["declined", "Declined"],
-                  ].map(([v, l]) => (
-                    <option key={v} value={v}>
-                      {l}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setStatus}
+                  options={STATUS_OPTIONS}
+                  menuWidth="w-full"
+                  buttonClassName="h-10 text-sm font-medium"
+                />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-500 block mb-1.5">Priority</label>
-                <select
+                <label className="text-xs font-semibold text-slate-600 block mb-1.5">Priority</label>
+                <CustomDropdown
+                  variant="light"
                   value={sPriority}
-                  onChange={(e) => setPriority(e.target.value)}
-                  className="w-full h-9 px-3 rounded-lg border border-slate-200 text-sm text-slate-700 focus:outline-none focus:border-blue-400 cursor-pointer"
-                >
-                  {[
-                    ["low", "Low"],
-                    ["medium", "Medium"],
-                    ["high", "High"],
-                  ].map(([v, l]) => (
-                    <option key={v} value={v}>
-                      {l}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setPriority}
+                  options={PRIORITY_OPTIONS}
+                  menuWidth="w-full"
+                  buttonClassName="h-10 text-sm font-medium"
+                />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-500 block mb-1.5">Internal notes</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1.5">Internal notes</label>
                 <textarea
                   value={sNotes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={4}
                   placeholder="Notes visible only to admins…"
-                  className="w-full p-3 rounded-lg border border-slate-200 text-sm text-slate-700 focus:outline-none focus:border-blue-400 resize-none"
+                  className="w-full p-3 rounded-xl border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all resize-none font-sans"
                 />
               </div>
 
               {error && <p className="text-xs text-rose-600">{error}</p>}
             </div>
 
-            <div className="flex items-center justify-end gap-2 mt-5">
+            <div className="flex items-center justify-end gap-2.5 mt-6 pt-4 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -141,7 +149,7 @@ export function RequestEditDialog({
                 type="button"
                 onClick={save}
                 disabled={isPending}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-60 shadow-sm"
               >
                 {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Save

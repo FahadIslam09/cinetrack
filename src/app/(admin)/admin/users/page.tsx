@@ -218,11 +218,11 @@ export default async function AdminUsers({ searchParams }: Props) {
             defaultValue="all"
             options={[
               { value: "all", label: "All users" },
-              { value: "new", label: "New (7d)" },
-              { value: "active", label: "Active" },
-              { value: "inactive", label: "Inactive" },
-              { value: "suspended", label: "Suspended" },
-              { value: "admin", label: "Admins" },
+              { value: "new", label: "New (7d)", dot: "bg-blue-500" },
+              { value: "active", label: "Active", dot: "bg-emerald-500" },
+              { value: "inactive", label: "Inactive", dot: "bg-slate-400" },
+              { value: "suspended", label: "Suspended", dot: "bg-rose-500" },
+              { value: "admin", label: "Admins", dot: "bg-violet-500" },
             ]}
           />
           <FilterSelect

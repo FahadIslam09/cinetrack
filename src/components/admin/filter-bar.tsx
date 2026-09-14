@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CustomDropdown, type DropdownOption } from "@/components/ui/custom-dropdown";
 
 function usePushParam() {
   const router = useRouter();
@@ -85,6 +86,8 @@ export function SearchBar({
 export interface FilterOption {
   value: string;
   label: string;
+  dot?: string;
+  icon?: React.ReactNode;
 }
 
 export function FilterSelect({
@@ -104,29 +107,28 @@ export function FilterSelect({
   const searchParams = useSearchParams();
   const value = searchParams.get(param) || defaultValue;
 
+  const dropdownOptions: DropdownOption[] = options.map((o) => ({
+    id: o.value,
+    label: o.label,
+    dot: o.dot,
+    icon: o.icon,
+  }));
+
+  const isFiltered = value !== defaultValue;
+
   return (
-    <div className="relative inline-flex items-center">
-      <select
-        value={value}
-        disabled={isPending}
-        onChange={(e) => push(param, e.target.value === defaultValue ? null : e.target.value)}
-        aria-label={label}
-        className={cn(
-          "h-9 pl-3 pr-8 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-shadow cursor-pointer disabled:cursor-wait",
-          value !== defaultValue && "border-blue-300 text-blue-700 font-medium",
-          isPending && "opacity-75",
-          className
-        )}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      {isPending && (
-        <Loader2 className="w-3.5 h-3.5 text-blue-500 animate-spin absolute right-2.5 pointer-events-none" />
-      )}
-    </div>
+    <CustomDropdown
+      variant="light"
+      value={value}
+      onChange={(newVal) => push(param, newVal === defaultValue ? null : newVal)}
+      options={dropdownOptions}
+      highlightActive={isFiltered}
+      isLoading={isPending}
+      ariaLabel={label}
+      className={className}
+      buttonClassName="h-9 px-3 rounded-xl text-xs font-medium"
+      menuWidth="min-w-[160px]"
+    />
   );
 }
+

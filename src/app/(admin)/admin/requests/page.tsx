@@ -182,7 +182,11 @@ export default async function AdminRequests({ searchParams }: Props) {
             defaultValue="all"
             options={[
               { value: "all", label: "All statuses" },
-              ...REQUEST_STATUS_ORDER.map((s) => ({ value: s, label: REQUEST_STATUS[s].label })),
+              ...REQUEST_STATUS_ORDER.map((s) => ({
+                value: s,
+                label: REQUEST_STATUS[s].label,
+                dot: REQUEST_STATUS[s].dot,
+              })),
             ]}
           />
           <FilterSelect

@@ -26,6 +26,7 @@ export interface CustomDropdownProps {
   highlightActive?: boolean;
   dropDirection?: "up" | "down" | "auto";
   isLoading?: boolean;
+  variant?: "dark" | "light";
 }
 
 export function CustomDropdown({
@@ -42,6 +43,7 @@ export function CustomDropdown({
   highlightActive,
   dropDirection = "auto",
   isLoading = false,
+  variant = "dark",
 }: CustomDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [openUpward, setOpenUpward] = useState(dropDirection === "up");
@@ -123,6 +125,8 @@ export function CustomDropdown({
 
   const displayLabel = triggerLabel || selectedOption?.label;
 
+  const isLight = variant === "light";
+
   return (
     <div ref={dropdownRef} className={`relative ${isOpen ? "z-50" : "z-10"} ${className}`}>
       <button
@@ -133,7 +137,13 @@ export function CustomDropdown({
         className={`w-full px-3 rounded-xl text-xs font-medium flex items-center justify-between gap-1.5 transition-all duration-150 cursor-pointer border select-none outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 ${
           buttonClassName || "h-9"
         } ${
-          isFiltered
+          isLight
+            ? isFiltered
+              ? "bg-blue-50/80 border-blue-300 text-blue-700 font-semibold shadow-sm"
+              : isOpen
+              ? "bg-white border-blue-500 ring-2 ring-blue-100 text-slate-900 shadow-sm"
+              : "bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 shadow-sm"
+            : isFiltered
             ? "bg-[#3B9EFF]/12 border-[#3B9EFF]/60 text-[#3B9EFF] font-semibold shadow-[0_0_12px_rgba(59,158,255,0.12)]"
             : isOpen
             ? "bg-[#1A2330] border-[#3B9EFF] text-[#F5F7FA]"
@@ -145,23 +155,39 @@ export function CustomDropdown({
             <span className={`w-2 h-2 rounded-full ${selectedOption.dot} shrink-0`} />
           )}
           {selectedOption?.icon && (
-            <span className="shrink-0 text-[#3B9EFF]">{selectedOption.icon}</span>
+            <span className={`shrink-0 ${isLight ? "text-blue-600" : "text-[#3B9EFF]"}`}>{selectedOption.icon}</span>
           )}
           <span className="truncate">{displayLabel}</span>
         </span>
 
         {isLoading ? (
-          <Loader2 className="w-3.5 h-3.5 shrink-0 text-[#3B9EFF] animate-spin" />
+          <Loader2 className={`w-3.5 h-3.5 shrink-0 animate-spin ${isLight ? "text-blue-600" : "text-[#3B9EFF]"}`} />
         ) : suffixIcon === "sort" ? (
           <ArrowUpDown
             className={`w-3.5 h-3.5 shrink-0 transition-colors ${
-              isFiltered || isOpen ? "text-[#3B9EFF]" : "text-[#6F7886]"
+              isLight
+                ? isFiltered || isOpen
+                  ? "text-blue-600"
+                  : "text-slate-400"
+                : isFiltered || isOpen
+                ? "text-[#3B9EFF]"
+                : "text-[#6F7886]"
             }`}
           />
         ) : (
           <ChevronDown
             className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
-              isOpen ? "rotate-180 text-[#3B9EFF]" : isFiltered ? "text-[#3B9EFF]" : "text-[#6F7886]"
+              isOpen
+                ? isLight
+                  ? "rotate-180 text-blue-600"
+                  : "rotate-180 text-[#3B9EFF]"
+                : isFiltered
+                ? isLight
+                  ? "text-blue-600"
+                  : "text-[#3B9EFF]"
+                : isLight
+                ? "text-slate-400"
+                : "text-[#6F7886]"
             }`}
           />
         )}
@@ -175,11 +201,17 @@ export function CustomDropdown({
               : "top-full mt-1.5 origin-top animate-in fade-in zoom-in-95 slide-in-from-top-1"
           } ${
             align === "right" ? "right-0" : "left-0"
-          } ${menuWidth || "min-w-[170px]"} max-w-[280px] bg-[#121824]/95 backdrop-blur-xl border border-white/[0.12] shadow-2xl shadow-black/80 rounded-xl overflow-hidden p-1 duration-150`}
+          } ${menuWidth || "min-w-[170px] max-w-[280px]"} ${
+            isLight
+              ? "bg-white/95 backdrop-blur-xl border border-slate-200 shadow-xl shadow-slate-900/10 ring-1 ring-black/5"
+              : "bg-[#121824]/95 backdrop-blur-xl border border-white/[0.12] shadow-2xl shadow-black/80"
+          } rounded-xl overflow-hidden p-1 duration-150`}
         >
           <div
             data-lenis-prevent="true"
-            className="max-h-[190px] overflow-y-auto overscroll-contain custom-scrollbar pr-1.5 flex flex-col gap-0.5"
+            className={`max-h-[190px] overflow-y-auto overscroll-contain ${
+              isLight ? "custom-scrollbar-light" : "custom-scrollbar"
+            } pr-1.5 flex flex-col gap-0.5`}
           >
             {options.map((opt) => {
               const isSelected = opt.id === value;
@@ -193,7 +225,11 @@ export function CustomDropdown({
                     setIsOpen(false);
                   }}
                   className={`w-full flex items-center justify-between gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors text-left outline-none focus:outline-none focus-visible:outline-none select-none ${
-                    isSelected
+                    isLight
+                      ? isSelected
+                        ? "bg-blue-50 text-blue-700 font-semibold"
+                        : "text-slate-700 hover:text-slate-900 hover:bg-slate-100/80"
+                      : isSelected
                       ? "bg-[#3B9EFF]/15 text-[#3B9EFF] font-semibold"
                       : "text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-white/[0.06]"
                   }`}
@@ -207,7 +243,11 @@ export function CustomDropdown({
                     {opt.count !== undefined && (
                       <span
                         className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
-                          isSelected
+                          isLight
+                            ? isSelected
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-slate-100 text-slate-500"
+                            : isSelected
                             ? "bg-[#3B9EFF]/20 text-[#3B9EFF]"
                             : "bg-white/[0.05] text-[#6F7886]"
                         }`}
@@ -215,7 +255,9 @@ export function CustomDropdown({
                         {opt.count}
                       </span>
                     )}
-                    {isSelected && <Check className="w-3.5 h-3.5 text-[#3B9EFF] shrink-0" />}
+                    {isSelected && (
+                      <Check className={`w-3.5 h-3.5 shrink-0 ${isLight ? "text-blue-600" : "text-[#3B9EFF]"}`} />
+                    )}
                   </span>
                 </button>
               );
