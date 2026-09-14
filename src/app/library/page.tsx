@@ -7,7 +7,6 @@ import { db } from "@/lib/db";
 import { userMediaLogs, mediaItems, profiles } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { parseRating } from "@/lib/rating";
-import { demoStats, demoLibraryItems } from "@/lib/demo-library";
 
 interface LibraryPageProps {
   searchParams: Promise<{
@@ -115,8 +114,8 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
     }
   }
 
-  const finalItems = items.length > 0 ? items : demoLibraryItems;
-  const finalStats = items.length > 0 ? stats : demoStats;
+  const finalItems = items;
+  const finalStats = stats;
 
   const userProp = user
     ? {

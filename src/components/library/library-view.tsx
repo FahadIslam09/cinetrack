@@ -21,6 +21,7 @@ import {
   RotateCcw,
   Loader2,
   Settings,
+  Compass,
 } from "lucide-react";
 import { MediaCard } from "@/components/media/media-card";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
@@ -614,7 +615,7 @@ export function LibraryView({
             <div className="text-lg sm:text-xl font-bold text-[#F5F7FA] leading-none">
               {stats.total > 0
                 ? `${Math.round((stats.completed / stats.total) * 100)}%`
-                : "78%"}
+                : "0%"}
             </div>
             <div className="text-[11px] font-medium text-[#A8B0BD] mt-1">
               Completion Rate
@@ -622,210 +623,308 @@ export function LibraryView({
           </div>
         </div>
       </div>
+      {initialItems.length === 0 ? (
+        /* Full Premium Library Empty State */
+        <div className="relative rounded-3xl bg-gradient-to-b from-[#151C27]/90 via-[#131924]/90 to-[#0F141D]/95 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-8 sm:p-14 lg:p-16 text-center overflow-hidden my-2">
+          {/* Ambient Glows */}
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-[#3B9EFF]/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Controls: Search, Status & Filter Dropdowns */}
-      <div className="relative flex flex-col gap-2.5">
-        {/* Laser beam scan when filtering */}
-        {isFiltering && (
-          <div className="absolute inset-x-0 -top-[1px] h-[2px] overflow-hidden rounded-t-xl z-50 pointer-events-none">
-            <div className="absolute inset-0 bg-[#3B9EFF]/40 shadow-[0_0_8px_#3B9EFF]" />
-            <div className="h-full w-full bg-gradient-to-r from-transparent via-[#5AAFFF] to-transparent animate-laser-beam shadow-[0_0_14px_#3B9EFF]" />
-          </div>
-        )}
+          <div className="relative z-10 max-w-xl mx-auto flex flex-col items-center">
+            {/* Glowing Hero Icon Badge */}
+            <div className="relative mb-6 w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-3xl bg-[#3B9EFF]/20 blur-xl animate-pulse" />
+              <div className="relative w-full h-full rounded-3xl bg-gradient-to-br from-[#1E293B] to-[#0F172A] border border-[#3B9EFF]/30 flex items-center justify-center shadow-xl">
+                <Film className="w-9 h-9 sm:w-11 sm:h-11 text-[#3B9EFF]" />
+                {isOwner && (
+                  <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#3B9EFF] text-white flex items-center justify-center shadow-lg ring-3 ring-[#0F141D]">
+                    <Plus className="w-4 h-4" />
+                  </div>
+                )}
+              </div>
+            </div>
 
-        {/* Unified Search & Dropdown Filters Bar */}
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5">
-          {/* Row 1 on Mobile: Status Dropdown + Search Input Inline */}
-          <div className="flex items-center gap-2 flex-1">
-            {/* Status Dropdown */}
-            <CustomDropdown
-              value={statusFilter}
-              onChange={handleFilterChange(setStatusFilter)}
-              isLoading={isFiltering}
-              options={statusOptions}
-              triggerLabel={statusTriggerLabel}
-              align="left"
-              className="shrink-0 w-[125px] sm:w-[140px]"
-              menuWidth="w-[185px]"
-              ariaLabel="Filter by watch status"
-            />
+            {/* Heading */}
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-[#F5F7FA]">
+              {isOwner ? "Your Library is Waiting" : "No Titles Tracked Yet"}
+            </h2>
 
-            {/* Instant Client Search */}
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 text-[#6F7886] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                placeholder="Filter by title or genre..."
-                className="w-full h-9 pl-9 pr-8 rounded-lg bg-[#151C27] border border-white/[0.08] text-xs text-[#F5F7FA] placeholder-[#6F7886] focus:outline-none focus:border-[#3B9EFF] transition-colors"
-              />
-              {searchQuery && (
+            {/* Description */}
+            <p className="text-xs sm:text-sm text-[#A8B0BD] leading-relaxed mt-3 mb-8 max-w-md">
+              {isOwner
+                ? "You haven't added any movies, series, or anime yet. Start tracking your favorites, log episodes, rate your taste, and build your personal collection."
+                : "This user hasn't added any movies, television series, or anime to their CineTrack collection yet."}
+            </p>
+
+            {/* Action Buttons */}
+            {isOwner ? (
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                 <button
                   type="button"
-                  onClick={() => {
-                    setVisibleCount(12);
-                    setSearchQuery("");
-                  }}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6F7886] hover:text-white p-0.5"
+                  onClick={() => setIsQuickAddOpen(true)}
+                  className="w-full sm:w-auto h-11 sm:h-12 px-7 rounded-xl bg-[#3B9EFF] hover:bg-[#2F8EEA] text-white font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(59,158,255,0.35)] hover:shadow-[0_6px_25px_rgba(59,158,255,0.5)] transition-all active:scale-95 cursor-pointer"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <Plus className="w-4 h-4" />
+                  <span>Add Your First Title</span>
                 </button>
-              )}
+
+                <Link
+                  href="/discover"
+                  className="w-full sm:w-auto h-11 sm:h-12 px-6 rounded-xl bg-[#1D2734] hover:bg-[#253244] border border-white/[0.1] hover:border-white/[0.2] text-[#F5F7FA] font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer"
+                >
+                  <Compass className="w-4 h-4 text-[#A8B0BD]" />
+                  <span>Explore Discover</span>
+                </Link>
+              </div>
+            ) : (
+              <Link
+                href="/discover"
+                className="h-11 sm:h-12 px-7 rounded-xl bg-[#3B9EFF] hover:bg-[#2F8EEA] text-white font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 shadow-lg shadow-[#3B9EFF]/25 transition-all active:scale-95 cursor-pointer"
+              >
+                <Compass className="w-4 h-4" />
+                <span>Explore Movies on CineTrack</span>
+              </Link>
+            )}
+
+            {/* Quick Suggestions Chips */}
+            <div className="pt-8 mt-8 border-t border-white/[0.06] w-full flex flex-col items-center gap-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#6F7886]">
+                Quick Browse Inspiration
+              </span>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Link
+                  href="/discover?type=movie"
+                  className="px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-xs text-[#A8B0BD] hover:text-[#F5F7FA] transition-colors flex items-center gap-1.5"
+                >
+                  <Film className="w-3.5 h-3.5 text-[#3B9EFF]" />
+                  <span>Trending Movies</span>
+                </Link>
+                <Link
+                  href="/discover?type=series"
+                  className="px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-xs text-[#A8B0BD] hover:text-[#F5F7FA] transition-colors flex items-center gap-1.5"
+                >
+                  <Tv className="w-3.5 h-3.5 text-[#A855F7]" />
+                  <span>Top Series</span>
+                </Link>
+                <Link
+                  href="/discover?type=anime"
+                  className="px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-xs text-[#A8B0BD] hover:text-[#F5F7FA] transition-colors flex items-center gap-1.5"
+                >
+                  <Flame className="w-3.5 h-3.5 text-[#F5C84B]" />
+                  <span>Popular Anime</span>
+                </Link>
+              </div>
             </div>
-          </div>
-
-          {/* 4 Compact Filter Dropdowns: 2x2 Grid on Mobile, 4 Columns on Tablet, Flex on Desktop */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:flex lg:items-center gap-2 w-full lg:w-auto shrink-0">
-            {/* 1. Format */}
-            <CustomDropdown
-              value={typeFilter}
-              onChange={handleFilterChange(setTypeFilter)}
-              isLoading={isFiltering}
-              options={formatOptions}
-              align="left"
-              className="w-full lg:w-auto lg:min-w-[125px]"
-              menuWidth="w-[165px]"
-              ariaLabel="Filter by format"
-            />
-
-            {/* 2. Rating */}
-            <CustomDropdown
-              value={ratingFilter}
-              onChange={handleFilterChange(setRatingFilter)}
-              isLoading={isFiltering}
-              options={ratingOptions}
-              triggerLabel={ratingTriggerLabel}
-              align="right"
-              className="w-full lg:w-auto lg:min-w-[140px]"
-              menuWidth="w-[195px]"
-              ariaLabel="Filter by personal rating"
-            />
-
-            {/* 3. Genre */}
-            <CustomDropdown
-              value={selectedGenre}
-              onChange={handleFilterChange(setSelectedGenre)}
-              isLoading={isFiltering}
-              options={genreOptions}
-              align="left"
-              className="w-full lg:w-auto lg:min-w-[125px]"
-              menuWidth="w-[170px]"
-              ariaLabel="Filter by genre"
-            />
-
-            {/* 4. Sort */}
-            <CustomDropdown
-              value={sortBy}
-              onChange={handleFilterChange(setSortBy)}
-              isLoading={isFiltering}
-              options={sortOptions}
-              align="right"
-              className="w-full lg:w-auto lg:min-w-[160px]"
-              menuWidth="w-[230px]"
-              suffixIcon="sort"
-              ariaLabel="Sort library titles"
-            />
           </div>
         </div>
+      ) : (
+        <>
+          {/* Controls: Search, Status & Filter Dropdowns */}
+          <div className="relative flex flex-col gap-2.5">
+            {/* Laser beam scan when filtering */}
+            {isFiltering && (
+              <div className="absolute inset-x-0 -top-[1px] h-[2px] overflow-hidden rounded-t-xl z-50 pointer-events-none">
+                <div className="absolute inset-0 bg-[#3B9EFF]/40 shadow-[0_0_8px_#3B9EFF]" />
+                <div className="h-full w-full bg-gradient-to-r from-transparent via-[#5AAFFF] to-transparent animate-laser-beam shadow-[0_0_14px_#3B9EFF]" />
+              </div>
+            )}
 
-        {/* Active Filter Bar (when any filter is active) */}
-        {hasActiveFilters && (
-          <div className="flex items-center justify-between text-xs text-[#A8B0BD] pt-1 border-t border-white/[0.04]">
-            <span className="text-[11px]">
-              Showing <strong className="text-[#F5F7FA]">{Math.min(visibleCount, filteredItems.length)}</strong> of {filteredItems.length} titles
-            </span>
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="text-[11px] font-semibold text-[#3B9EFF] hover:underline inline-flex items-center gap-1 cursor-pointer"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Reset Filters</span>
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* 5. Responsive Media Grid (Full-Width Responsive Cells) */}
-      <div className="relative">
-        {/* Floating beacon during filter transition */}
-        {isFiltering && (
-          <div className="absolute top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#151C27]/90 backdrop-blur-md border border-[#3B9EFF]/30 shadow-[0_4px_20px_rgba(59,158,255,0.25)] text-xs text-[#F5F7FA] font-medium animate-pulse">
-            <Loader2 className="w-3.5 h-3.5 text-[#3B9EFF] animate-spin" />
-            <span>Updating library...</span>
-          </div>
-        )}
-
-        {filteredItems.length > 0 ? (
-          <>
-            <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4 transition-opacity duration-200 ${isFiltering ? "opacity-40" : "opacity-100"}`}>
-              {displayedItems.map((item) => (
-                <MediaCard
-                  key={item.id}
-                  media={item.media}
-                  status={item.status}
-                  userRating={item.userRating || undefined}
-                  userEpisodes={item.userEpisodes}
-                  currentSeason={item.currentSeason}
-                  currentEpisode={item.currentEpisode}
-                  seasons={item.seasons}
-                  reviewText={item.reviewText}
-                  containsSpoilers={item.containsSpoilers}
-                  fromUsername={currentUserState?.username || undefined}
-                  readOnly={!isOwner}
-                  className="w-full"
+            {/* Unified Search & Dropdown Filters Bar */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5">
+              {/* Row 1 on Mobile: Status Dropdown + Search Input Inline */}
+              <div className="flex items-center gap-2 flex-1">
+                {/* Status Dropdown */}
+                <CustomDropdown
+                  value={statusFilter}
+                  onChange={handleFilterChange(setStatusFilter)}
+                  isLoading={isFiltering}
+                  options={statusOptions}
+                  triggerLabel={statusTriggerLabel}
+                  align="left"
+                  className="shrink-0 w-[125px] sm:w-[140px]"
+                  menuWidth="w-[185px]"
+                  ariaLabel="Filter by watch status"
                 />
-              ))}
+
+                {/* Instant Client Search */}
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 text-[#6F7886] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    placeholder="Filter by title or genre..."
+                    className="w-full h-9 pl-9 pr-8 rounded-lg bg-[#151C27] border border-white/[0.08] text-xs text-[#F5F7FA] placeholder-[#6F7886] focus:outline-none focus:border-[#3B9EFF] transition-colors"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVisibleCount(12);
+                        setSearchQuery("");
+                      }}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6F7886] hover:text-white p-0.5"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* 4 Compact Filter Dropdowns: 2x2 Grid on Mobile, 4 Columns on Tablet, Flex on Desktop */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:flex lg:items-center gap-2 w-full lg:w-auto shrink-0">
+                {/* 1. Format */}
+                <CustomDropdown
+                  value={typeFilter}
+                  onChange={handleFilterChange(setTypeFilter)}
+                  isLoading={isFiltering}
+                  options={formatOptions}
+                  align="left"
+                  className="w-full lg:w-auto lg:min-w-[125px]"
+                  menuWidth="w-[155px]"
+                  ariaLabel="Filter by format"
+                />
+
+                {/* 2. Rating */}
+                <CustomDropdown
+                  value={ratingFilter}
+                  onChange={handleFilterChange(setRatingFilter)}
+                  isLoading={isFiltering}
+                  options={ratingOptions}
+                  triggerLabel={ratingTriggerLabel}
+                  align="left"
+                  className="w-full lg:w-auto lg:min-w-[130px]"
+                  menuWidth="w-[185px]"
+                  ariaLabel="Filter by rating"
+                />
+
+                {/* 3. Genre */}
+                <CustomDropdown
+                  value={selectedGenre}
+                  onChange={handleFilterChange(setSelectedGenre)}
+                  isLoading={isFiltering}
+                  options={genreOptions}
+                  triggerLabel={selectedGenre === "All" ? "Genre" : selectedGenre}
+                  align="left"
+                  className="w-full lg:w-auto lg:min-w-[125px]"
+                  menuWidth="w-[165px]"
+                  ariaLabel="Filter by genre"
+                />
+
+                {/* 4. Sort By */}
+                <CustomDropdown
+                  value={sortBy}
+                  onChange={handleFilterChange(setSortBy)}
+                  isLoading={isFiltering}
+                  options={sortOptions}
+                  align="right"
+                  className="w-full lg:w-auto lg:min-w-[160px]"
+                  menuWidth="w-[230px]"
+                  suffixIcon="sort"
+                  ariaLabel="Sort library titles"
+                />
+              </div>
             </div>
 
-            {/* Pagination / See More Button */}
-            {hasMore && (
-              <div className="flex justify-center pt-6 pb-2">
+            {/* Active Filter Bar (when any filter is active) */}
+            {hasActiveFilters && (
+              <div className="flex items-center justify-between text-xs text-[#A8B0BD] pt-1 border-t border-white/[0.04]">
+                <span className="text-[11px]">
+                  Showing <strong className="text-[#F5F7FA]">{Math.min(visibleCount, filteredItems.length)}</strong> of {filteredItems.length} titles
+                </span>
                 <button
                   type="button"
-                  onClick={handleSeeMore}
-                  disabled={isLoadingMore}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#141B26]/90 hover:bg-[#1A2434] border border-white/[0.08] hover:border-[#3B9EFF]/40 text-xs font-semibold text-[#F5F7FA] hover:text-white transition-all shadow-md hover:shadow-[0_0_16px_rgba(59,158,255,0.15)] cursor-pointer group active:scale-95 select-none disabled:opacity-80 disabled:cursor-default"
+                  onClick={resetFilters}
+                  className="text-[11px] font-semibold text-[#3B9EFF] hover:underline inline-flex items-center gap-1 cursor-pointer"
                 >
-                  {isLoadingMore ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 text-[#3B9EFF] animate-spin shrink-0" />
-                      <span className="text-[#3B9EFF] font-medium">Loading titles...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>See More</span>
-                      <ChevronDown className="w-3.5 h-3.5 text-[#8E97A6] group-hover:text-[#3B9EFF] group-hover:translate-y-0.5 transition-all shrink-0" />
-                      <span className="text-[11px] text-[#6F7886] font-normal">
-                        ({filteredItems.length - visibleCount} more)
-                      </span>
-                    </>
-                  )}
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Reset Filters</span>
                 </button>
               </div>
             )}
-          </>
-        ) : (
-          /* Empty State */
-          <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl bg-[#151C27] border border-white/[0.06] my-6">
-            <div className="w-12 h-12 rounded-full bg-[#1D2734] flex items-center justify-center text-[#6F7886] mb-3">
-              <Search className="w-6 h-6" />
-            </div>
-            <h3 className="font-bold text-base text-[#F5F7FA]">No titles match your filters</h3>
-            <p className="text-xs text-[#A8B0BD] max-w-sm mt-1 mb-4 leading-relaxed">
-              Try adjusting your search query, switching format tabs, or clearing genre filters.
-            </p>
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="px-4 py-2 rounded-lg bg-[#1D2734] hover:bg-[#253244] text-[#F5F7FA] text-xs font-semibold border border-white/[0.08] transition-colors cursor-pointer"
-            >
-              Clear All Filters
-            </button>
           </div>
-        )}
-      </div>
+
+          {/* 5. Responsive Media Grid (Full-Width Responsive Cells) */}
+          <div className="relative">
+            {/* Floating beacon during filter transition */}
+            {isFiltering && (
+              <div className="absolute top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#151C27]/90 backdrop-blur-md border border-[#3B9EFF]/30 shadow-[0_4px_20px_rgba(59,158,255,0.25)] text-xs text-[#F5F7FA] font-medium animate-pulse">
+                <Loader2 className="w-3.5 h-3.5 text-[#3B9EFF] animate-spin" />
+                <span>Updating library...</span>
+              </div>
+            )}
+
+            {filteredItems.length > 0 ? (
+              <>
+                <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4 transition-opacity duration-200 ${isFiltering ? "opacity-40" : "opacity-100"}`}>
+                  {displayedItems.map((item) => (
+                    <MediaCard
+                      key={item.id}
+                      media={item.media}
+                      status={item.status}
+                      userRating={item.userRating || undefined}
+                      userEpisodes={item.userEpisodes}
+                      currentSeason={item.currentSeason}
+                      currentEpisode={item.currentEpisode}
+                      seasons={item.seasons}
+                      reviewText={item.reviewText}
+                      containsSpoilers={item.containsSpoilers}
+                      fromUsername={currentUserState?.username || undefined}
+                      readOnly={!isOwner}
+                      className="w-full"
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination / See More Button */}
+                {hasMore && (
+                  <div className="flex justify-center pt-6 pb-2">
+                    <button
+                      type="button"
+                      onClick={handleSeeMore}
+                      disabled={isLoadingMore}
+                      className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#141B26]/90 hover:bg-[#1A2434] border border-white/[0.08] hover:border-[#3B9EFF]/40 text-xs font-semibold text-[#F5F7FA] hover:text-white transition-all shadow-md hover:shadow-[0_0_16px_rgba(59,158,255,0.15)] cursor-pointer group active:scale-95 select-none disabled:opacity-80 disabled:cursor-default"
+                    >
+                      {isLoadingMore ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 text-[#3B9EFF] animate-spin shrink-0" />
+                          <span className="text-[#3B9EFF] font-medium">Loading titles...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>See More</span>
+                          <ChevronDown className="w-3.5 h-3.5 text-[#8E97A6] group-hover:text-[#3B9EFF] group-hover:translate-y-0.5 transition-all shrink-0" />
+                          <span className="text-[11px] text-[#6F7886] font-normal">
+                            ({filteredItems.length - visibleCount} more)
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* Filter Zero-State */
+              <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl bg-[#151C27] border border-white/[0.06] my-6">
+                <div className="w-12 h-12 rounded-full bg-[#1D2734] flex items-center justify-center text-[#6F7886] mb-3">
+                  <Search className="w-6 h-6" />
+                </div>
+                <h3 className="font-bold text-base text-[#F5F7FA]">No titles match your filters</h3>
+                <p className="text-xs text-[#A8B0BD] max-w-sm mt-1 mb-4 leading-relaxed">
+                  Try adjusting your search query, switching format tabs, or clearing genre filters.
+                </p>
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="px-4 py-2 rounded-lg bg-[#1D2734] hover:bg-[#253244] text-[#F5F7FA] text-xs font-semibold border border-white/[0.08] transition-colors cursor-pointer"
+                >
+                  Clear All Filters
+                </button>
+              </div>
+            )}
+          </div>
+        </>
+      )}
 
       {/* Add to Library Modal */}
       {isOwner && (
