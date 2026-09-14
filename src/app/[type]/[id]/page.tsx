@@ -20,8 +20,8 @@ import { MediaDetailsActions, WriteReviewButton } from "./actions-client";
 import { DetailsBackButton } from "./back-button";
 import { TrailerPlayer, TrailerVideo } from "@/components/media/trailer-player";
 import { db } from "@/lib/db";
-import { mediaItems, profiles, userMediaLogs } from "@/lib/db/schema";
-import { eq, and, ne, isNotNull, desc, count } from "drizzle-orm";
+import { mediaItems, profiles, userMediaLogs, reviewReactions } from "@/lib/db/schema";
+import { eq, and, ne, isNotNull, desc, count, inArray } from "drizzle-orm";
 import { getConsensusRating, RatingCategory } from "@/lib/rating";
 import { getImdbGenres } from "@/lib/imdb/client";
 
@@ -145,6 +145,10 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
   const trailerKey = trailerVideos[0]?.key || null;
 
   // Fetch user tracking log for this title if authenticated
+  const supabase = await createClient();
+  const {
+    data: { user: currentUser },
+  } = await supabase.auth.getUser();
   const userLog = await getUserMediaLog(media.id);
 
   // Fetch contextual curator review if user arrived from a specific profile (?from=username)
@@ -279,6 +283,8 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
     rating?: string | null;
     reviewText: string;
     containsSpoilers?: boolean;
+    likesCount: number;
+    hasLiked: boolean;
     timeAgo: string;
   }> = [];
 
@@ -311,26 +317,57 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
 
     totalReviews = Number(countRow?.value || 0);
 
-    communityReviews = rawCommunityLogs
-      .filter((r) => r.log.reviewText && r.log.reviewText.trim().length > 0)
-      .map((r) => ({
-        id: r.log.id,
-        author: {
-          name: r.profile.fullName || r.profile.username,
-          avatarUrl: r.profile.avatarUrl || undefined,
-          username: r.profile.username,
-          isVerified: true,
-        },
-        rating: r.log.rating,
-        reviewText: r.log.reviewText!,
-        containsSpoilers: Boolean(r.log.containsSpoilers),
-        timeAgo: r.log.updatedAt
-          ? new Intl.DateTimeFormat("en", {
-              month: "short",
-              day: "numeric",
-            }).format(new Date(r.log.updatedAt))
-          : "Recent log",
-      }));
+    const filteredLogs = rawCommunityLogs.filter(
+      (r) => r.log.reviewText && r.log.reviewText.trim().length > 0
+    );
+    const revIds = filteredLogs.map((r) => r.log.id);
+
+    const reactionsMap: Record<string, { count: number; hasLiked: boolean }> = {};
+    if (revIds.length > 0) {
+      const reactions = await db
+        .select({
+          reviewId: reviewReactions.reviewId,
+          userId: reviewReactions.userId,
+        })
+        .from(reviewReactions)
+        .where(
+          and(
+            inArray(reviewReactions.reviewId, revIds),
+            eq(reviewReactions.type, "like")
+          )
+        );
+
+      for (const rx of reactions) {
+        if (!reactionsMap[rx.reviewId]) {
+          reactionsMap[rx.reviewId] = { count: 0, hasLiked: false };
+        }
+        reactionsMap[rx.reviewId].count++;
+        if (currentUser && rx.userId === currentUser.id) {
+          reactionsMap[rx.reviewId].hasLiked = true;
+        }
+      }
+    }
+
+    communityReviews = filteredLogs.map((r) => ({
+      id: r.log.id,
+      author: {
+        name: r.profile.fullName || r.profile.username,
+        avatarUrl: r.profile.avatarUrl || undefined,
+        username: r.profile.username,
+        isVerified: true,
+      },
+      rating: r.log.rating,
+      reviewText: r.log.reviewText!,
+      containsSpoilers: Boolean(r.log.containsSpoilers),
+      likesCount: reactionsMap[r.log.id]?.count || 0,
+      hasLiked: reactionsMap[r.log.id]?.hasLiked || false,
+      timeAgo: r.log.updatedAt
+        ? new Intl.DateTimeFormat("en", {
+            month: "short",
+            day: "numeric",
+          }).format(new Date(r.log.updatedAt))
+        : "Recent log",
+    }));
   } catch (err) {
     console.error("Community reviews fetch error:", err);
   }
@@ -785,12 +822,15 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
                 communityReviews.map((rev) => (
                   <ReviewCard
                     key={rev.id}
+                    reviewId={rev.id}
                     author={rev.author}
                     mediaTitle={media.title}
+                    mediaHref={`/${type}/${id}`}
                     rating={rev.rating}
                     reviewText={rev.reviewText}
                     containsSpoilers={rev.containsSpoilers}
-                    likesCount={0}
+                    likesCount={rev.likesCount}
+                    initialLiked={rev.hasLiked}
                     commentsCount={0}
                     timeAgo={rev.timeAgo}
                   />

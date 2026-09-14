@@ -126,6 +126,59 @@ export const featureRequests = pgTable(
   ]
 );
 
+// 5. Review Reactions (Likes on user reviews)
+export const reviewReactions = pgTable(
+  "review_reactions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    reviewId: uuid("review_id")
+      .references(() => userMediaLogs.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => profiles.id, { onDelete: "cascade" })
+      .notNull(),
+    type: text("type").default("like").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("review_reactions_user_unique_idx").on(
+      table.reviewId,
+      table.userId,
+      table.type
+    ),
+    index("review_reactions_review_idx").on(table.reviewId),
+  ]
+);
+
+// 6. User Notifications
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .references(() => profiles.id, { onDelete: "cascade" })
+      .notNull(),
+    actorId: uuid("actor_id").references(() => profiles.id, {
+      onDelete: "set null",
+    }),
+    type: text("type").notNull(), // 'review_reaction' | 'system'
+    title: text("title").notNull(),
+    message: text("message").notNull(),
+    link: text("link"),
+    isRead: boolean("is_read").default(false).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("notifications_user_idx").on(table.userId),
+    index("notifications_is_read_idx").on(table.userId, table.isRead),
+    index("notifications_created_idx").on(table.createdAt),
+  ]
+);
+
 export type Profile = typeof profiles.$inferSelect;
 export type NewProfile = typeof profiles.$inferInsert;
 export type MediaItem = typeof mediaItems.$inferSelect;
@@ -134,3 +187,8 @@ export type UserMediaLog = typeof userMediaLogs.$inferSelect;
 export type NewUserMediaLog = typeof userMediaLogs.$inferInsert;
 export type FeatureRequest = typeof featureRequests.$inferSelect;
 export type NewFeatureRequest = typeof featureRequests.$inferInsert;
+export type ReviewReaction = typeof reviewReactions.$inferSelect;
+export type NewReviewReaction = typeof reviewReactions.$inferInsert;
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;
+

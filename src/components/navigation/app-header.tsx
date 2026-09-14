@@ -21,6 +21,7 @@ import { LogoIcon } from "@/components/ui/logo-icon";
 import { createClient } from "@/lib/supabase/client";
 
 import { HeaderSearch } from "./header-search";
+import { NotificationDropdown } from "./notification-dropdown";
 
 interface AppHeaderProps {
   user?: {
@@ -372,16 +373,8 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
               <Search className="w-5 h-5 block" />
             </button>
 
-            {/* Notification Bell */}
-            <button
-              type="button"
-              suppressHydrationWarning
-              aria-label="Notifications"
-              className="relative p-2 text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] rounded-lg transition-colors shrink-0 cursor-pointer"
-            >
-              <Bell className="w-5 h-5 block" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#3B9EFF] ring-2 ring-[#0F141D]" />
-            </button>
+            {/* Notification Bell Dropdown */}
+            <NotificationDropdown currentUser={currentUser} />
 
             {/* Settings Link */}
             {currentUser && (

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Star, Heart, MessageSquare, ShieldAlert, AlertTriangle } from "lucide-react";
 import { RatingCategory, getRatingConfig } from "@/lib/rating";
+import { toggleReviewReaction } from "@/actions/notifications";
 
 export interface ReviewCardProps {
+  reviewId?: string;
   author: {
     name: string;
     avatarUrl?: string;
@@ -23,6 +25,7 @@ export interface ReviewCardProps {
   bengaliQuote?: string;
   containsSpoilers?: boolean;
   likesCount?: number;
+  initialLiked?: boolean;
   commentsCount?: number;
   timeAgo?: string;
   isBengali?: boolean;
@@ -30,6 +33,7 @@ export interface ReviewCardProps {
 }
 
 export function ReviewCard({
+  reviewId,
   author,
   mediaTitle,
   mediaHref,
@@ -39,6 +43,7 @@ export function ReviewCard({
   bengaliQuote,
   containsSpoilers = false,
   likesCount = 0,
+  initialLiked = false,
   commentsCount = 0,
   timeAgo = "2 hours ago",
   isBengali = false,
@@ -46,16 +51,38 @@ export function ReviewCard({
 }: ReviewCardProps) {
   const [revealed, setRevealed] = useState(!containsSpoilers);
   const [likes, setLikes] = useState(likesCount);
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(initialLiked);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [, startTransition] = useTransition();
 
   const profileUrl = author.profileHref || (author.username ? `/u/${author.username}` : undefined);
 
   const isLong = (reviewText?.length || 0) > 180 || (reviewText?.split("\n").length || 0) > 3;
 
   const toggleLike = () => {
-    setLiked(!liked);
-    setLikes(liked ? likes - 1 : likes + 1);
+    const prevLiked = liked;
+    const prevLikes = likes;
+    const nextLiked = !prevLiked;
+    const nextCount = nextLiked ? prevLikes + 1 : Math.max(0, prevLikes - 1);
+
+    setLiked(nextLiked);
+    setLikes(nextCount);
+
+    if (reviewId) {
+      startTransition(async () => {
+        const res = await toggleReviewReaction({
+          reviewId,
+          mediaHref,
+        });
+        if (res.error) {
+          setLiked(prevLiked);
+          setLikes(prevLikes);
+        } else if (res.likesCount !== undefined) {
+          setLikes(res.likesCount);
+          setLiked(Boolean(res.liked));
+        }
+      });
+    }
   };
 
   const roleText =
