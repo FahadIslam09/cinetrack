@@ -109,21 +109,25 @@ export function ReviewModal({
 
   return createPortal(
     <div
+      role="dialog"
+      aria-modal="true"
+      data-lenis-prevent="true"
+      aria-labelledby="review-modal-title"
       className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 overscroll-contain"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-lg bg-[#151C27] rounded-2xl overflow-hidden border border-white/10 shadow-2xl flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-lg bg-[#151C27] rounded-2xl overflow-hidden border border-white/10 shadow-2xl flex flex-col max-h-[90dvh] md:max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08] bg-[#121824]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08] bg-[#121824] shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-lg bg-[#3B9EFF]/15 text-[#3B9EFF] flex items-center justify-center shrink-0">
               <Star className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-[#F5F7FA]">
+              <h2 id="review-modal-title" className="text-sm font-bold text-[#F5F7FA]">
                 {isEditing ? "Edit Review" : "Write a Review"}
               </h2>
               <p className="text-[11px] text-[#6F7886] truncate max-w-[280px]">
@@ -142,7 +146,12 @@ export function ReviewModal({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex flex-col overflow-y-auto p-5 gap-4">
+        <form
+          onSubmit={handleSubmit}
+          data-modal-scroll="true"
+          data-lenis-prevent="true"
+          className="flex flex-col flex-1 min-h-0 overflow-y-auto overscroll-contain modal-scrollbar p-5 gap-4"
+        >
           {error && (
             <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />

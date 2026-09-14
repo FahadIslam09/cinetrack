@@ -600,15 +600,18 @@ export function QuickAddModal({
     );
   };
 
+  if (!isOpen || !mounted) return null;
+
   return createPortal(
     <div
       role="dialog"
       aria-modal="true"
+      data-lenis-prevent="true"
       aria-labelledby="add-to-library-title"
       className="fixed inset-0 z-[80] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
     >
       <div
-        className="w-full max-w-lg bg-[#151C27] border border-white/[0.08] rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90dvh] md:h-auto md:min-h-[620px] md:max-h-[88vh] animate-in zoom-in-95 duration-200"
+        className="w-full max-w-lg bg-[#151C27] border border-white/[0.08] rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90dvh] md:h-[640px] max-h-[92dvh] md:max-h-[85vh] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header & Step Indicator */}
@@ -708,7 +711,11 @@ export function QuickAddModal({
         </div>
 
         {/* Modal Body Container */}
-        <div className="flex-1 overflow-y-auto modal-scrollbar p-4 sm:p-5 flex flex-col min-h-0">
+        <div
+          data-modal-scroll="true"
+          data-lenis-prevent="true"
+          className="flex-1 overflow-y-auto overscroll-contain modal-scrollbar p-4 sm:p-5 flex flex-col min-h-0"
+        >
           {/* =========================================================================
               STEP 1: SEARCH & SELECT
              ========================================================================= */}
@@ -898,7 +905,7 @@ export function QuickAddModal({
               STEP 2: SET WATCH INFORMATION
              ========================================================================= */}
           {step === 2 && selectedMedia && (
-            <div className="flex flex-col gap-5 flex-1">
+            <div className="w-full pb-3 flex flex-col gap-4">
               {/* Selected Media Mini Card */}
               <div className="p-3 rounded-xl bg-[#1D2734]/80 border border-white/[0.06] flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">

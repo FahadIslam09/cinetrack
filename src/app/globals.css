@@ -49,6 +49,10 @@ body.modal-open {
   overscroll-behavior: none !important;
 }
 
+html.modal-open header {
+  padding-right: var(--scrollbar-compensation, 0px);
+}
+
 body {
   background-color: #0F141D;
   color: #F5F7FA;
@@ -196,6 +200,12 @@ html::-webkit-scrollbar-thumb:active {
 }
 
 /* 2. Modal & Internal Scroll Areas (Mid-thickness: 6px) */
+.modal-scrollbar {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
 .modal-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;

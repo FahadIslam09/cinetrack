@@ -92,6 +92,9 @@ export function EditProfileModal({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Lock background scroll when modal is open
+  useScrollLock(isOpen);
+
   useEffect(() => {
     if (isOpen) {
       setDisplayName(initialData.displayName || "");
@@ -277,19 +280,25 @@ export function EditProfileModal({
   const bioLength = bio.length;
   const isNearLimit = bioLength > 140;
 
+  if (!isOpen) return null;
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-fade-in overscroll-contain"
+      role="dialog"
+      aria-modal="true"
+      data-lenis-prevent="true"
+      aria-labelledby="edit-profile-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in overscroll-contain"
       onClick={(e) => {
         if (e.target === e.currentTarget && !isSaving && !isUploadingImage && !isUploadingCover) {
           onClose();
         }
       }}
     >
-      <div className="bg-[#151C27] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden max-w-lg w-full text-white my-8">
+      <div className="bg-[#151C27] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden max-w-lg w-full text-white flex flex-col max-h-[90dvh] md:max-h-[85vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
-          <h3 className="font-bold text-base sm:text-lg text-[#F5F7FA]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08] shrink-0">
+          <h3 id="edit-profile-title" className="font-bold text-base sm:text-lg text-[#F5F7FA]">
             Edit Profile
           </h3>
           <button
@@ -303,7 +312,12 @@ export function EditProfileModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
+        <form
+          onSubmit={handleSubmit}
+          data-modal-scroll="true"
+          data-lenis-prevent="true"
+          className="p-5 flex flex-col gap-4 flex-1 min-h-0 overflow-y-auto overscroll-contain modal-scrollbar"
+        >
           {error && (
             <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />

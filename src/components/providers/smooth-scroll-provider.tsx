@@ -93,6 +93,21 @@ export function SmoothScrollProvider({
         lerp: 0.09,
         duration: 1.1,
         smoothWheel: true,
+        prevent: (node: HTMLElement) => {
+          return (
+            Boolean(node.hasAttribute?.("data-lenis-prevent")) ||
+            Boolean(node.hasAttribute?.("data-modal-scroll")) ||
+            node.classList?.contains("modal-scrollbar") ||
+            node.classList?.contains("custom-scrollbar") ||
+            node.classList?.contains("dropdown-scrollbar") ||
+            node.classList?.contains("overflow-y-auto") ||
+            Boolean(
+              node.closest?.(
+                '[role="dialog"], [role="alertdialog"], [data-lenis-prevent], .modal-scrollbar, .overflow-y-auto'
+              )
+            )
+          );
+        },
       }}
     >
       <RouteScrollReset />

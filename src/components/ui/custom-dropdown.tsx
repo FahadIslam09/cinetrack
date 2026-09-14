@@ -177,7 +177,10 @@ export function CustomDropdown({
             align === "right" ? "right-0" : "left-0"
           } ${menuWidth || "min-w-[170px]"} max-w-[280px] bg-[#121824]/95 backdrop-blur-xl border border-white/[0.12] shadow-2xl shadow-black/80 rounded-xl overflow-hidden p-1 duration-150`}
         >
-          <div className="max-h-[190px] overflow-y-auto custom-scrollbar pr-1.5 flex flex-col gap-0.5">
+          <div
+            data-lenis-prevent="true"
+            className="max-h-[190px] overflow-y-auto overscroll-contain custom-scrollbar pr-1.5 flex flex-col gap-0.5"
+          >
             {options.map((opt) => {
               const isSelected = opt.id === value;
               return (

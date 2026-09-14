@@ -220,12 +220,17 @@ export function ProfileSetupModal({
     !isPending;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div
+      role="dialog"
+      aria-modal="true"
+      data-lenis-prevent="true"
+      aria-labelledby="profile-setup-title"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
+    >
       <div
-        className="w-full max-w-[460px] bg-[#151C27] border border-white/[0.1] rounded-3xl p-6 sm:p-8 shadow-2xl relative flex flex-col max-h-[90dvh] overflow-y-auto"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="profile-setup-title"
+        className="w-full max-w-[460px] bg-[#151C27] border border-white/[0.1] rounded-3xl p-6 sm:p-8 shadow-2xl relative flex flex-col max-h-[90dvh] overflow-y-auto overscroll-contain modal-scrollbar"
+        data-modal-scroll="true"
+        data-lenis-prevent="true"
       >
         {/* Subtle Ambient Radial Glow */}
         <div
