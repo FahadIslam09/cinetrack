@@ -8,6 +8,7 @@ import {
   CheckCheck,
   Loader2,
   Bookmark,
+  X,
 } from "lucide-react";
 import {
   getUserNotifications,
@@ -267,16 +268,35 @@ export function NotificationDropdown({
   );
 
   return (
-    <div ref={dropdownRef} className="relative">
+    <div ref={dropdownRef} className="relative z-50">
       <button
         type="button"
         onClick={handleToggle}
-        aria-label="Notifications"
+        aria-label={isOpen ? "Close notifications" : "Notifications"}
         aria-expanded={isOpen}
-        className="relative p-2 text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] rounded-lg transition-colors shrink-0 cursor-pointer"
+        className={`relative z-50 p-2 rounded-lg transition-colors shrink-0 cursor-pointer ${
+          isOpen
+            ? "text-[#F5F7FA] bg-[#1A2330]"
+            : "text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330]"
+        }`}
       >
-        <Bell className="w-5 h-5 block" />
-        {notifications.unreadCount > 0 && (
+        <div className="relative w-5 h-5 flex items-center justify-center">
+          <Bell
+            className={`w-5 h-5 absolute inset-0 transition-all duration-300 ease-out transform ${
+              isOpen
+                ? "opacity-0 rotate-90 scale-50"
+                : "opacity-100 rotate-0 scale-100"
+            }`}
+          />
+          <X
+            className={`w-5 h-5 absolute inset-0 transition-all duration-300 ease-out transform ${
+              isOpen
+                ? "opacity-100 rotate-0 scale-100"
+                : "opacity-0 -rotate-90 scale-50"
+            }`}
+          />
+        </div>
+        {notifications.unreadCount > 0 && !isOpen && (
           <span className="absolute top-1 right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-[#3B9EFF] rounded-full ring-2 ring-[#0F141D] shadow-[0_0_8px_rgba(59,158,255,0.45)] animate-in zoom-in-75 duration-150">
             {notifications.unreadCount > 9 ? "9+" : notifications.unreadCount}
           </span>
@@ -288,10 +308,10 @@ export function NotificationDropdown({
           {/* Mobile Screen: Centered modal below header with backdrop */}
           <div className="sm:hidden">
             <div
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs"
+              className="fixed inset-x-0 top-16 bottom-0 z-40 bg-black/60 backdrop-blur-xs"
               onClick={() => setIsOpen(false)}
             />
-            <div className="fixed inset-x-3 top-[70px] z-50 max-w-sm mx-auto rounded-2xl border border-white/[0.12] bg-[#121824]/98 backdrop-blur-2xl shadow-2xl shadow-black/90 overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150">
+            <div className="fixed inset-x-3 top-[72px] z-50 max-w-sm mx-auto rounded-2xl border border-white/[0.12] bg-[#121824]/98 backdrop-blur-2xl shadow-2xl shadow-black/90 overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150">
               {panelContent}
             </div>
           </div>
