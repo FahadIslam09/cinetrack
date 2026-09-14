@@ -1,8 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ExternalLink, Film, LogOut, X } from "lucide-react";
+import { ExternalLink, Film, Loader2, LogOut, X } from "lucide-react";
 import { NAV_ITEMS } from "./nav";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,11 @@ interface SidebarProps {
 export function Sidebar({ collapsed, mobileOpen, onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [navigatingHref, setNavigatingHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNavigatingHref(null);
+  }, [pathname]);
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -76,24 +82,42 @@ export function Sidebar({ collapsed, mobileOpen, onCloseMobile }: SidebarProps) 
           {NAV_ITEMS.map((item) => {
             const active = isActive(item.href);
             const Icon = item.icon;
+            const isNavigating = navigatingHref === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={onCloseMobile}
+                onClick={() => {
+                  if (item.href !== pathname) {
+                    setNavigatingHref(item.href);
+                  }
+                  onCloseMobile();
+                }}
                 title={collapsed ? item.label : undefined}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors cursor-pointer",
                   collapsed && "lg:justify-center lg:px-0",
                   active
-                    ? "bg-blue-50 text-blue-700"
+                    ? "bg-blue-50 text-blue-700 font-semibold"
+                    : isNavigating
+                    ? "bg-blue-50/60 text-blue-600"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 )}
               >
-                <Icon
-                  className={cn("w-[18px] h-[18px] shrink-0", active ? "text-blue-600" : "text-slate-400")}
-                />
-                {!collapsed && <span className="truncate">{item.label}</span>}
+                {isNavigating ? (
+                  <Loader2 className="w-[18px] h-[18px] shrink-0 animate-spin text-blue-600" />
+                ) : (
+                  <Icon
+                    className={cn(
+                      "w-[18px] h-[18px] shrink-0",
+                      active ? "text-blue-600" : "text-slate-400"
+                    )}
+                  />
+                )}
+                {!collapsed && <span className="truncate flex-1">{item.label}</span>}
+                {!collapsed && isNavigating && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse ml-auto shrink-0" />
+                )}
               </Link>
             );
           })}

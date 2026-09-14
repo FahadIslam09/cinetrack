@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Sidebar } from "./sidebar";
 import { Header } from "./header";
+import { TopLoader } from "./top-loader";
 import { cn } from "@/lib/utils";
 
 interface AdminUser {
@@ -24,6 +25,7 @@ export function AdminShell({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
+      <TopLoader />
       <Sidebar
         collapsed={collapsed}
         mobileOpen={mobileOpen}

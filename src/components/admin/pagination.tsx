@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PaginationProps {
@@ -14,39 +15,60 @@ export function Pagination({ page, pageSize, total }: PaginationProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  const [pendingPage, setPendingPage] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isPending) setPendingPage(null);
+  }, [isPending]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const start = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const end = Math.min(total, page * pageSize);
 
   const go = (p: number) => {
-    if (p < 1 || p > totalPages || p === page) return;
+    if (p < 1 || p > totalPages || p === page || isPending) return;
+    setPendingPage(p);
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", String(p));
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   };
 
   const pages = paginate(page, totalPages);
 
   return (
     <div className="flex items-center justify-between gap-3 py-1">
-      <p className="text-xs text-slate-500">
-        Showing{" "}
-        <span className="font-semibold text-slate-700">
-          {start}–{end}
-        </span>{" "}
-        of <span className="font-semibold text-slate-700">{total}</span>
-      </p>
+      <div className="flex items-center gap-2">
+        <p className="text-xs text-slate-500">
+          Showing{" "}
+          <span className="font-semibold text-slate-700">
+            {start}–{end}
+          </span>{" "}
+          of <span className="font-semibold text-slate-700">{total}</span>
+        </p>
+        {isPending && (
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 animate-pulse">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            Loading…
+          </span>
+        )}
+      </div>
 
       <div className="flex items-center gap-1">
         <button
           type="button"
           onClick={() => go(page - 1)}
-          disabled={page <= 1}
+          disabled={page <= 1 || isPending}
           aria-label="Previous page"
           className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
-          <ChevronLeft className="w-4 h-4" />
+          {isPending && pendingPage === page - 1 ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
         </button>
 
         {pages.map((p, i) =>
@@ -58,15 +80,22 @@ export function Pagination({ page, pageSize, total }: PaginationProps) {
             <button
               key={p}
               type="button"
+              disabled={isPending}
               onClick={() => go(p)}
               className={cn(
-                "w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors cursor-pointer",
+                "w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors cursor-pointer disabled:cursor-wait",
                 p === page
                   ? "bg-slate-900 text-white"
+                  : isPending && pendingPage === p
+                  ? "border border-blue-300 bg-blue-50 text-blue-600"
                   : "border border-slate-200 text-slate-600 hover:bg-slate-50"
               )}
             >
-              {p}
+              {isPending && pendingPage === p ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
+              ) : (
+                p
+              )}
             </button>
           )
         )}
@@ -74,11 +103,15 @@ export function Pagination({ page, pageSize, total }: PaginationProps) {
         <button
           type="button"
           onClick={() => go(page + 1)}
-          disabled={page >= totalPages}
+          disabled={page >= totalPages || isPending}
           aria-label="Next page"
           className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
-          <ChevronRight className="w-4 h-4" />
+          {isPending && pendingPage === page + 1 ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
+          ) : (
+            <ChevronRight className="w-4 h-4" />
+          )}
         </button>
       </div>
     </div>
