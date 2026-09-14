@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { notifyNewUserRegistration } from "@/lib/telegram";
 
 export interface AccountSecurityInfo {
   email: string;
@@ -207,3 +208,21 @@ export async function changePassword(params: {
     return { error: err.message || "An unexpected error occurred." };
   }
 }
+
+export async function notifyAccountCreated(
+  email: string,
+  method: string = "Email & Password"
+) {
+  try {
+    if (!email || !email.includes("@")) return { success: false };
+    await notifyNewUserRegistration({
+      email: email.trim(),
+      method,
+    });
+    return { success: true };
+  } catch (err) {
+    console.error("notifyAccountCreated error:", err);
+    return { success: false };
+  }
+}
+

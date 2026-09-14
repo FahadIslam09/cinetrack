@@ -17,6 +17,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { LogoIcon } from "@/components/ui/logo-icon";
 import { sanitizeRedirect } from "@/lib/security";
+import { notifyAccountCreated } from "@/actions/account";
 
 function LoginForm() {
   const router = useRouter();
@@ -164,6 +165,11 @@ function LoginForm() {
           setError(error.message);
           setLoading(false);
           return;
+        }
+
+        // Send instant Telegram notification for new account
+        if (data.user) {
+          notifyAccountCreated(data.user.email || email.trim(), "Email & Password").catch(() => {});
         }
 
         if (data.session) {

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { profiles, featureRequests } from "@/lib/db/schema";
 import { getAdminProfile } from "@/lib/admin/auth";
 import { createClient } from "@/lib/supabase/server";
+import { notifyNewRequest } from "@/lib/telegram";
 import { eq, desc, count } from "drizzle-orm";
 import { headers } from "next/headers";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -134,6 +135,9 @@ export async function submitFeatureRequest(params: {
     }
 
     let userId: string | null = null;
+    let submitterUsername: string | null = null;
+    let submitterEmail = rawEmail;
+
     try {
       const supabase = await createClient();
       const {
@@ -141,11 +145,17 @@ export async function submitFeatureRequest(params: {
       } = await supabase.auth.getUser();
       if (user) {
         const [profile] = await db
-          .select({ id: profiles.id })
+          .select({ id: profiles.id, username: profiles.username })
           .from(profiles)
           .where(eq(profiles.id, user.id))
           .limit(1);
-        if (profile) userId = profile.id;
+        if (profile) {
+          userId = profile.id;
+          submitterUsername = profile.username;
+        }
+        if (!submitterEmail && user.email) {
+          submitterEmail = user.email;
+        }
       }
     } catch {
       // anonymous submission is fine
@@ -153,11 +163,23 @@ export async function submitFeatureRequest(params: {
 
     await db.insert(featureRequests).values({
       userId,
-      email: rawEmail,
+      email: submitterEmail,
       category: category as any,
       title,
       description,
     });
+
+    // Send instant Telegram alert asynchronously
+    notifyNewRequest({
+      title,
+      description,
+      category,
+      email: submitterEmail,
+      username: submitterUsername,
+    }).catch((err) => {
+      console.error("Failed to send Telegram notification for request:", err);
+    });
+
     revalidatePath("/admin");
     revalidatePath("/admin/requests");
     revalidatePath("/admin/notifications");

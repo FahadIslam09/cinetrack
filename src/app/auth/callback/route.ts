@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeRedirect } from "@/lib/security";
+import { db } from "@/lib/db";
+import { profiles } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { notifyNewUserRegistration } from "@/lib/telegram";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -16,6 +20,23 @@ export async function GET(request: Request) {
     const { error, data } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data?.user) {
+      try {
+        const [existing] = await db
+          .select({ id: profiles.id })
+          .from(profiles)
+          .where(eq(profiles.id, data.user.id))
+          .limit(1);
+
+        if (!existing) {
+          notifyNewUserRegistration({
+            email: data.user.email,
+            method: "Google OAuth",
+          }).catch(() => {});
+        }
+      } catch (err) {
+        console.error("OAuth registration check error:", err);
+      }
+
       // Profile will be configured through Profile Setup popup if not already present
       return NextResponse.redirect(`${origin}${next}`);
     }
