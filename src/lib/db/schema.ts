@@ -8,6 +8,7 @@ import {
   timestamp,
   jsonb,
   uniqueIndex,
+  index,
 } from "drizzle-orm/pg-core";
 
 // 1. Profiles Table
@@ -22,6 +23,8 @@ export const profiles = pgTable(
     bio: text("bio"),
     preferredCountry: text("preferred_country").default("US").notNull(),
     isPublic: boolean("is_public").default(true).notNull(),
+    role: text("role").default("user").notNull(),
+    status: text("status").default("active").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -81,6 +84,7 @@ export const userMediaLogs = pgTable(
     reviewText: text("review_text"),
     containsSpoilers: boolean("contains_spoilers").default(false).notNull(),
     isFavorite: boolean("is_favorite").default(false).notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -90,6 +94,35 @@ export const userMediaLogs = pgTable(
   },
   (table) => [
     uniqueIndex("user_media_unique_idx").on(table.userId, table.mediaId),
+    index("user_media_completed_at_idx").on(table.completedAt),
+  ]
+);
+
+// 4. Feature Requests (product feedback management)
+export const featureRequests = pgTable(
+  "feature_requests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id").references(() => profiles.id, {
+      onDelete: "set null",
+    }),
+    email: text("email"),
+    category: text("category").default("feature").notNull(), // 'feature' | 'bug' | 'general'
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    status: text("status").default("new").notNull(), // 'new' | 'under_review' | 'planned' | 'in_progress' | 'completed' | 'declined'
+    priority: text("priority").default("medium").notNull(), // 'low' | 'medium' | 'high'
+    adminNotes: text("admin_notes"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("feature_requests_status_idx").on(table.status),
+    index("feature_requests_created_idx").on(table.createdAt),
   ]
 );
 
@@ -99,3 +132,5 @@ export type MediaItem = typeof mediaItems.$inferSelect;
 export type NewMediaItem = typeof mediaItems.$inferInsert;
 export type UserMediaLog = typeof userMediaLogs.$inferSelect;
 export type NewUserMediaLog = typeof userMediaLogs.$inferInsert;
+export type FeatureRequest = typeof featureRequests.$inferSelect;
+export type NewFeatureRequest = typeof featureRequests.$inferInsert;

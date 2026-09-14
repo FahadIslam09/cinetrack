@@ -68,6 +68,10 @@ export async function updateProfile(params: UpdateProfileParams) {
       .where(eq(profiles.id, user.id))
       .limit(1);
 
+    if (existing?.status === "suspended") {
+      return { error: "Account is suspended. Profile updates are disabled." };
+    }
+
     let targetUsername = existing?.username;
 
     // Validate username if provided

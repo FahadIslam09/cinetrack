@@ -6,6 +6,7 @@ const RESERVED_ROUTES = new Set([
   "api",
   "_next",
   "auth",
+  "admin",
   "discover",
   "landing",
   "library",
@@ -49,6 +50,15 @@ export default async function proxy(request: NextRequest) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/login";
       loginUrl.search = "?next=/profile";
+      const redirectResponse = NextResponse.redirect(loginUrl);
+      copyCookies(supabaseResponse, redirectResponse);
+      return redirectResponse;
+    }
+
+    if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.search = `?next=${encodeURIComponent(pathname + search)}`;
       const redirectResponse = NextResponse.redirect(loginUrl);
       copyCookies(supabaseResponse, redirectResponse);
       return redirectResponse;

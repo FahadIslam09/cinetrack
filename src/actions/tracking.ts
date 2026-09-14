@@ -40,6 +40,10 @@ export async function upsertMediaLog(params: LogMediaParams) {
       .where(eq(profiles.id, user.id))
       .limit(1);
 
+    if (existingProfile?.status === "suspended") {
+      return { error: "Account is suspended. Tracking is disabled." };
+    }
+
     if (!existingProfile) {
       const generatedUsername =
         user.user_metadata?.user_name ||
@@ -75,6 +79,29 @@ export async function upsertMediaLog(params: LogMediaParams) {
     }
     const finalRating =
       status === "plan_to_watch" ? null : rating ? parseRating(rating) : null;
+
+    // Determine when the log reached "completed" (for accurate admin metrics)
+    const [existingLog] = await db
+      .select({
+        status: userMediaLogs.status,
+        completedAt: userMediaLogs.completedAt,
+      })
+      .from(userMediaLogs)
+      .where(
+        and(
+          eq(userMediaLogs.userId, user.id),
+          eq(userMediaLogs.mediaId, media.id)
+        )
+      )
+      .limit(1);
+
+    let completedAt: Date | null = null;
+    if (status === "completed") {
+      completedAt =
+        existingLog?.status === "completed" && existingLog.completedAt
+          ? existingLog.completedAt
+          : new Date();
+    }
 
     // Auto-fetch real runtime from TMDb if not provided by search result
     let runtime = media.runtime;
@@ -149,6 +176,7 @@ export async function upsertMediaLog(params: LogMediaParams) {
           reviewText: reviewText?.trim() || null,
           containsSpoilers,
           isFavorite,
+          completedAt,
           updatedAt: new Date(),
         })
         .onConflictDoUpdate({
@@ -162,6 +190,7 @@ export async function upsertMediaLog(params: LogMediaParams) {
             reviewText: reviewText?.trim() || null,
             containsSpoilers,
             isFavorite,
+            completedAt,
             updatedAt: new Date(),
           },
         });
@@ -186,6 +215,16 @@ export async function incrementEpisode(mediaId: string, totalEpisodes: number = 
     } = await supabase.auth.getUser();
 
     if (!user) return { error: "Unauthorized" };
+
+    const [profile] = await db
+      .select({ status: profiles.status })
+      .from(profiles)
+      .where(eq(profiles.id, user.id))
+      .limit(1);
+
+    if (profile?.status === "suspended") {
+      return { error: "Account is suspended." };
+    }
 
     const [existing] = await db
       .select()
@@ -260,6 +299,16 @@ export async function deleteMediaLog(mediaId: string) {
 
     if (authError || !user) {
       return { error: "Authentication required to remove items." };
+    }
+
+    const [profile] = await db
+      .select({ status: profiles.status })
+      .from(profiles)
+      .where(eq(profiles.id, user.id))
+      .limit(1);
+
+    if (profile?.status === "suspended") {
+      return { error: "Account is suspended." };
     }
 
     await db

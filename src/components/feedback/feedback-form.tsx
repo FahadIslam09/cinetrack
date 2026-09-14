@@ -13,6 +13,7 @@ import {
   Check,
   ArrowLeft,
 } from "lucide-react";
+import { submitFeatureRequest } from "@/actions/admin";
 
 type FeedbackCategory = "feature" | "bug" | "general";
 
@@ -75,7 +76,7 @@ export function FeedbackForm({ initialUserEmail }: FeedbackFormProps) {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !description.trim()) return;
 
@@ -98,10 +99,19 @@ export function FeedbackForm({ initialUserEmail }: FeedbackFormProps) {
       // ignore storage errors
     }
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-    }, 400);
+    try {
+      await submitFeatureRequest({
+        category,
+        title,
+        description,
+        email,
+      });
+    } catch {
+      // persisting is best-effort; the local log is still recorded
+    }
+
+    setIsSubmitting(false);
+    setIsSubmitted(true);
   };
 
   const formattedSubject = encodeURIComponent(
