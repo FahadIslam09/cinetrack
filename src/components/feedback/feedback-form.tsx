@@ -29,6 +29,7 @@ export function FeedbackForm({ initialUserEmail }: FeedbackFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const categories = [
     {
@@ -80,6 +81,7 @@ export function FeedbackForm({ initialUserEmail }: FeedbackFormProps) {
     e.preventDefault();
     if (!title.trim() || !description.trim()) return;
 
+    setSubmitError(null);
     setIsSubmitting(true);
 
     try {
@@ -100,14 +102,22 @@ export function FeedbackForm({ initialUserEmail }: FeedbackFormProps) {
     }
 
     try {
-      await submitFeatureRequest({
+      const res = await submitFeatureRequest({
         category,
-        title,
-        description,
-        email,
+        title: title.trim(),
+        description: description.trim(),
+        email: email.trim() || undefined,
       });
+
+      if (res?.error) {
+        setSubmitError(res.error);
+        setIsSubmitting(false);
+        return;
+      }
     } catch {
-      // persisting is best-effort; the local log is still recorded
+      setSubmitError("Failed to submit request. Please try again.");
+      setIsSubmitting(false);
+      return;
     }
 
     setIsSubmitting(false);
@@ -322,6 +332,12 @@ export function FeedbackForm({ initialUserEmail }: FeedbackFormProps) {
           className="w-full h-11 px-4 rounded-xl bg-[#0F141D] border border-white/[0.08] focus:border-[#3B9EFF]/50 text-sm text-[#F5F7FA] placeholder-[#6F7886] outline-none focus:ring-1 focus:ring-[#3B9EFF]/40 transition-all font-sans"
         />
       </div>
+
+      {submitError && (
+        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-400 text-xs flex items-center gap-2">
+          <span>{submitError}</span>
+        </div>
+      )}
 
       {/* Submit Button */}
       <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">

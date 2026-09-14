@@ -6,6 +6,7 @@ import { Compass, Library, X, Send, CheckCircle2 } from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { Footer } from "@/components/navigation/footer";
+import { submitFeatureRequest } from "@/actions/admin";
 
 interface RedesignedHomeViewProps {
   user: {
@@ -33,7 +34,8 @@ export function RedesignedHomeView({ user }: RedesignedHomeViewProps) {
 
   const handleSubmitFeedback = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!feedbackText.trim()) return;
+    const trimmed = feedbackText.trim();
+    if (!trimmed) return;
 
     // Persist locally so feedback isn't lost
     try {
@@ -41,7 +43,7 @@ export function RedesignedHomeView({ user }: RedesignedHomeViewProps) {
         localStorage.getItem("cinetrack_home_ideas") || "[]"
       );
       existing.push({
-        text: feedbackText.trim(),
+        text: trimmed,
         user: user?.username || user?.email || "anonymous",
         createdAt: new Date().toISOString(),
       });
@@ -49,6 +51,14 @@ export function RedesignedHomeView({ user }: RedesignedHomeViewProps) {
     } catch {
       // ignore storage errors
     }
+
+    // Submit to server action so it appears on Admin Dashboard & Notifications panel
+    submitFeatureRequest({
+      category: "feature",
+      title: trimmed.length > 55 ? `${trimmed.slice(0, 52)}...` : trimmed,
+      description: trimmed,
+      email: user?.email || undefined,
+    }).catch(() => {});
 
     setIsSubmitted(true);
     setTimeout(() => {

@@ -8,9 +8,14 @@ const RADIUS = 17;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export function BackToTop() {
+  const [mounted, setMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const circleRef = useRef<SVGCircleElement>(null);
   const lenis = useLenis();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Helper to update progress ring smoothly in exact sync with scroll
   const updateProgress = (currentScroll: number, maxLimit?: number) => {
@@ -121,6 +126,8 @@ export function BackToTop() {
     }
   };
 
+  if (!mounted) return null;
+
   return (
     <div
       className={`fixed bottom-20 md:bottom-8 right-4 sm:right-6 md:right-8 z-30 transition-all duration-300 ${
@@ -131,6 +138,7 @@ export function BackToTop() {
     >
       <button
         type="button"
+        suppressHydrationWarning
         onClick={scrollToTop}
         aria-label="Back to top"
         title="Back to top"

@@ -6,6 +6,8 @@ import { Header } from "./header";
 import { TopLoader } from "./top-loader";
 import { cn } from "@/lib/utils";
 
+import type { AdminNotificationItem } from "@/actions/admin";
+
 interface AdminUser {
   username: string | null;
   fullName: string | null;
@@ -13,11 +15,18 @@ interface AdminUser {
   email?: string | null;
 }
 
+interface NotificationsData {
+  unreadCount: number;
+  items: AdminNotificationItem[];
+}
+
 export function AdminShell({
   admin,
+  initialNotifications,
   children,
 }: {
   admin: AdminUser;
+  initialNotifications?: NotificationsData;
   children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -40,6 +49,7 @@ export function AdminShell({
       >
         <Header
           admin={admin}
+          initialNotifications={initialNotifications}
           collapsed={collapsed}
           onToggleCollapse={() => setCollapsed((v) => !v)}
           onOpenMobile={() => setMobileOpen(true)}

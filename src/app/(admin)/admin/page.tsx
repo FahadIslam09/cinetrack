@@ -28,6 +28,8 @@ const STATUS_ICON: Record<string, { icon: ActivityItem["icon"]; className: strin
   dropped: { icon: Library, className: "bg-rose-50 text-rose-600", verb: "Dropped" },
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboard({
   searchParams,
 }: {
@@ -84,7 +86,7 @@ export default async function AdminDashboard({
     mediaByType[r.mediaType as keyof typeof mediaByType] = r.n;
   }
 
-  const [userGrowth, mediaAdded, recentLogs, pendingRequests] = await Promise.all([
+  const [userGrowth, mediaAdded, recentLogs, pendingRequests, recentRequests] = await Promise.all([
     getUserGrowth(rangeDays),
     getMediaAddedSeries(rangeDays),
     db
@@ -104,6 +106,21 @@ export default async function AdminDashboard({
       .select({ status: featureRequests.status, n: count(featureRequests.id) })
       .from(featureRequests)
       .groupBy(featureRequests.status),
+    db
+      .select({
+        id: featureRequests.id,
+        title: featureRequests.title,
+        description: featureRequests.description,
+        category: featureRequests.category,
+        status: featureRequests.status,
+        createdAt: featureRequests.createdAt,
+        username: profiles.username,
+        email: featureRequests.email,
+      })
+      .from(featureRequests)
+      .leftJoin(profiles, eq(featureRequests.userId, profiles.id))
+      .orderBy(desc(featureRequests.createdAt))
+      .limit(4),
   ]);
 
   const requestCountMap = new Map<string, number>();
@@ -239,20 +256,63 @@ export default async function AdminDashboard({
           {totals.requests === 0 ? (
             <EmptyState title="No feature requests yet" description="Requests submitted on the site will appear here." />
           ) : (
-            <div className="flex flex-wrap gap-2">
-              {(["new", "under_review", "in_progress"] as const).map((s) => {
-                const n = requestCountMap.get(s) || 0;
-                return (
-                  <Link
-                    key={s}
-                    href={`/admin/requests?status=${s}`}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
-                  >
-                    <StatusBadge colors={REQUEST_STATUS[s]} />
-                    <span className="text-sm font-semibold text-slate-900">{n}</span>
-                  </Link>
-                );
-              })}
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {(["new", "under_review", "in_progress"] as const).map((s) => {
+                  const n = requestCountMap.get(s) || 0;
+                  return (
+                    <Link
+                      key={s}
+                      href={`/admin/requests?status=${s}`}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
+                    >
+                      <StatusBadge colors={REQUEST_STATUS[s]} />
+                      <span className="text-sm font-semibold text-slate-900">{n}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {recentRequests.length > 0 && (
+                <div className="divide-y divide-slate-100 border-t border-slate-100 pt-1">
+                  {recentRequests.map((req) => (
+                    <div
+                      key={req.id}
+                      className="py-2.5 flex items-center justify-between gap-3 text-sm"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-slate-900 truncate">
+                            {req.title}
+                          </span>
+                          <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 shrink-0">
+                            {req.category}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 truncate mt-0.5">
+                          From {req.username ? `@${req.username}` : req.email || "Anonymous"} •{" "}
+                          {req.createdAt ? new Date(req.createdAt).toLocaleDateString() : ""}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <StatusBadge
+                          colors={
+                            REQUEST_STATUS[req.status as keyof typeof REQUEST_STATUS] ||
+                            REQUEST_STATUS.new
+                          }
+                        />
+                        <Link
+                          href="/admin/requests"
+                          className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                        >
+                          Review
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </Panel>

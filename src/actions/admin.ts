@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { profiles, featureRequests } from "@/lib/db/schema";
 import { getAdminProfile } from "@/lib/admin/auth";
 import { createClient } from "@/lib/supabase/server";
-import { eq } from "drizzle-orm";
+import { eq, desc, count } from "drizzle-orm";
 import { headers } from "next/headers";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -44,7 +44,9 @@ export async function updateFeatureRequest(params: {
       .update(featureRequests)
       .set(set)
       .where(eq(featureRequests.id, params.id));
+    revalidatePath("/admin");
     revalidatePath("/admin/requests");
+    revalidatePath("/admin/notifications");
     return { success: true };
   } catch (err: any) {
     console.error("updateFeatureRequest error:", err);
@@ -156,10 +158,89 @@ export async function submitFeatureRequest(params: {
       title,
       description,
     });
+    revalidatePath("/admin");
     revalidatePath("/admin/requests");
+    revalidatePath("/admin/notifications");
     return { success: true };
   } catch (err: any) {
     console.error("submitFeatureRequest error:", err);
     return { error: "Failed to submit request. Please try again later." };
+  }
+}
+
+export type AdminNotificationItem = {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  status: string;
+  createdAt: string;
+  author: string;
+};
+
+export async function getAdminNotifications(): Promise<{
+  unreadCount: number;
+  items: AdminNotificationItem[];
+}> {
+  const admin = await getAdminProfile();
+  if (!admin) return { unreadCount: 0, items: [] };
+
+  try {
+    const [unreadRes] = await db
+      .select({ n: count(featureRequests.id) })
+      .from(featureRequests)
+      .where(eq(featureRequests.status, "new"));
+
+    const recent = await db
+      .select({
+        id: featureRequests.id,
+        title: featureRequests.title,
+        description: featureRequests.description,
+        category: featureRequests.category,
+        status: featureRequests.status,
+        createdAt: featureRequests.createdAt,
+        email: featureRequests.email,
+        username: profiles.username,
+      })
+      .from(featureRequests)
+      .leftJoin(profiles, eq(featureRequests.userId, profiles.id))
+      .orderBy(desc(featureRequests.createdAt))
+      .limit(6);
+
+    return {
+      unreadCount: unreadRes?.n ?? 0,
+      items: recent.map((r) => ({
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        category: r.category,
+        status: r.status,
+        createdAt: r.createdAt.toISOString(),
+        author: r.username ? `@${r.username}` : r.email || "Anonymous",
+      })),
+    };
+  } catch (err) {
+    console.error("getAdminNotifications error:", err);
+    return { unreadCount: 0, items: [] };
+  }
+}
+
+export async function markAllRequestsReviewed() {
+  const admin = await getAdminProfile();
+  if (!admin) return { error: "Unauthorized" };
+
+  try {
+    await db
+      .update(featureRequests)
+      .set({ status: "under_review", updatedAt: new Date() })
+      .where(eq(featureRequests.status, "new"));
+
+    revalidatePath("/admin");
+    revalidatePath("/admin/requests");
+    revalidatePath("/admin/notifications");
+    return { success: true };
+  } catch (err: any) {
+    console.error("markAllRequestsReviewed error:", err);
+    return { error: err.message || "Failed to update requests." };
   }
 }
