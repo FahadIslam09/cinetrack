@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import { sanitizeRedirect } from "@/lib/security";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
-  const next = requestUrl.searchParams.get("next") || "/library";
+  const next = sanitizeRedirect(requestUrl.searchParams.get("next"), "/library");
   const supabase = await createClient();
 
   const headersList = await headers();

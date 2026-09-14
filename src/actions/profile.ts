@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
 import { createClient } from "@/lib/supabase/server";
 import { eq, and, ne, inArray } from "drizzle-orm";
+import { isValidHttpsUrl } from "@/lib/security";
 
 const RESERVED_USERNAMES = new Set([
   "api",
@@ -60,6 +61,14 @@ export async function updateProfile(params: UpdateProfileParams) {
     const trimmedBio = params.bio?.trim().slice(0, 160) || null;
     const trimmedAvatar = params.avatarUrl?.trim() || null;
     const trimmedBackdrop = params.backdropUrl?.trim() || null;
+
+    if (trimmedAvatar && !isValidHttpsUrl(trimmedAvatar)) {
+      return { error: "Avatar URL must be a valid https URL." };
+    }
+
+    if (trimmedBackdrop && !isValidHttpsUrl(trimmedBackdrop)) {
+      return { error: "Backdrop URL must be a valid https URL." };
+    }
 
     // Get current profile
     const [existing] = await db
@@ -430,5 +439,78 @@ export async function completeProfileSetup(params: {
   } catch (err: any) {
     console.error("Complete profile setup error:", err);
     return { error: err.message || "Failed to complete profile setup." };
+  }
+}
+
+/**
+ * Secure server-side image upload handler.
+ * Verifies authentication, validates MIME and size (<=5MB), and proxies upload to ImgBB.
+ */
+export async function uploadProfileImage(
+  formData: FormData
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { success: false, error: "Authentication required to upload images." };
+    }
+
+    const [existing] = await db
+      .select({ status: profiles.status })
+      .from(profiles)
+      .where(eq(profiles.id, user.id))
+      .limit(1);
+
+    if (existing?.status === "suspended") {
+      return { success: false, error: "Account is suspended." };
+    }
+
+    const file = formData.get("image") as File | null;
+    if (!file || typeof file === "string") {
+      return { success: false, error: "No image file provided." };
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      return {
+        success: false,
+        error: "Invalid image format. Only JPEG, PNG, WEBP, and GIF are supported.",
+      };
+    }
+
+    // 5MB maximum limit
+    if (file.size > 5 * 1024 * 1024) {
+      return { success: false, error: "Image size must not exceed 5MB." };
+    }
+
+    const imgbbKey = process.env.IMGBB_API_KEY || "991f94ae55c7ee215507ec80b51bfa5b";
+    const uploadData = new FormData();
+    uploadData.append("image", file);
+
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, {
+      method: "POST",
+      body: uploadData,
+    });
+
+    if (!res.ok) {
+      return { success: false, error: "Image upload provider returned an error." };
+    }
+
+    const json = await res.json();
+    const uploadedUrl = json?.data?.display_url || json?.data?.url;
+
+    if (!uploadedUrl || !isValidHttpsUrl(uploadedUrl)) {
+      return { success: false, error: "Failed to obtain secure uploaded image URL." };
+    }
+
+    return { success: true, url: uploadedUrl };
+  } catch (err: any) {
+    console.error("uploadProfileImage error:", err);
+    return { success: false, error: "Failed to upload image. Please try again." };
   }
 }

@@ -74,6 +74,16 @@ export async function upsertMediaLog(params: LogMediaParams) {
       isFavorite = false,
     } = params;
 
+    const ALLOWED_STATUSES = ["watching", "completed", "plan_to_watch", "on_hold", "dropped"] as const;
+    if (!ALLOWED_STATUSES.includes(status as any)) {
+      return { error: "Invalid status value." };
+    }
+
+    const safeEpisodesWatched = Math.max(0, Math.min(Math.floor(Number(episodesWatched) || 0), 10000));
+    const safeCurrentSeason = Math.max(1, Math.min(Math.floor(Number(currentSeason) || 1), 1000));
+    const safeCurrentEpisode = Math.max(1, Math.min(Math.floor(Number(currentEpisode) || 1), 10000));
+    const cleanReviewText = reviewText ? reviewText.trim().slice(0, 5000) : null;
+
     if (rating !== undefined && rating !== null && !isValidRating(rating)) {
       return { error: "Invalid rating. Allowed categories: poor, average, good, great, masterpiece." };
     }
@@ -127,7 +137,7 @@ export async function upsertMediaLog(params: LogMediaParams) {
 
     // Atomic transaction: upsert media_items first, then user_media_logs
     await db.transaction(async (tx) => {
-      // 1. Upsert metadata
+      // 1. Insert metadata if not already cached (prevents arbitrary client metadata defacement)
       await tx
         .insert(mediaItems)
         .values({
@@ -147,20 +157,7 @@ export async function upsertMediaLog(params: LogMediaParams) {
           synopsis: media.synopsis,
           updatedAt: new Date(),
         })
-        .onConflictDoUpdate({
-          target: mediaItems.id,
-          set: {
-            title: media.title,
-            posterPath: media.posterPath,
-            backdropPath: media.backdropPath,
-            totalEpisodes: media.totalEpisodes,
-            runtime,
-            genres: media.genres,
-            streamingProviders: media.streamingProviders || {},
-            synopsis: media.synopsis,
-            updatedAt: new Date(),
-          },
-        });
+        .onConflictDoNothing();
 
       // 2. Upsert user log
       await tx
@@ -170,10 +167,10 @@ export async function upsertMediaLog(params: LogMediaParams) {
           mediaId: media.id,
           status,
           rating: finalRating,
-          episodesWatched,
-          currentSeason,
-          currentEpisode,
-          reviewText: reviewText?.trim() || null,
+          episodesWatched: safeEpisodesWatched,
+          currentSeason: safeCurrentSeason,
+          currentEpisode: safeCurrentEpisode,
+          reviewText: cleanReviewText,
           containsSpoilers,
           isFavorite,
           completedAt,
@@ -184,10 +181,10 @@ export async function upsertMediaLog(params: LogMediaParams) {
           set: {
             status,
             rating: finalRating,
-            episodesWatched,
-            currentSeason,
-            currentEpisode,
-            reviewText: reviewText?.trim() || null,
+            episodesWatched: safeEpisodesWatched,
+            currentSeason: safeCurrentSeason,
+            currentEpisode: safeCurrentEpisode,
+            reviewText: cleanReviewText,
             containsSpoilers,
             isFavorite,
             completedAt,
@@ -227,8 +224,13 @@ export async function incrementEpisode(mediaId: string, totalEpisodes: number = 
     }
 
     const [existing] = await db
-      .select()
+      .select({
+        log: userMediaLogs,
+        mediaType: mediaItems.mediaType,
+        totalEpisodes: mediaItems.totalEpisodes,
+      })
       .from(userMediaLogs)
+      .innerJoin(mediaItems, eq(userMediaLogs.mediaId, mediaItems.id))
       .where(
         and(
           eq(userMediaLogs.userId, user.id),
@@ -239,20 +241,31 @@ export async function incrementEpisode(mediaId: string, totalEpisodes: number = 
 
     if (!existing) return { error: "Log not found" };
 
-    const newEpisodeCount = existing.episodesWatched + 1;
-    const newCurrentEpisode = (existing.currentEpisode || 1) + 1;
-    const shouldComplete =
-      totalEpisodes > 1 && newEpisodeCount >= totalEpisodes;
+    if (existing.mediaType === "movie") {
+      return { error: "Cannot increment episodes on a movie." };
+    }
+
+    const maxEpisodes = Math.max(1, existing.totalEpisodes || totalEpisodes || 1);
+    const currentWatched = existing.log.episodesWatched || 0;
+
+    if (currentWatched >= maxEpisodes) {
+      return { success: true, count: currentWatched };
+    }
+
+    const newEpisodeCount = Math.min(currentWatched + 1, maxEpisodes);
+    const newCurrentEpisode = (existing.log.currentEpisode || 1) + 1;
+    const shouldComplete = newEpisodeCount >= maxEpisodes;
 
     await db
       .update(userMediaLogs)
       .set({
         episodesWatched: newEpisodeCount,
         currentEpisode: newCurrentEpisode,
-        status: shouldComplete ? "completed" : existing.status,
+        status: shouldComplete ? "completed" : (existing.log.status === "plan_to_watch" ? "watching" : existing.log.status),
+        completedAt: shouldComplete ? (existing.log.completedAt || new Date()) : null,
         updatedAt: new Date(),
       })
-      .where(eq(userMediaLogs.id, existing.id));
+      .where(eq(userMediaLogs.id, existing.log.id));
 
     revalidatePath("/library");
     revalidatePath("/");

@@ -15,10 +15,12 @@ import {
   AlertCircle,
   Film,
 } from "lucide-react";
-import { updateProfile, checkUsernameAvailability } from "@/actions/profile";
+import {
+  updateProfile,
+  checkUsernameAvailability,
+  uploadProfileImage,
+} from "@/actions/profile";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
-
-const IMGBB_API_KEY = "991f94ae55c7ee215507ec80b51bfa5b";
 
 const COVER_PRESETS = [
   {
@@ -199,22 +201,16 @@ export function EditProfileModal({
       const formData = new FormData();
       formData.append("image", file);
 
-      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await uploadProfileImage(formData);
 
-      const json = await res.json();
-
-      if (json.success && json.data) {
-        const uploadedUrl = json.data.display_url || json.data.url;
+      if (res.success && res.url) {
         if (target === "avatar") {
-          setAvatarUrl(uploadedUrl);
+          setAvatarUrl(res.url);
         } else {
-          setBackdropUrl(uploadedUrl);
+          setBackdropUrl(res.url);
         }
       } else {
-        setError(json.error?.message || "Failed to upload image.");
+        setError(res.error || "Failed to upload image.");
       }
     } catch (uploadErr) {
       console.error("Image upload error:", uploadErr);

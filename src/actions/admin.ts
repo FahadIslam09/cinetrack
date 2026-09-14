@@ -6,6 +6,8 @@ import { profiles, featureRequests } from "@/lib/db/schema";
 import { getAdminProfile } from "@/lib/admin/auth";
 import { createClient } from "@/lib/supabase/server";
 import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const REQUEST_STATUSES = [
   "new",
@@ -89,38 +91,67 @@ export async function submitFeatureRequest(params: {
   description: string;
   email?: string | null;
 }) {
-  const category = ["feature", "bug", "general"].includes(params.category)
-    ? params.category
-    : "feature";
-  const title = params.title?.trim().slice(0, 140);
-  const description = params.description?.trim().slice(0, 4000);
-
-  if (!title || !description) {
-    return { error: "Title and description are required." };
-  }
-
-  let userId: string | null = null;
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      const [profile] = await db
-        .select({ id: profiles.id })
-        .from(profiles)
-        .where(eq(profiles.id, user.id))
-        .limit(1);
-      if (profile) userId = profile.id;
+    const headersList = await headers();
+    const clientIp =
+      headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      headersList.get("x-real-ip") ||
+      "anonymous";
+
+    const rateLimit = checkRateLimit(`feedback:${clientIp}`, {
+      limit: 5,
+      windowMs: 10 * 60 * 1000, // 5 submissions per 10 minutes
+    });
+
+    if (!rateLimit.allowed) {
+      return {
+        error: "Too many submissions. Please wait a few minutes before submitting another request.",
+      };
     }
-  } catch {
-    // anonymous submission is fine
-  }
 
-  try {
+    const category = ["feature", "bug", "general"].includes(params.category)
+      ? params.category
+      : "feature";
+    const title = params.title?.trim().slice(0, 140);
+    const description = params.description?.trim().slice(0, 4000);
+
+    if (!title || !description) {
+      return { error: "Title and description are required." };
+    }
+
+    if (title.length < 3) {
+      return { error: "Title must be at least 3 characters long." };
+    }
+
+    const rawEmail = params.email?.trim() || null;
+    if (rawEmail) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(rawEmail) || rawEmail.length > 150) {
+        return { error: "Please enter a valid email address." };
+      }
+    }
+
+    let userId: string | null = null;
+    try {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const [profile] = await db
+          .select({ id: profiles.id })
+          .from(profiles)
+          .where(eq(profiles.id, user.id))
+          .limit(1);
+        if (profile) userId = profile.id;
+      }
+    } catch {
+      // anonymous submission is fine
+    }
+
     await db.insert(featureRequests).values({
       userId,
-      email: params.email?.trim() || null,
+      email: rawEmail,
       category: category as any,
       title,
       description,
@@ -129,6 +160,6 @@ export async function submitFeatureRequest(params: {
     return { success: true };
   } catch (err: any) {
     console.error("submitFeatureRequest error:", err);
-    return { error: err.message || "Failed to submit request." };
+    return { error: "Failed to submit request. Please try again later." };
   }
 }

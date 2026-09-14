@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { sanitizeRedirect } from "@/lib/security";
 
 const RESERVED_ROUTES = new Set([
   "api",
@@ -76,7 +77,7 @@ export default async function proxy(request: NextRequest) {
   } else {
     // Authenticated users visiting /login get redirected to their library or next target
     if (pathname === "/login") {
-      const nextTarget = request.nextUrl.searchParams.get("next") || "/library";
+      const nextTarget = sanitizeRedirect(request.nextUrl.searchParams.get("next"), "/library");
       const targetUrl = new URL(nextTarget, request.url);
       const redirectResponse = NextResponse.redirect(targetUrl);
       copyCookies(supabaseResponse, redirectResponse);

@@ -9,7 +9,9 @@ import {
 } from "@/lib/media/normalize";
 import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
-import { or, ilike } from "drizzle-orm";
+import { or, ilike, and, eq } from "drizzle-orm";
+import { escapeSqlLike } from "@/lib/security";
+import { createClient } from "@/lib/supabase/server";
 
 export interface ProfileSearchResult {
   id: string;
@@ -80,11 +82,12 @@ function rankMediaResults(items: NormalizedMedia[], query: string): NormalizedMe
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const q = (searchParams.get("q") || "").trim();
+  const rawQ = (searchParams.get("q") || "").trim();
+  const q = rawQ.slice(0, 100);
   const type = searchParams.get("type") || "all";
   const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
   const limitParam = searchParams.get("limit");
-  const limit = limitParam ? parseInt(limitParam, 10) : undefined;
+  const limit = limitParam ? Math.min(50, Math.max(1, parseInt(limitParam, 10))) : undefined;
 
   if (!q) {
     return NextResponse.json({
@@ -109,43 +112,53 @@ export async function GET(req: NextRequest) {
     // 1. Fetch User Profiles (if type is 'all' or 'profiles')
     if (type === "all" || type === "profiles") {
       try {
-        const cleanQ = q.replace(/^@/, "");
-        const dbMatches = await db
-          .select({
-            id: profiles.id,
-            username: profiles.username,
-            fullName: profiles.fullName,
-            avatarUrl: profiles.avatarUrl,
-            bio: profiles.bio,
-          })
-          .from(profiles)
-          .where(
-            or(
-              ilike(profiles.username, `%${cleanQ}%`),
-              ilike(profiles.fullName, `%${cleanQ}%`)
-            )
-          )
-          .limit(10);
+        const supabase = await createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-        if (dbMatches && dbMatches.length > 0) {
-          profileResults = dbMatches;
+        // Product rule: Logged-out users can only access public profiles through direct /u/[username] links
+        if (!user) {
+          profileResults = [];
         } else {
-          // Fallback to matching demo profiles
-          const lowerQ = cleanQ.toLowerCase();
-          profileResults = fallbackDemoProfiles.filter(
-            (p) =>
-              p.username.toLowerCase().includes(lowerQ) ||
-              (p.fullName && p.fullName.toLowerCase().includes(lowerQ))
-          );
+          const cleanQ = q.replace(/^@/, "");
+          const escapedQ = escapeSqlLike(cleanQ);
+
+          const dbMatches = await db
+            .select({
+              id: profiles.id,
+              username: profiles.username,
+              fullName: profiles.fullName,
+              avatarUrl: profiles.avatarUrl,
+              bio: profiles.bio,
+            })
+            .from(profiles)
+            .where(
+              and(
+                eq(profiles.isPublic, true),
+                eq(profiles.status, "active"),
+                or(
+                  ilike(profiles.username, `%${escapedQ}%`),
+                  ilike(profiles.fullName, `%${escapedQ}%`)
+                )
+              )
+            )
+            .limit(10);
+
+          if (dbMatches && dbMatches.length > 0) {
+            profileResults = dbMatches;
+          } else {
+            const lowerQ = cleanQ.toLowerCase();
+            profileResults = fallbackDemoProfiles.filter(
+              (p) =>
+                p.username.toLowerCase().includes(lowerQ) ||
+                (p.fullName && p.fullName.toLowerCase().includes(lowerQ))
+            );
+          }
         }
       } catch (profileErr) {
         console.warn("Profile search error:", profileErr);
-        const lowerQ = q.replace(/^@/, "").toLowerCase();
-        profileResults = fallbackDemoProfiles.filter(
-          (p) =>
-            p.username.toLowerCase().includes(lowerQ) ||
-            (p.fullName && p.fullName.toLowerCase().includes(lowerQ))
-        );
+        profileResults = [];
       }
     }
 
@@ -177,7 +190,7 @@ export async function GET(req: NextRequest) {
         totalPages = tmdbRes.total_pages || 1;
         totalMedia = tmdbRes.total_results || mediaResults.length;
       } else {
-        // "all": query TMDb Movies, TMDb TV, and AniList Anime in parallel (avoids TMDb search/multi person pollution)
+        // "all": query TMDb Movies, TMDb TV, and AniList Anime in parallel
         const [moviesRes, tvRes, animeRes] = await Promise.all([
           tmdb.searchMovies(q, page).catch(() => ({
             results: [],
@@ -225,10 +238,13 @@ export async function GET(req: NextRequest) {
         totalMedia,
         totalProfiles: profileResults.length,
       },
-      results: mediaResults, // backwards-compatible
+      results: mediaResults,
     });
   } catch (err: any) {
     console.error("API search error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to perform search. Please try again later." },
+      { status: 500 }
+    );
   }
 }

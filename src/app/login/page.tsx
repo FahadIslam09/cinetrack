@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LogoIcon } from "@/components/ui/logo-icon";
+import { sanitizeRedirect } from "@/lib/security";
 
 function LoginForm() {
   const router = useRouter();
@@ -24,7 +25,7 @@ function LoginForm() {
   const initialMode = searchParams.get("mode") === "signup" ? "signup" : "signin";
   const initialEmail = searchParams.get("email") || "";
   const initialUsername = searchParams.get("username") || "";
-  const next = searchParams.get("next") || "/library";
+  const next = sanitizeRedirect(searchParams.get("next"), "/library");
 
   const [mode, setMode] = useState<"signin" | "signup">(initialMode);
   const [email, setEmail] = useState(initialEmail);

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Lock } from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { Footer } from "@/components/navigation/footer";
@@ -74,7 +75,14 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
 
   const isOwner = Boolean(currentUser && targetProfile && currentUser.id === targetProfile.id);
 
-  if (targetProfile) {
+  // If user is suspended and caller is not owner/admin, hide profile
+  if (targetProfile && targetProfile.status === "suspended" && !isOwner) {
+    notFound();
+  }
+
+  const isPrivate = Boolean(targetProfile && !targetProfile.isPublic && !isOwner);
+
+  if (targetProfile && !isPrivate) {
     try {
       const allUserLogs = await db
         .select({
@@ -174,14 +182,26 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
       <AppHeader />
 
       <main className="flex-1 w-full max-w-[834px] lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 pt-24 sm:pt-28 pb-24 md:pb-12">
-        <LibraryView
-          initialItems={finalItems}
-          user={userProp}
-          stats={finalStats}
-          initialStatus={status}
-          initialType={type}
-          isOwner={isOwner}
-        />
+        {isPrivate ? (
+          <div className="flex flex-col items-center justify-center py-20 px-6 text-center rounded-2xl bg-[#151C27] border border-white/[0.08] shadow-xl my-8 max-w-lg mx-auto">
+            <div className="w-14 h-14 rounded-2xl bg-[#1D2734] border border-white/10 flex items-center justify-center text-[#A8B0BD] mb-4 shadow-inner">
+              <Lock className="w-6 h-6 text-[#3B9EFF]" />
+            </div>
+            <h2 className="font-bold text-xl text-[#F5F7FA] tracking-tight">This Profile is Private</h2>
+            <p className="text-xs sm:text-sm text-[#A8B0BD] mt-2 leading-relaxed max-w-sm">
+              @{userProp.username} has set their library, watch activity, and statistics to private.
+            </p>
+          </div>
+        ) : (
+          <LibraryView
+            initialItems={finalItems}
+            user={userProp}
+            stats={finalStats}
+            initialStatus={status}
+            initialType={type}
+            isOwner={isOwner}
+          />
+        )}
       </main>
 
       <Footer />
