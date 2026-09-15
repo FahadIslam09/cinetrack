@@ -291,15 +291,15 @@ export function NotificationDropdown({
   );
 
   return (
-    <div ref={dropdownRef} className="relative z-50">
+    <div ref={dropdownRef} className={`relative ${isOpen ? "z-50" : ""}`}>
       <button
         type="button"
         onClick={handleToggle}
         aria-label={isOpen ? "Close notifications" : "Notifications"}
         aria-expanded={isOpen}
-        className={`relative z-50 p-2 rounded-lg transition-colors shrink-0 cursor-pointer ${
+        className={`relative p-2 rounded-lg transition-colors shrink-0 cursor-pointer ${
           isOpen
-            ? "text-[#F5F7FA] bg-[#1A2330]"
+            ? "z-50 text-[#F5F7FA] bg-[#1A2330]"
             : "text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330]"
         }`}
       >

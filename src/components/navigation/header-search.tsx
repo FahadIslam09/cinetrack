@@ -113,6 +113,17 @@ export function HeaderSearch({ isMobileOpen, onCloseMobile }: HeaderSearchProps)
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  const handleCloseMobile = () => {
+    setIsFocused(false);
+    onCloseMobile();
+  };
+
+  useEffect(() => {
+    if (!isMobileOpen) {
+      setIsFocused(false);
+    }
+  }, [isMobileOpen]);
+
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const trimmed = searchQuery.trim();
@@ -142,14 +153,14 @@ export function HeaderSearch({ isMobileOpen, onCloseMobile }: HeaderSearchProps)
   };
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className={isMobileOpen ? "relative z-[60]" : "relative"}>
       {/* 1. Mobile Search Overlay Bar (< 768px when active) */}
       {isMobileOpen && (
-        <div className="md:hidden fixed inset-x-0 top-0 h-16 bg-[#0F141D] z-50 flex items-center px-3 border-b border-white/[0.08] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
+        <div className="md:hidden fixed inset-x-0 top-0 h-14 sm:h-16 bg-[#0F141D] z-[60] flex items-center px-3 border-b border-white/[0.08] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
           <form onSubmit={handleSubmit} className="relative flex items-center w-full gap-2">
             <button
               type="button"
-              onClick={onCloseMobile}
+              onClick={handleCloseMobile}
               className="p-1.5 text-[#A8B0BD] hover:text-[#F5F7FA] rounded-lg cursor-pointer shrink-0"
               aria-label="Close search"
             >
@@ -251,9 +262,9 @@ export function HeaderSearch({ isMobileOpen, onCloseMobile }: HeaderSearchProps)
       {/* 4. Live Search Dropdown Preview */}
       {showDropdown && (
         <div
-          className={`absolute left-0 lg:left-auto lg:right-0 mt-2 z-50 rounded-2xl bg-[#141B26]/95 backdrop-blur-2xl border border-white/[0.1] shadow-2xl overflow-hidden divide-y divide-white/[0.06] transition-all animate-in fade-in slide-in-from-top-2 duration-150 ${
+          className={`absolute left-0 lg:left-auto lg:right-0 mt-2 z-[70] rounded-2xl bg-[#141B26]/95 backdrop-blur-2xl border border-white/[0.1] shadow-2xl overflow-hidden divide-y divide-white/[0.06] transition-all animate-in fade-in slide-in-from-top-2 duration-150 ${
             isMobileOpen
-              ? "fixed top-16 left-3 right-3 max-h-[calc(100vh-80px)] overflow-y-auto"
+              ? "fixed top-14 sm:top-16 left-3 right-3 max-h-[calc(100vh-80px)] overflow-y-auto"
               : "w-[340px] sm:w-[400px] lg:w-[420px] max-h-[500px] overflow-y-auto"
           }`}
         >
