@@ -49,39 +49,13 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const moreDropdownRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const dropdownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const isMoreActive = ["/about", "/contact", "/feedback", "/terms", "/privacy"].includes(pathname);
 
-  const handleDropdownMouseEnter = () => {
-    if (dropdownTimerRef.current) {
-      clearTimeout(dropdownTimerRef.current);
-      dropdownTimerRef.current = null;
-    }
-    setIsMoreDropdownOpen(true);
-  };
-
-  const handleDropdownMouseLeave = () => {
-    if (dropdownTimerRef.current) {
-      clearTimeout(dropdownTimerRef.current);
-    }
-    dropdownTimerRef.current = setTimeout(() => {
-      setIsMoreDropdownOpen(false);
-    }, 240);
-  };
-
   // Close dropdown on route change
   useEffect(() => {
-    if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
     setIsMoreDropdownOpen(false);
   }, [pathname]);
-
-  // Clean up timer on unmount
-  useEffect(() => {
-    return () => {
-      if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
-    };
-  }, []);
 
   // Close dropdown on click outside or escape key
   useEffect(() => {
@@ -243,12 +217,13 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
               <div
                 className="relative"
                 ref={moreDropdownRef}
-                onMouseEnter={handleDropdownMouseEnter}
-                onMouseLeave={handleDropdownMouseLeave}
               >
                 <button
                   type="button"
-                  onClick={() => setIsMoreDropdownOpen((prev) => !prev)}
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    setIsMoreDropdownOpen((prev) => !prev);
+                  }}
                   className={`relative py-2 font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group cursor-pointer ${
                     isMoreActive
                       ? "text-[#F5F7FA]"
@@ -457,7 +432,10 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
               <div className="relative shrink-0 pl-1" ref={userMenuRef}>
                 <button
                   type="button"
-                  onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                  onClick={() => {
+                    setIsMoreDropdownOpen(false);
+                    setIsUserMenuOpen((prev) => !prev);
+                  }}
                   className="flex items-center rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-[#3B9EFF]/40 cursor-pointer select-none"
                   aria-label="User account menu"
                   aria-expanded={isUserMenuOpen}
