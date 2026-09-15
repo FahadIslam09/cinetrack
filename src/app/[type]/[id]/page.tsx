@@ -601,7 +601,7 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
     console.error("Related platform media query error:", err);
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cinetrack.app";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cinetrack.xyz";
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": type === "movie" ? "Movie" : "TVSeries",

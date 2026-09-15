@@ -107,7 +107,7 @@ export default async function Image() {
                 background: "#22C55E",
               }}
             />
-            <span>cinetrack.app</span>
+            <span>cinetrack.xyz</span>
           </div>
         </div>
 

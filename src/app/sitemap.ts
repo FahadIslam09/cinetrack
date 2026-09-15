@@ -6,7 +6,7 @@ import { desc } from "drizzle-orm";
 export const revalidate = 86400; // Daily revalidation
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cinetrack.app";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cinetrack.xyz";
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {

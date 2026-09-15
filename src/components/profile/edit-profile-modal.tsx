@@ -551,7 +551,7 @@ export function EditProfileModal({
             <p className="text-[11px] text-[#6F7886]">
               Your public URL:{" "}
               <span className="text-[#3B9EFF]">
-                cinetrack.com/{username || "username"}
+                cinetrack.xyz/@{username || "username"}
               </span>
             </p>
           </div>

@@ -18,7 +18,7 @@ const notoSansBengali = Noto_Sans_Bengali({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cinetrack.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cinetrack.xyz";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -73,9 +73,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/icon.png", type: "image/png" },
-      { url: "/favicon.ico" },
     ],
+    shortcut: "/favicon.ico",
     apple: "/apple-icon.png",
   },
 };
@@ -96,6 +99,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${notoSansBengali.variable} dark`} suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+        <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
+        <link rel="icon" href="/icon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
+      </head>
       <body className="bg-[#0F141D] text-[#F5F7FA] min-h-screen flex flex-col antialiased selection:bg-[#3B9EFF]/30" suppressHydrationWarning>
         <SmoothScrollProvider>
           {children}

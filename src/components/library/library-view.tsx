@@ -323,7 +323,7 @@ export function LibraryView({
     const link =
       typeof window !== "undefined"
         ? `${window.location.origin}/${currentUserState?.username || "library"}`
-        : "https://cinetrack.app";
+        : "https://cinetrack.xyz";
 
     try {
       if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {

@@ -18,7 +18,7 @@ export function ShareProfileButton({
     const profileUrl =
       typeof window !== "undefined"
         ? `${window.location.origin}/u/${username}`
-        : `https://cinetrack.app/u/${username}`;
+        : `https://cinetrack.xyz/u/${username}`;
 
     try {
       if (

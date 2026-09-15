@@ -279,7 +279,7 @@ export function LandingView() {
     HIGHLIGHT_MOVIES_BY_CATEGORY[activeCategory] || HIGHLIGHT_MOVIES_BY_CATEGORY.all;
 
   const handleCopyProfileLink = () => {
-    navigator.clipboard.writeText("https://cinetrack.app/@rifat");
+    navigator.clipboard.writeText("https://cinetrack.xyz/@rifat");
     setCopiedProfile(true);
     setTimeout(() => setCopiedProfile(false), 2500);
   };
@@ -540,7 +540,7 @@ export function LandingView() {
                     <p className="text-xs text-[#A8B0BD] mb-5 leading-relaxed">
                       Copy a formatted text bundle directly into WhatsApp/iMessage, or send your
                       clean public profile link{" "}
-                      <code className="text-[#3B9EFF] font-mono text-[11px]">cinetrack.app/@you</code>.
+                      <code className="text-[#3B9EFF] font-mono text-[11px]">cinetrack.xyz/@you</code>.
                     </p>
                   </div>
 
@@ -673,7 +673,7 @@ export function LandingView() {
               <h2 className="text-2xl sm:text-4xl font-extrabold text-[#F5F7FA] leading-tight">
                 Your Public Curator Identity <br />
                 <span className="text-[#3B9EFF] font-mono text-xl sm:text-2xl font-normal">
-                  cinetrack.app/@yourname
+                  cinetrack.xyz/@yourname
                 </span>
               </h2>
               <p className="text-xs sm:text-sm text-[#A8B0BD] leading-relaxed mb-2">
@@ -754,7 +754,7 @@ export function LandingView() {
                         <CheckCircle2 className="w-3.5 h-3.5 text-[#3B9EFF]" />
                       </div>
                       <div className="text-[11px] text-[#6F7886] font-mono">
-                        cinetrack.app/@rifat
+                        cinetrack.xyz/@rifat
                       </div>
                     </div>
                   </div>
@@ -826,7 +826,7 @@ export function LandingView() {
                 <div className="bg-[#1A2330] p-2.5 rounded-lg flex items-center justify-between text-xs text-[#A8B0BD] border border-white/[0.06]">
                   <span className="flex items-center gap-1.5 truncate">
                     <Share2 className="w-3.5 h-3.5 text-[#3B9EFF]" />
-                    <span className="font-mono text-[11px]">cinetrack.app/@rifat/recommend</span>
+                    <span className="font-mono text-[11px]">cinetrack.xyz/@rifat/recommend</span>
                   </span>
                   <button
                     type="button"
