@@ -21,29 +21,6 @@ export interface ProfileSearchResult {
   bio: string | null;
 }
 
-const fallbackDemoProfiles: ProfileSearchResult[] = [
-  {
-    id: "demo-fahad",
-    username: "fahad",
-    fullName: "Fahad Islam",
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-    bio: "Cinema archivist, Sci-Fi enthusiast, and CineTrack developer.",
-  },
-  {
-    id: "demo-alex",
-    username: "alex_cinema",
-    fullName: "Alex Rivera",
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
-    bio: "Auteur cinema, 70s crime thrillers, and Japanese New Wave.",
-  },
-  {
-    id: "demo-sarah",
-    username: "sarah_films",
-    fullName: "Sarah Chen",
-    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
-    bio: "Anime reviewer and modern television critic.",
-  },
-];
 
 function rankMediaResults(items: NormalizedMedia[], query: string): NormalizedMedia[] {
   const qLower = query.toLowerCase().trim();
@@ -145,16 +122,7 @@ export async function GET(req: NextRequest) {
             )
             .limit(10);
 
-          if (dbMatches && dbMatches.length > 0) {
-            profileResults = dbMatches;
-          } else {
-            const lowerQ = cleanQ.toLowerCase();
-            profileResults = fallbackDemoProfiles.filter(
-              (p) =>
-                p.username.toLowerCase().includes(lowerQ) ||
-                (p.fullName && p.fullName.toLowerCase().includes(lowerQ))
-            );
-          }
+          profileResults = dbMatches || [];
         }
       } catch (profileErr) {
         console.warn("Profile search error:", profileErr);

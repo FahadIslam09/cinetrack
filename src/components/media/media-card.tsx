@@ -259,51 +259,6 @@ export function MediaCard({
       };
     }
 
-    const titleLower = media.title.toLowerCase();
-    if (titleLower.includes("severance")) {
-      return {
-        label: "MIND-BENDER",
-        className: "bg-[#8B5CF6]/10 border border-[#8B5CF6]/25 text-[#A78BFA]",
-        dotColor: "bg-[#8B5CF6]",
-      };
-    }
-    if (titleLower.includes("dune")) {
-      return {
-        label: "CINEMATIC EPIC",
-        className: "bg-[#F59E0B]/10 border border-[#F59E0B]/25 text-[#FBBF24]",
-        dotColor: "bg-[#F59E0B]",
-      };
-    }
-    if (titleLower.includes("oppenheimer")) {
-      return {
-        label: "MASTERPIECE",
-        className: "bg-[#F5C84B]/10 border border-[#F5C84B]/30 text-[#F5C84B]",
-        isStar: true,
-      };
-    }
-    if (titleLower.includes("spider-man")) {
-      return {
-        label: "GOOD",
-        className: "bg-[#3B9EFF]/10 border border-[#3B9EFF]/25 text-[#60A5FA]",
-        dotColor: "bg-[#3B9EFF]",
-      };
-    }
-
-    const g0 = media.genres?.[0]?.toLowerCase() || "";
-    if (g0.includes("sci-fi") || g0.includes("mystery") || g0.includes("thriller")) {
-      return {
-        label: "MIND-BENDER",
-        className: "bg-[#8B5CF6]/10 border border-[#8B5CF6]/25 text-[#A78BFA]",
-        dotColor: "bg-[#8B5CF6]",
-      };
-    }
-    if (g0.includes("action") || g0.includes("adventure") || g0.includes("war")) {
-      return {
-        label: "CINEMATIC EPIC",
-        className: "bg-[#F59E0B]/10 border border-[#F59E0B]/25 text-[#FBBF24]",
-        dotColor: "bg-[#F59E0B]",
-      };
-    }
     if (media.genres && media.genres.length > 0) {
       return {
         label: media.genres[0].toUpperCase(),
@@ -317,13 +272,6 @@ export function MediaCard({
 
   // Bottom right genre text
   const getBottomRightText = () => {
-    const titleLower = media.title.trim().toLowerCase();
-    if (titleLower.includes("spider-man")) return "Action • Comic";
-    if (titleLower.includes("dune")) return "IMAX 70mm";
-    if (titleLower.includes("oppenheimer")) return "Biopic • Drama";
-    if (titleLower.includes("breaking bad")) return "Crime • Drama";
-    if (titleLower === "from") return "Mystery • Drama";
-
     if (media.genres && media.genres.length > 1) {
       return media.genres.slice(0, 2).join(" • ");
     }
