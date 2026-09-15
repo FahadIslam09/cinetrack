@@ -214,22 +214,22 @@ function BottomNavContent() {
               setIsMoreOpen(false);
               openInstallModal(false);
             }}
-            className="w-full flex items-center justify-between p-3.5 mb-2.5 rounded-2xl bg-gradient-to-r from-[#3B9EFF]/20 via-[#3B9EFF]/10 to-[#2563EB]/15 hover:from-[#3B9EFF]/25 hover:to-[#2563EB]/20 border border-[#3B9EFF]/35 transition-all cursor-pointer group shadow-[0_0_16px_rgba(59,158,255,0.1)] text-left active:scale-[0.98]"
+            className="w-full flex items-center justify-between p-2.5 sm:p-3.5 mb-2 sm:mb-2.5 rounded-2xl bg-gradient-to-r from-[#3B9EFF]/20 via-[#3B9EFF]/10 to-[#2563EB]/15 hover:from-[#3B9EFF]/25 hover:to-[#2563EB]/20 border border-[#3B9EFF]/35 transition-all cursor-pointer group shadow-[0_0_16px_rgba(59,158,255,0.1)] text-left active:scale-[0.98]"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-[#3B9EFF] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#3B9EFF]/30 group-hover:scale-105 transition-transform">
-                <Download className="w-4 h-4" />
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#3B9EFF] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#3B9EFF]/30 group-hover:scale-105 transition-transform">
+                <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
               <div className="min-w-0">
-                <span className="text-sm font-bold text-[#F5F7FA] block leading-tight">
+                <span className="text-[13px] sm:text-sm font-bold text-[#F5F7FA] block leading-tight">
                   Install CineTrack
                 </span>
-                <span className="text-[11px] text-[#A8B0BD] mt-0.5 block truncate">
+                <span className="text-[10px] sm:text-[11px] text-[#A8B0BD] mt-0.5 block truncate">
                   {isInstalled ? "App is active on this device" : "Add to home screen for full-screen"}
                 </span>
               </div>
             </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-1 rounded-lg bg-[#3B9EFF] text-white shadow-sm shadow-[#3B9EFF]/25 shrink-0 flex items-center gap-1 ml-2">
+            <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg bg-[#3B9EFF] text-white shadow-sm shadow-[#3B9EFF]/25 shrink-0 flex items-center gap-1 ml-2">
               <span>{isInstalled ? "Installed" : "Install"}</span>
             </span>
           </button>
@@ -238,27 +238,27 @@ function BottomNavContent() {
           <Link
             href="/feedback"
             onClick={() => setIsMoreOpen(false)}
-            className="flex items-center justify-between p-3.5 mb-3 rounded-2xl bg-gradient-to-r from-[#3B9EFF]/15 to-[#3B9EFF]/5 hover:from-[#3B9EFF]/20 hover:to-[#3B9EFF]/10 border border-[#3B9EFF]/30 transition-all cursor-pointer group shadow-[0_0_16px_rgba(59,158,255,0.08)]"
+            className="flex items-center justify-between p-2.5 sm:p-3.5 mb-2.5 sm:mb-3 rounded-2xl bg-gradient-to-r from-[#3B9EFF]/15 to-[#3B9EFF]/5 hover:from-[#3B9EFF]/20 hover:to-[#3B9EFF]/10 border border-[#3B9EFF]/30 transition-all cursor-pointer group shadow-[0_0_16px_rgba(59,158,255,0.08)]"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-[#3B9EFF]/20 border border-[#3B9EFF]/30 flex items-center justify-center text-[#3B9EFF] shrink-0">
-                <Lightbulb className="w-4 h-4" />
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#3B9EFF]/20 border border-[#3B9EFF]/30 flex items-center justify-center text-[#3B9EFF] shrink-0">
+                <Lightbulb className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
               <div className="text-left">
-                <span className="text-sm font-semibold text-[#F5F7FA] block leading-tight">
+                <span className="text-[13px] sm:text-sm font-semibold text-[#F5F7FA] block leading-tight">
                   Need a New Feature?
                 </span>
-                <span className="text-[11px] text-[#3B9EFF] mt-0.5 block">
+                <span className="text-[10px] sm:text-[11px] text-[#3B9EFF] mt-0.5 block">
                   Request a feature or report a bug
                 </span>
               </div>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#3B9EFF] text-white shrink-0">
+            <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#3B9EFF] text-white shrink-0">
               Request
             </span>
           </Link>
 
-          <div className="space-y-1">
+          <div className="space-y-0.5 sm:space-y-1">
             {moreLinks.map((link) => {
               const Icon = link.icon;
               const isCurrent = pathname === link.href;
@@ -267,21 +267,21 @@ function BottomNavContent() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMoreOpen(false)}
-                  className={`flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer ${
+                  className={`flex items-center justify-between p-2.5 sm:p-3 rounded-xl transition-all cursor-pointer ${
                     isCurrent
                       ? "bg-[#3B9EFF]/15 text-[#3B9EFF] font-semibold"
                       : "text-[#F5F7FA] hover:bg-white/[0.06] active:bg-white/[0.1] font-medium"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5 sm:gap-3">
                     <Icon
-                      className={`w-4 h-4 ${
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
                         isCurrent ? "text-[#3B9EFF]" : "text-[#A8B0BD]"
                       }`}
                     />
-                    <span className="text-sm">{link.label}</span>
+                    <span className="text-xs sm:text-sm">{link.label}</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-[#6F7886]" />
+                  <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#6F7886]" />
                 </Link>
               );
             })}
@@ -333,7 +333,7 @@ function BottomNavContent() {
 
       {/* Main Bottom Navigation Bar (z-50 solid background so sheet slides behind it) */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe bg-[#151C27] border-t border-white/[0.06] shadow-2xl">
-        <div className="h-16 flex items-center justify-around px-1 sm:px-2">
+        <div className="h-14 sm:h-16 flex items-center justify-around px-0.5 sm:px-2">
           {navItems.map((item) => {
             if (item.isPrimary) {
               return (
@@ -342,19 +342,19 @@ function BottomNavContent() {
                   type="button"
                   suppressHydrationWarning
                   onClick={handleAddClick}
-                  className="flex flex-col items-center justify-center min-w-[48px] h-full py-1 gap-0.5 group focus:outline-none cursor-pointer"
+                  className="flex flex-col items-center justify-center min-w-[42px] sm:min-w-[48px] h-full py-0.5 sm:py-1 gap-0.5 group focus:outline-none cursor-pointer"
                   aria-label="Add to Library"
                 >
                   <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all active:scale-95 ${
+                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shadow-md transition-all active:scale-95 ${
                       isAddOpen
                         ? "bg-[#5AAFFF] text-white shadow-[#3B9EFF]/40 ring-2 ring-[#3B9EFF]/50"
                         : "bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white shadow-[#3B9EFF]/25"
                     }`}
                   >
-                    <Plus className="w-5 h-5 stroke-[2.5]" />
+                    <Plus className="w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-[2.5]" />
                   </div>
-                  <span className="text-[10px] font-semibold text-[#3B9EFF] tracking-tight">
+                  <span className="text-[9.5px] sm:text-[10px] font-semibold text-[#3B9EFF] tracking-tight">
                     {item.label}
                   </span>
                 </button>
@@ -366,19 +366,19 @@ function BottomNavContent() {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex flex-col items-center justify-center min-w-[44px] h-full py-1 gap-1 transition-colors cursor-pointer ${
+                className={`flex flex-col items-center justify-center min-w-[38px] sm:min-w-[44px] h-full py-0.5 sm:py-1 gap-0.5 sm:gap-1 transition-colors cursor-pointer ${
                   item.isActive
                     ? "text-[#3B9EFF]"
                     : "text-[#A8B0BD] hover:text-[#F5F7FA]"
                 }`}
               >
                 <div className="relative">
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                   {item.isActive && (
                     <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#3B9EFF]" />
                   )}
                 </div>
-                <span className="text-[11px] font-medium tracking-tight">
+                <span className="text-[10px] sm:text-[11px] font-medium tracking-tight">
                   {item.label}
                 </span>
               </Link>

@@ -158,23 +158,23 @@ export function LibraryView({
   }, [initialItems]);
 
   const statusOptions = useMemo<DropdownOption[]>(() => [
-    { id: "all", label: "All", count: initialItems.length },
+    { id: "all", label: "All Status", shortLabel: "Status", count: initialItems.length },
     { id: "watching", label: "Watching", count: stats.watching, dot: "bg-[#3B9EFF] shadow-[0_0_8px_rgba(59,158,255,0.7)]" },
     { id: "completed", label: "Completed", count: stats.completed, dot: "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]" },
-    { id: "plan_to_watch", label: "Plan to Watch", dot: "bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.7)]" },
+    { id: "plan_to_watch", label: "Plan to Watch", shortLabel: "Plan", dot: "bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.7)]" },
     { id: "on_hold", label: "On Hold", dot: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.7)]" },
     { id: "dropped", label: "Dropped", dot: "bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.7)]" },
   ], [initialItems.length, stats.watching, stats.completed]);
 
   const formatOptions = useMemo<DropdownOption[]>(() => [
-    { id: "all", label: "All Formats" },
+    { id: "all", label: "All Formats", shortLabel: "Format" },
     { id: "movie", label: "Movies", icon: <Film className="w-3.5 h-3.5" /> },
     { id: "series", label: "TV Shows", icon: <Tv className="w-3.5 h-3.5" /> },
     { id: "anime", label: "Anime", icon: <Flame className="w-3.5 h-3.5" /> },
   ], []);
 
   const ratingOptions = useMemo<DropdownOption[]>(() => [
-    { id: "all", label: "All Ratings", count: initialItems.length },
+    { id: "all", label: "All Ratings", shortLabel: "Rating", count: initialItems.length },
     { id: "masterpiece", label: "Masterpiece", dot: "bg-[#F5C84B] shadow-[0_0_8px_rgba(245,200,75,0.7)]", count: tasteCounts.masterpiece, color: "text-[#F5C84B]" },
     { id: "great", label: "Great", dot: "bg-[#10B981] shadow-[0_0_8px_rgba(16,185,129,0.7)]", count: tasteCounts.great, color: "text-[#10B981]" },
     { id: "good", label: "Good", dot: "bg-[#3B9EFF] shadow-[0_0_8px_rgba(59,158,255,0.7)]", count: tasteCounts.good, color: "text-[#3B9EFF]" },
@@ -184,7 +184,7 @@ export function LibraryView({
   ], [initialItems.length, tasteCounts]);
 
   const genreOptions = useMemo<DropdownOption[]>(() => [
-    { id: "All", label: "All Genres" },
+    { id: "All", label: "All Genres", shortLabel: "Genre" },
     ...GENRES.filter((g) => g !== "All").map((g) => ({ id: g, label: g })),
   ], []);
 
@@ -426,9 +426,9 @@ export function LibraryView({
         </div>
 
         {/* Card Body: Overlapping Avatar, Identity, Bio & Actions */}
-        <div className="px-5 sm:px-8 pb-6 flex flex-col items-center text-center relative z-10">
+        <div className="px-4 sm:px-8 pb-5 sm:pb-6 flex flex-col items-center text-center relative z-10">
           {/* Circular Overlapping Avatar */}
-          <div className="relative -mt-14 sm:-mt-16 w-24 h-24 sm:w-28 sm:h-28 rounded-full ring-4 ring-[#151C27] sm:ring-[5px] bg-[#1A2332] shadow-2xl overflow-hidden flex items-center justify-center shrink-0 group">
+          <div className="relative -mt-12 sm:-mt-16 w-20 h-20 sm:w-28 sm:h-28 rounded-full ring-4 ring-[#151C27] sm:ring-[5px] bg-[#1A2332] shadow-2xl overflow-hidden flex items-center justify-center shrink-0 group">
             {currentUserState?.avatarUrl && !avatarError ? (
               <img
                 src={currentUserState.avatarUrl}
@@ -450,14 +450,14 @@ export function LibraryView({
                 className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer"
                 title="Change Avatar"
               >
-                <Pencil className="w-5 h-5" />
+                <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             )}
           </div>
 
           {/* 1. Display Name */}
-          <div className="flex items-center justify-center gap-2 mt-3.5 flex-wrap">
-            <h1 className="text-2xl sm:text-3xl font-black text-[#F5F7FA] tracking-tight">
+          <div className="flex items-center justify-center gap-2 mt-2.5 sm:mt-3.5 flex-wrap">
+            <h1 className="text-xl sm:text-3xl font-black text-[#F5F7FA] tracking-tight">
               {currentUserState?.displayName || currentUserState?.fullName || currentUserState?.username || "Personal Media Vault"}
             </h1>
           </div>
@@ -501,61 +501,61 @@ export function LibraryView({
 
           {/* 4. Action Buttons (Owner Only) */}
           {isOwner && (
-            <div className="flex items-center justify-center gap-2.5 mt-5 flex-wrap">
+            <div className="flex items-center justify-center gap-2 sm:gap-2.5 mt-3.5 sm:mt-5 flex-wrap">
               <button
                 type="button"
                 onClick={() => setIsEditProfileOpen(true)}
-                className="h-10 px-5 rounded-full bg-[#1D2734] hover:bg-[#253244] border border-white/[0.08] hover:border-white/[0.15] text-[#F5F7FA] text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer"
+                className="h-8.5 sm:h-10 px-3.5 sm:px-5 rounded-full bg-[#1D2734] hover:bg-[#253244] border border-white/[0.08] hover:border-white/[0.15] text-[#F5F7FA] text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5 sm:gap-2 transition-all active:scale-95 shadow-sm cursor-pointer"
               >
-                <Pencil className="w-3.5 h-3.5 text-[#A8B0BD]" />
+                <Pencil className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#A8B0BD]" />
                 <span>Edit Profile</span>
               </button>
 
               <Link
                 href="/settings"
-                className="h-10 px-4 rounded-full bg-[#1D2734] hover:bg-[#253244] border border-white/[0.08] hover:border-white/[0.15] text-[#A8B0BD] hover:text-[#F5F7FA] text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer"
+                className="h-8.5 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#1D2734] hover:bg-[#253244] border border-white/[0.08] hover:border-white/[0.15] text-[#A8B0BD] hover:text-[#F5F7FA] text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5 sm:gap-2 transition-all active:scale-95 shadow-sm cursor-pointer"
                 title="Settings"
               >
-                <Settings className="w-3.5 h-3.5" />
+                <Settings className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span>Settings</span>
               </Link>
 
               <button
                 type="button"
                 onClick={() => setIsQuickAddOpen(true)}
-                className="h-10 px-6 rounded-full bg-[#3B9EFF] hover:bg-[#2F8EEA] text-white text-xs sm:text-sm font-bold inline-flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-[#3B9EFF]/25 cursor-pointer"
+                className="h-8.5 sm:h-10 px-4 sm:px-6 rounded-full bg-[#3B9EFF] hover:bg-[#2F8EEA] text-white text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 sm:gap-2 transition-all active:scale-95 shadow-lg shadow-[#3B9EFF]/25 cursor-pointer"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>Add Media</span>
               </button>
             </div>
           )}
 
           {/* 5. 3-Column Stats Bar with Vertical Dividers */}
-          <div className="w-full mt-6 pt-5 border-t border-white/[0.06] grid grid-cols-3 divide-x divide-white/[0.08] text-center">
-            <div className="flex flex-col items-center justify-center px-2">
-              <span className="text-xl sm:text-2xl font-black text-[#F5F7FA] tracking-tight">
+          <div className="w-full mt-4 sm:mt-6 pt-3.5 sm:pt-5 border-t border-white/[0.06] grid grid-cols-3 divide-x divide-white/[0.08] text-center">
+            <div className="flex flex-col items-center justify-center px-1 sm:px-2">
+              <span className="text-lg sm:text-2xl font-black text-[#F5F7FA] tracking-tight">
                 {stats.total}
               </span>
-              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#6F7886] mt-0.5">
+              <span className="text-[9px] sm:text-xs font-bold uppercase tracking-wider text-[#6F7886] mt-0.5">
                 Tracked
               </span>
             </div>
 
-            <div className="flex flex-col items-center justify-center px-2">
-              <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight">
+            <div className="flex flex-col items-center justify-center px-1 sm:px-2">
+              <span className="text-lg sm:text-2xl font-black text-emerald-400 tracking-tight">
                 {stats.completed}
               </span>
-              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#6F7886] mt-0.5">
+              <span className="text-[9px] sm:text-xs font-bold uppercase tracking-wider text-[#6F7886] mt-0.5">
                 Completed
               </span>
             </div>
 
-            <div className="flex flex-col items-center justify-center px-2">
-              <span className="text-xl sm:text-2xl font-black text-[#3B9EFF] tracking-tight">
+            <div className="flex flex-col items-center justify-center px-1 sm:px-2">
+              <span className="text-lg sm:text-2xl font-black text-[#3B9EFF] tracking-tight">
                 {days}d {hours}h
               </span>
-              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#6F7886] mt-0.5">
+              <span className="text-[9px] sm:text-xs font-bold uppercase tracking-wider text-[#6F7886] mt-0.5">
                 Watch Time
               </span>
             </div>
@@ -564,61 +564,61 @@ export function LibraryView({
       </div>
 
       {/* 2. Key Metrics Bar (Desktop 4-col, Mobile 2-col) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-3.5 sm:p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[#3B9EFF]/15 text-[#3B9EFF] flex items-center justify-center shrink-0">
-            <Film className="w-5 h-5" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+        <div className="p-2.5 sm:p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-2.5 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#3B9EFF]/15 text-[#3B9EFF] flex items-center justify-center shrink-0">
+            <Film className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div className="min-w-0">
-            <div className="text-lg sm:text-xl font-bold text-[#F5F7FA] leading-none">
+            <div className="text-base sm:text-xl font-bold text-[#F5F7FA] leading-none">
               {stats.movies}
             </div>
-            <div className="text-[11px] font-medium text-[#A8B0BD] mt-1">
+            <div className="text-[10px] sm:text-[11px] font-medium text-[#A8B0BD] mt-0.5 sm:mt-1">
               Movies
             </div>
           </div>
         </div>
 
-        <div className="p-3.5 sm:p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[#A855F7]/15 text-[#A855F7] flex items-center justify-center shrink-0">
-            <Tv className="w-5 h-5" />
+        <div className="p-2.5 sm:p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-2.5 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#A855F7]/15 text-[#A855F7] flex items-center justify-center shrink-0">
+            <Tv className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div className="min-w-0">
-            <div className="text-lg sm:text-xl font-bold text-[#F5F7FA] leading-none">
+            <div className="text-base sm:text-xl font-bold text-[#F5F7FA] leading-none">
               {stats.series + stats.anime}
             </div>
-            <div className="text-[11px] font-medium text-[#A8B0BD] mt-1">
+            <div className="text-[10px] sm:text-[11px] font-medium text-[#A8B0BD] mt-0.5 sm:mt-1">
               Series &amp; Anime
             </div>
           </div>
         </div>
 
-        <div className="p-3.5 sm:p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[#F5C84B]/15 text-[#F5C84B] flex items-center justify-center shrink-0">
-            <Crown className="w-5 h-5 fill-[#F5C84B]/20" />
+        <div className="p-2.5 sm:p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-2.5 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#F5C84B]/15 text-[#F5C84B] flex items-center justify-center shrink-0">
+            <Crown className="w-4 h-4 sm:w-5 sm:h-5 fill-[#F5C84B]/20" />
           </div>
           <div className="min-w-0">
-            <div className="text-lg sm:text-xl font-bold text-[#F5C84B] leading-none">
+            <div className="text-base sm:text-xl font-bold text-[#F5C84B] leading-none">
               {tasteCounts.masterpiece}
             </div>
-            <div className="text-[11px] font-medium text-[#A8B0BD] mt-1">
+            <div className="text-[10px] sm:text-[11px] font-medium text-[#A8B0BD] mt-0.5 sm:mt-1">
               Masterpieces
             </div>
           </div>
         </div>
 
-        <div className="p-3.5 sm:p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[#22C55E]/15 text-[#22C55E] flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-5 h-5" />
+        <div className="p-2.5 sm:p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-2.5 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#22C55E]/15 text-[#22C55E] flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div className="min-w-0">
-            <div className="text-lg sm:text-xl font-bold text-[#F5F7FA] leading-none">
+            <div className="text-base sm:text-xl font-bold text-[#F5F7FA] leading-none">
               {stats.total > 0
                 ? `${Math.round((stats.completed / stats.total) * 100)}%`
                 : "0%"}
             </div>
-            <div className="text-[11px] font-medium text-[#A8B0BD] mt-1">
-              Completion Rate
+            <div className="text-[10px] sm:text-[11px] font-medium text-[#A8B0BD] mt-0.5 sm:mt-1">
+              Completion
             </div>
           </div>
         </div>
@@ -730,9 +730,9 @@ export function LibraryView({
             )}
 
             {/* Unified Search & Dropdown Filters Bar */}
-            <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5">
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 sm:gap-2.5">
               {/* Row 1 on Mobile: Status Dropdown + Search Input Inline */}
-              <div className="flex items-center gap-2 flex-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-1">
                 {/* Status Dropdown */}
                 <CustomDropdown
                   value={statusFilter}
@@ -741,20 +741,20 @@ export function LibraryView({
                   options={statusOptions}
                   triggerLabel={statusTriggerLabel}
                   align="left"
-                  className="shrink-0 w-[125px] sm:w-[140px]"
+                  className="shrink-0 w-[115px] sm:w-[140px]"
                   menuWidth="w-[185px]"
                   ariaLabel="Filter by watch status"
                 />
 
                 {/* Instant Client Search */}
                 <div className="relative flex-1">
-                  <Search className="w-4 h-4 text-[#6F7886] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#6F7886] absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={handleSearchChange}
-                    placeholder="Filter by title or genre..."
-                    className="w-full h-9 pl-9 pr-8 rounded-lg bg-[#151C27] border border-white/[0.08] text-xs text-[#F5F7FA] placeholder-[#6F7886] focus:outline-none focus:border-[#3B9EFF] transition-colors"
+                    placeholder="Filter title or genre..."
+                    className="w-full h-8 sm:h-9 pl-8 sm:pl-9 pr-7 sm:pr-8 rounded-xl bg-[#151C27] border border-white/[0.08] text-[11px] sm:text-xs text-[#F5F7FA] placeholder-[#6F7886] focus:outline-none focus:border-[#3B9EFF] transition-colors"
                   />
                   {searchQuery && (
                     <button
@@ -763,16 +763,16 @@ export function LibraryView({
                         setVisibleCount(12);
                         setSearchQuery("");
                       }}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6F7886] hover:text-white p-0.5"
+                      className="absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 text-[#6F7886] hover:text-white p-0.5"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </button>
                   )}
                 </div>
               </div>
 
               {/* 4 Compact Filter Dropdowns: 2x2 Grid on Mobile, 4 Columns on Tablet, Flex on Desktop */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:flex lg:items-center gap-2 w-full lg:w-auto shrink-0">
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:flex lg:items-center gap-1.5 sm:gap-2 w-full lg:w-auto shrink-0">
                 {/* 1. Format */}
                 <CustomDropdown
                   value={typeFilter}
@@ -856,7 +856,7 @@ export function LibraryView({
 
             {filteredItems.length > 0 ? (
               <>
-                <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4 transition-opacity duration-200 ${isFiltering ? "opacity-40" : "opacity-100"}`}>
+                <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5 sm:gap-4 transition-opacity duration-200 ${isFiltering ? "opacity-40" : "opacity-100"}`}>
                   {displayedItems.map((item) => (
                     <MediaCard
                       key={item.id}

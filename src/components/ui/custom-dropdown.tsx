@@ -6,6 +6,7 @@ import { ChevronDown, ArrowUpDown, Check, Loader2 } from "lucide-react";
 export interface DropdownOption {
   id: string;
   label: string;
+  shortLabel?: string;
   count?: number;
   dot?: string;
   icon?: React.ReactNode;
@@ -98,15 +99,22 @@ export function CustomDropdown({
 
         const MENU_HEIGHT = 205;
         // Default: opens downward. If no space below and more clearance above, open upward
-        setOpenUpward(spaceBelow < MENU_HEIGHT && spaceAbove > spaceBelow);
+        if (spaceBelow < MENU_HEIGHT && spaceAbove > spaceBelow) {
+          setOpenUpward(true);
+        } else {
+          setOpenUpward(false);
+        }
       }
     }
-    setIsOpen((prev) => !prev);
+    setIsOpen(!isOpen);
   };
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -134,8 +142,8 @@ export function CustomDropdown({
         onClick={handleToggle}
         aria-label={ariaLabel}
         aria-expanded={isOpen}
-        className={`w-full px-3 rounded-xl text-xs font-medium flex items-center justify-between gap-1.5 transition-all duration-150 cursor-pointer border select-none outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 ${
-          buttonClassName || "h-9"
+        className={`w-full px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-medium flex items-center justify-between gap-1 sm:gap-1.5 transition-all duration-150 cursor-pointer border select-none outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 ${
+          buttonClassName || "h-8 sm:h-9"
         } ${
           isLight
             ? isFiltered
@@ -150,21 +158,30 @@ export function CustomDropdown({
             : "bg-[#151C27] hover:bg-[#1A2330] border-white/[0.08] hover:border-white/[0.14] text-[#A8B0BD] hover:text-[#F5F7FA]"
         }`}
       >
-        <span className="flex items-center gap-1.5 truncate">
+        <span className="flex items-center gap-1 sm:gap-1.5 truncate min-w-0">
           {selectedOption?.dot && (
-            <span className={`w-2 h-2 rounded-full ${selectedOption.dot} shrink-0`} />
+            <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${selectedOption.dot} shrink-0`} />
           )}
           {selectedOption?.icon && (
             <span className={`shrink-0 ${isLight ? "text-blue-600" : "text-[#3B9EFF]"}`}>{selectedOption.icon}</span>
           )}
-          <span className="truncate">{displayLabel}</span>
+          <span className="truncate">
+            {selectedOption?.shortLabel ? (
+              <>
+                <span className="hidden sm:inline">{displayLabel}</span>
+                <span className="inline sm:hidden">{selectedOption.shortLabel}</span>
+              </>
+            ) : (
+              displayLabel
+            )}
+          </span>
         </span>
 
         {isLoading ? (
-          <Loader2 className={`w-3.5 h-3.5 shrink-0 animate-spin ${isLight ? "text-blue-600" : "text-[#3B9EFF]"}`} />
+          <Loader2 className={`w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 animate-spin ${isLight ? "text-blue-600" : "text-[#3B9EFF]"}`} />
         ) : suffixIcon === "sort" ? (
           <ArrowUpDown
-            className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+            className={`w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 transition-colors ${
               isLight
                 ? isFiltered || isOpen
                   ? "text-blue-600"
@@ -176,7 +193,7 @@ export function CustomDropdown({
           />
         ) : (
           <ChevronDown
-            className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
+            className={`w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 transition-transform duration-200 ${
               isOpen
                 ? isLight
                   ? "rotate-180 text-blue-600"

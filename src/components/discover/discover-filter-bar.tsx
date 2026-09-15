@@ -71,7 +71,8 @@ export function DiscoverFilterBar({
       {
         id: "all",
         label: "All Platforms",
-        icon: <Globe className="w-3.5 h-3.5 text-[#3B9EFF]" />,
+        shortLabel: "Platforms",
+        icon: <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#3B9EFF]" />,
       },
       ...OTT_PROVIDERS.map((provider) => ({
         id: provider.id,
@@ -80,7 +81,7 @@ export function DiscoverFilterBar({
           <img
             src={provider.logo}
             alt={provider.name}
-            className="w-4 h-4 rounded object-cover shrink-0"
+            className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded object-cover shrink-0"
             loading="lazy"
             onError={(e) => {
               e.currentTarget.style.display = "none";
@@ -98,7 +99,8 @@ export function DiscoverFilterBar({
       {
         id: "all",
         label: "All Genres",
-        icon: <Tag className="w-3.5 h-3.5 text-[#3B9EFF]" />,
+        shortLabel: "Genres",
+        icon: <Tag className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#3B9EFF]" />,
       },
       ...DISCOVER_GENRES.map((g) => ({
         id: g,
@@ -114,7 +116,8 @@ export function DiscoverFilterBar({
       {
         id: "all",
         label: "All Ratings",
-        icon: <Award className="w-3.5 h-3.5 text-[#3B9EFF]" />,
+        shortLabel: "Ratings",
+        icon: <Award className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#3B9EFF]" />,
       },
       {
         id: "masterpiece",
@@ -206,7 +209,7 @@ export function DiscoverFilterBar({
         {/* Left Section: Segmented Type Switcher + Dropdown Filters */}
         <div className="flex flex-col lg:flex-row lg:items-center gap-2.5 sm:gap-3 min-w-0">
           {/* 1. Media Type Tabs in unified segmented rail */}
-          <div className="inline-flex items-center p-1 rounded-xl bg-[#080C14]/90 border border-white/[0.06] shadow-inner overflow-x-auto no-scrollbar shrink-0">
+          <div className="inline-flex items-center p-0.5 sm:p-1 rounded-xl bg-[#080C14]/90 border border-white/[0.06] shadow-inner overflow-x-auto no-scrollbar shrink-0 max-w-full">
             {mediaTabs.map((tab) => {
               const isActive = currentType === tab.id;
               return (
@@ -214,7 +217,7 @@ export function DiscoverFilterBar({
                   key={tab.id}
                   type="button"
                   onClick={() => handleUpdateFilter("type", tab.id)}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-150 cursor-pointer select-none active:scale-95 outline-none focus:outline-none focus-visible:outline-none border ${
+                  className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-medium whitespace-nowrap transition-all duration-150 cursor-pointer select-none active:scale-95 outline-none focus:outline-none focus-visible:outline-none border ${
                     isActive
                       ? "bg-gradient-to-r from-[#3B9EFF] to-[#2563EB] text-white font-semibold border-transparent shadow-md shadow-[#3B9EFF]/25"
                       : "text-[#8E97A6] hover:text-[#F5F7FA] hover:bg-white/[0.04] border-transparent"
@@ -233,7 +236,7 @@ export function DiscoverFilterBar({
           <div className="hidden lg:block w-[1px] h-6 bg-white/[0.08] shrink-0" />
 
           {/* 2. Three Dropdowns (Platform, Genre, Rating) */}
-          <div className="grid grid-cols-3 lg:flex lg:items-center gap-2 w-full lg:w-auto">
+          <div className="grid grid-cols-3 lg:flex lg:items-center gap-1.5 sm:gap-2 w-full lg:w-auto">
             {/* Streaming Platform */}
             <CustomDropdown
               value={currentProvider}
@@ -241,7 +244,7 @@ export function DiscoverFilterBar({
               options={streamingOptions}
               align="left"
               className="w-full lg:w-[165px] xl:w-[185px] shrink-0 min-w-0"
-              buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30]"
+              buttonClassName="h-8 sm:h-9 px-1.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30]"
               menuWidth="w-[210px]"
               ariaLabel="Filter by streaming platform"
               isLoading={isPending}
@@ -254,7 +257,7 @@ export function DiscoverFilterBar({
               options={genreOptions}
               align="left"
               className="w-full lg:w-[150px] xl:w-[170px] shrink-0 min-w-0"
-              buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30]"
+              buttonClassName="h-8 sm:h-9 px-1.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30]"
               menuWidth="w-[190px]"
               ariaLabel="Filter by genre"
               isLoading={isPending}
@@ -267,7 +270,7 @@ export function DiscoverFilterBar({
               options={ratingOptions}
               align="right"
               className="w-full lg:w-[150px] xl:w-[170px] shrink-0 min-w-0"
-              buttonClassName="h-9 px-2.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30]"
+              buttonClassName="h-8 sm:h-9 px-1.5 sm:px-3 text-[11px] sm:text-xs rounded-xl bg-[#111724]/90 hover:bg-[#161F30]"
               menuWidth="w-[190px]"
               ariaLabel="Filter by rating"
               isLoading={isPending}

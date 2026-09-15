@@ -156,8 +156,8 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-50 bg-[#0F141D]/90 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_1px_8px_rgba(0,0,0,0.04)] h-16 sm:h-[70px] flex items-center">
-        <div className="w-full max-w-[1440px] mx-auto px-3.5 sm:px-5 md:px-6 lg:px-8 xl:px-12 flex items-center justify-between gap-2 sm:gap-4 lg:gap-6">
+      <header className="fixed top-0 left-0 w-full z-50 bg-[#0F141D]/90 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_1px_8px_rgba(0,0,0,0.04)] h-14 sm:h-16 lg:h-[70px] flex items-center">
+        <div className="w-full max-w-[1440px] mx-auto px-3 sm:px-5 md:px-6 lg:px-8 xl:px-12 flex items-center justify-between gap-1.5 sm:gap-4 lg:gap-6">
           {/* Left: Brand & Navigation Links */}
           <div className="flex items-center gap-3 sm:gap-4 md:gap-4 lg:gap-6 xl:gap-8 min-w-0">
             {/* Brand Logo & Badge */}
@@ -428,9 +428,9 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
               suppressHydrationWarning
               onClick={() => setIsMobileSearchOpen((prev) => !prev)}
               aria-label="Search"
-              className="md:hidden p-2 text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] rounded-lg transition-colors shrink-0 cursor-pointer"
+              className="md:hidden p-1.5 sm:p-2 text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330] rounded-lg transition-colors shrink-0 cursor-pointer"
             >
-              <Search className="w-5 h-5 block" />
+              <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5 block" />
             </button>
 
             {/* Notification Bell Dropdown */}
@@ -442,13 +442,13 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
                 href="/settings"
                 aria-label="Settings"
                 title="Settings"
-                className={`p-2 rounded-lg transition-colors shrink-0 cursor-pointer ${
+                className={`p-1.5 sm:p-2 rounded-lg transition-colors shrink-0 cursor-pointer ${
                   pathname.startsWith("/settings")
                     ? "text-[#3B9EFF] bg-[#1A2330]"
                     : "text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-[#1A2330]"
                 }`}
               >
-                <Settings className="w-5 h-5 block" />
+                <Settings className="w-4.5 h-4.5 sm:w-5 sm:h-5 block" />
               </Link>
             )}
 

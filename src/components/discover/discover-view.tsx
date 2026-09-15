@@ -346,27 +346,27 @@ export function DiscoverView({
                 const hasMore = cat.items.length > visibleCount;
 
                 return (
-                  <section key={cat.id} className="flex flex-col gap-3.5">
+                  <section key={cat.id} className="flex flex-col gap-2.5 sm:gap-3.5">
                     {/* Rating Category Header */}
-                    <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-                      <div className="flex items-center gap-2.5">
+                    <div className="flex items-center justify-between border-b border-white/[0.06] pb-2.5 sm:pb-3">
+                      <div className="flex items-center gap-2 sm:gap-2.5">
                         <div
-                          className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${cat.pillClass}`}
+                          className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${cat.pillClass}`}
                         >
                           {cat.icon}
                         </div>
                         <div className="flex flex-col">
-                          <div className="flex items-center gap-2">
-                            <h2 className="text-base sm:text-lg font-bold text-[#F5F7FA] tracking-tight">
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <h2 className="text-sm sm:text-lg font-bold text-[#F5F7FA] tracking-tight">
                               {cat.title}
                             </h2>
                             <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${cat.pillClass}`}
+                              className={`text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full border ${cat.pillClass}`}
                             >
                               {cat.items.length}
                             </span>
                           </div>
-                          <span className="text-[11px] sm:text-xs text-[#A8B0BD]">
+                          <span className="text-[10px] sm:text-xs text-[#A8B0BD]">
                             {cat.description}
                           </span>
                         </div>
@@ -374,7 +374,7 @@ export function DiscoverView({
                     </div>
 
                     {/* Media Cards Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5 sm:gap-4">
                       {displayedItems.map((item) => (
                         <MediaCard
                           key={item.id}

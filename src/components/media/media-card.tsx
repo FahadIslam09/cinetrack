@@ -371,8 +371,8 @@ export function MediaCard({
         badgeLabel ||
         (media.title.toLowerCase().includes("spider") ? "WATCHED" : "COMPLETED");
       return (
-        <div className="px-2.5 py-1 rounded-full bg-emerald-950/70 backdrop-blur-md border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34D399] shrink-0" />
+        <div className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-emerald-950/70 backdrop-blur-md border border-emerald-500/30 text-emerald-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap">
+          <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34D399] shrink-0" />
           <span>{label}</span>
         </div>
       );
@@ -380,8 +380,8 @@ export function MediaCard({
 
     if (localStatus === "watching") {
       return (
-        <div className="px-2.5 py-1 rounded-full bg-blue-950/70 backdrop-blur-md border border-blue-500/35 text-blue-400 text-[10px] font-bold uppercase tracking-wide shadow-lg flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_6px_#60A5FA] animate-pulse shrink-0" />
+        <div className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-blue-950/70 backdrop-blur-md border border-blue-500/35 text-blue-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-wide shadow-lg flex items-center gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap">
+          <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-400 shadow-[0_0_6px_#60A5FA] animate-pulse shrink-0" />
           <span>{badgeLabel || "WATCHING"}</span>
         </div>
       );
@@ -389,8 +389,8 @@ export function MediaCard({
 
     if (localStatus === "plan_to_watch") {
       return (
-        <div className="px-2.5 py-1 rounded-full bg-purple-950/70 backdrop-blur-md border border-purple-500/30 text-purple-300 text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
+        <div className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-purple-950/70 backdrop-blur-md border border-purple-500/30 text-purple-300 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap">
+          <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-purple-400 shrink-0" />
           <span>{badgeLabel || "WANT TO WATCH"}</span>
         </div>
       );
@@ -398,8 +398,8 @@ export function MediaCard({
 
     if (localStatus === "on_hold") {
       return (
-        <div className="px-2.5 py-1 rounded-full bg-amber-950/70 backdrop-blur-md border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+        <div className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-amber-950/70 backdrop-blur-md border border-amber-500/30 text-amber-300 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap">
+          <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-amber-400 shrink-0" />
           <span>{badgeLabel || "ON HOLD"}</span>
         </div>
       );
@@ -407,8 +407,8 @@ export function MediaCard({
 
     if (localStatus === "dropped") {
       return (
-        <div className="px-2.5 py-1 rounded-full bg-rose-950/70 backdrop-blur-md border border-rose-500/30 text-rose-300 text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-          <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
+        <div className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-rose-950/70 backdrop-blur-md border border-rose-500/30 text-rose-300 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap">
+          <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-rose-400 shrink-0" />
           <span>{badgeLabel || "DROPPED"}</span>
         </div>
       );
@@ -453,7 +453,7 @@ export function MediaCard({
 
           {/* Top-Left Status Pill Badge */}
           {localStatus && (
-            <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
+            <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-10 pointer-events-none">
               {renderTopLeftBadge()}
             </div>
           )}
@@ -461,7 +461,7 @@ export function MediaCard({
           {/* Top-Right Pill: For Watching Series, display Current Watch Position (S03 · E09); otherwise Star Rating Badge */}
           {isWatchingSeries ? (
             <div
-              className="absolute top-2.5 right-2.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#0B0F17]/85 backdrop-blur-md border border-white/10 text-[10px] sm:text-[11px] font-semibold text-[#E2E8F0] tracking-wider shadow-lg pointer-events-none flex items-center gap-1 font-mono z-10 select-none"
+              className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#0B0F17]/85 backdrop-blur-md border border-white/10 text-[9px] sm:text-[11px] font-semibold text-[#E2E8F0] tracking-wider shadow-lg pointer-events-none flex items-center gap-1 font-mono z-10 select-none"
               title={`Current Position: Season ${localSeason}, Episode ${localEpisode}`}
             >
               <span>{`S${String(localSeason).padStart(2, "0")} · E${String(
@@ -469,8 +469,8 @@ export function MediaCard({
               ).padStart(2, "0")}`}</span>
             </div>
           ) : (
-            <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-[#0B0F17]/80 backdrop-blur-md border border-white/10 text-[11px] font-bold text-[#F5F7FA] flex items-center gap-1 shadow-lg pointer-events-none z-10">
-              <Star className="w-3 h-3 fill-[#F5C84B] text-[#F5C84B]" />
+            <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#0B0F17]/80 backdrop-blur-md border border-white/10 text-[10px] sm:text-[11px] font-bold text-[#F5F7FA] flex items-center gap-0.5 sm:gap-1 shadow-lg pointer-events-none z-10">
+              <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-[#F5C84B] text-[#F5C84B]" />
               <span>{media.rating ? media.rating.toFixed(1) : "N/A"}</span>
             </div>
           )}
@@ -568,25 +568,25 @@ export function MediaCard({
         )}
 
         {/* Card Content Section */}
-        <div className="p-3 sm:p-3.5 flex flex-col justify-between flex-1 relative z-10 bg-[#121824]">
+        <div className="p-2.5 sm:p-3.5 flex flex-col justify-between flex-1 relative z-10 bg-[#121824]">
           <div>
             {/* Title */}
             <Link
               href={detailUrl}
-              className="font-bold text-sm sm:text-[15px] text-[#F5F7FA] group-hover:text-[#3B9EFF] transition-colors line-clamp-2 block leading-snug tracking-tight"
+              className="font-bold text-[13px] sm:text-[14px] lg:text-[15px] text-[#F5F7FA] group-hover:text-[#3B9EFF] transition-colors line-clamp-2 block leading-snug tracking-tight"
               title={media.title}
             >
               {media.title}
             </Link>
 
-            {/* Subtitle / Metadata */}
-            <div className="flex items-center gap-1.5 text-xs text-[#8B95A5] mt-1 font-medium">
-              <span className="text-[#A8B0BD]">{yearDisplay}</span>
-              <span className="text-white/20">•</span>
-              <span>{formatText}</span>
+            {/* Subtitle / Metadata (Never wrap year like 2022-2026 into two lines) */}
+            <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs text-[#8B95A5] mt-1 font-medium whitespace-nowrap overflow-hidden">
+              <span className="text-[#A8B0BD] shrink-0 whitespace-nowrap">{yearDisplay}</span>
+              <span className="text-white/20 shrink-0">•</span>
+              <span className="shrink-0 whitespace-nowrap">{formatText}</span>
               {extraMetadata && (
                 <>
-                  <span className="text-white/20">•</span>
+                  <span className="text-white/20 shrink-0">•</span>
                   <span className="truncate text-[#8B95A5]">{extraMetadata}</span>
                 </>
               )}
@@ -594,12 +594,12 @@ export function MediaCard({
           </div>
 
           {/* Bottom Row: Tag Badge & Right Action/Genre */}
-          <div className="mt-2.5 pt-2 border-t border-white/[0.04] flex items-center justify-between gap-2 text-xs">
+          <div className="mt-2 sm:mt-2.5 pt-1.5 sm:pt-2 border-t border-white/[0.04] flex items-center justify-between gap-1 sm:gap-2 text-xs">
             {bottomTag ? (
               <button
                 type="button"
                 onClick={(e) => requireAuthAndAct(e, () => setIsQuickAddOpen(true))}
-                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-80 active:scale-95 cursor-pointer shrink-0 whitespace-nowrap ${bottomTag.className}`}
+                className={`inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold uppercase tracking-wider transition-all hover:opacity-80 active:scale-95 cursor-pointer shrink-0 whitespace-nowrap ${bottomTag.className}`}
                 title="Click to rate or edit"
               >
                 {bottomTag.isStar && <Star className="w-2.5 h-2.5 fill-current shrink-0" />}
@@ -612,7 +612,7 @@ export function MediaCard({
               <span />
             )}
 
-            <span className="text-[11px] text-[#6F7886] font-medium tracking-wide truncate max-w-[55%] text-right">
+            <span className="text-[10px] sm:text-[11px] text-[#6F7886] font-medium tracking-wide truncate max-w-[45%] text-right">
               {bottomRightText}
             </span>
           </div>

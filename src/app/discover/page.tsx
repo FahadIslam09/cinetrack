@@ -213,10 +213,10 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
     <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D]">
       <AppHeader user={userProp} />
 
-      <main className="flex-1 max-w-[834px] lg:max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-12 pt-20 sm:pt-24 pb-24 md:pb-12 flex flex-col gap-6">
+      <main className="flex-1 max-w-[1440px] mx-auto w-full px-3.5 sm:px-6 lg:px-12 pt-18 sm:pt-24 pb-24 md:pb-12 flex flex-col gap-4 sm:gap-6">
         {/* Header Title & Subtitle */}
-        <div className="flex flex-col gap-1">
-          <h1 className="font-black text-2xl sm:text-3xl lg:text-4xl text-[#F5F7FA] tracking-tight">
+        <div className="flex flex-col gap-0.5 sm:gap-1">
+          <h1 className="font-black text-xl sm:text-3xl lg:text-4xl text-[#F5F7FA] tracking-tight">
             Discover
           </h1>
           <p className="text-xs sm:text-sm text-[#8E97A6] max-w-xl leading-relaxed">
