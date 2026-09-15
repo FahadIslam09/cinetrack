@@ -274,6 +274,7 @@ export function LandingView() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [claimUsername, setClaimUsername] = useState("");
   const [copiedProfile, setCopiedProfile] = useState(false);
+  const [copiedStep3, setCopiedStep3] = useState(false);
 
   const currentCategoryMovies =
     HIGHLIGHT_MOVIES_BY_CATEGORY[activeCategory] || HIGHLIGHT_MOVIES_BY_CATEGORY.all;
@@ -282,6 +283,13 @@ export function LandingView() {
     navigator.clipboard.writeText("https://cinetrack.xyz/@rifat");
     setCopiedProfile(true);
     setTimeout(() => setCopiedProfile(false), 2500);
+  };
+
+  const handleCopyStep3 = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText("https://cinetrack.xyz/@you");
+    setCopiedStep3(true);
+    setTimeout(() => setCopiedStep3(false), 2000);
   };
 
   const handleClaimSubmit = (e: React.FormEvent) => {
@@ -436,7 +444,7 @@ export function LandingView() {
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-3">
                 <div>
                   <div className="text-[#3B9EFF] text-[11px] font-bold tracking-wider uppercase mb-1">
-                    Architecture
+                    The Experience
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA]">
                     How It Works in 3 Simple Steps
@@ -444,7 +452,7 @@ export function LandingView() {
                 </div>
                 <p className="text-xs sm:text-sm text-[#A8B0BD] max-w-md leading-relaxed">
                   Built for film lovers who take pride in their watchlists and want zero friction
-                  when recommending to others.
+                  when recommending cinema to others.
                 </p>
               </div>
             </ScrollReveal>
@@ -452,111 +460,228 @@ export function LandingView() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {/* Step 01 */}
               <ScrollReveal delay={100} distance={28} className="h-full">
-                <div className="bg-gradient-to-b from-[#1D2734] to-[#151D28] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06] hover:border-[#3B9EFF]/30 hover:shadow-[0_8px_30px_rgba(59,158,255,0.08)] transition-all duration-300 h-full">
+                <div className="bg-gradient-to-b from-[#1D2734] to-[#151D28] rounded-xl p-5 sm:p-6 flex flex-col shadow-sm border border-white/[0.06] hover:border-[#3B9EFF]/30 hover:shadow-[0_8px_30px_rgba(59,158,255,0.08)] transition-all duration-300 h-full">
                   <div>
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-2.5">
                       <h3 className="font-bold text-sm text-[#F5F7FA]">1. Log What You Watch</h3>
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1B2029] text-[#A8B0BD]">
                         01
                       </span>
                     </div>
-                    <p className="text-xs text-[#A8B0BD] mb-5 leading-relaxed">
-                      Rate titles 1-10, tag by emotional vibe (Hilarious, Mind-Bending, Cozy), and
-                      jot 1-line spoiler-free curator notes.
+                    <p className="text-xs text-[#A8B0BD] mb-4 leading-relaxed">
+                      Track films, series &amp; anime in one tap. Set your personal tier (★ Masterpiece, Great, Good) and jot 1-line curator notes.
                     </p>
                   </div>
 
-                  {/* Mini Mock Log */}
-                  <div className="bg-[#090E17] p-3.5 rounded-lg border border-white/[0.06]">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-semibold text-[#F5F7FA] truncate">
-                        Superbad (2007)
-                      </span>
-                      <span className="text-xs font-bold text-[#F5C84B] flex items-center gap-0.5">
-                        <Star className="w-3 h-3 fill-[#F5C84B]" />
-                        <span>8.8</span>
-                      </span>
+                  {/* Mini Mock Log with Poster Thumbnail & Masterpiece Badge */}
+                  <div className="bg-[#090E17] p-3.5 rounded-xl border border-white/[0.06] flex flex-col gap-2.5 mt-auto">
+                    <div className="flex items-center justify-between text-[10px] font-bold text-[#6F7886] uppercase tracking-wide">
+                      <span>Recent Log</span>
+                      <span className="text-[#3B9EFF] font-semibold">Just Added</span>
                     </div>
-                    <div className="inline-flex items-center px-2 py-0.5 rounded bg-[#1B2029] text-[10px] font-semibold text-[#3B9EFF] mb-1.5">
-                      😂 Hilarious &amp; Feel-Good
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-16 rounded bg-[#161E2C] shrink-0 overflow-hidden shadow-sm border border-white/[0.06]">
+                        <img
+                          src="https://image.tmdb.org/t/p/w500/tCZFfYTIwrR7n94J6G14Y4hAFU6.jpg"
+                          alt="Death Note"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0 flex flex-col gap-1">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-xs font-bold text-[#F5F7FA] truncate">
+                            Death Note
+                          </span>
+                          <span className="text-[10px] font-mono text-[#6F7886] shrink-0">
+                            2006
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#F5C84B]/10 border border-[#F5C84B]/25 text-[#F5C84B] text-[9px] font-extrabold uppercase tracking-wide">
+                            <Star className="w-2.5 h-2.5 fill-[#F5C84B]" />
+                            <span>MASTERPIECE</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#22C55E] text-[9px] font-bold uppercase tracking-wider">
+                            <Check className="w-2.5 h-2.5" />
+                            <span>LOGGED</span>
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-[#A8B0BD] italic truncate">
+                          &ldquo;Peak psychological battle of wits.&rdquo;
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-[11px] text-[#A8B0BD] italic">
-                      &ldquo;Funniest high-school chaos ever written.&rdquo;
-                    </p>
+                    <div className="flex items-center justify-between pt-2 border-t border-white/[0.04] text-[10px] text-[#6F7886]">
+                      <span>Anime Series • Madhouse</span>
+                      <span className="text-[#F5C84B] font-semibold">Tier 1 • Essential</span>
+                    </div>
                   </div>
                 </div>
               </ScrollReveal>
 
               {/* Step 02 */}
               <ScrollReveal delay={200} distance={28} className="h-full">
-                <div className="bg-gradient-to-b from-[#1D2734] to-[#151D28] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06] hover:border-[#3B9EFF]/30 hover:shadow-[0_8px_30px_rgba(59,158,255,0.08)] transition-all duration-300 h-full">
+                <div className="bg-gradient-to-b from-[#1D2734] to-[#151D28] rounded-xl p-5 sm:p-6 flex flex-col shadow-sm border border-white/[0.06] hover:border-[#3B9EFF]/30 hover:shadow-[0_8px_30px_rgba(59,158,255,0.08)] transition-all duration-300 h-full">
                   <div>
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-2.5">
                       <h3 className="font-bold text-sm text-[#F5F7FA]">2. Friend Asks for a Pick</h3>
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1B2029] text-[#A8B0BD]">
                         02
                       </span>
                     </div>
-                    <p className="text-xs text-[#A8B0BD] mb-5 leading-relaxed">
-                      Friend asks: &ldquo;Got any funny movie for tonight?&rdquo; Filter your catalog
-                      by vibe &amp; their streaming apps in 2 clicks.
+                    <p className="text-xs text-[#A8B0BD] mb-4 leading-relaxed">
+                      Friend asks: &ldquo;Got any sci-fi epic on Netflix?&rdquo; Filter your personal vault by vibe &amp; platform in 2 clicks.
                     </p>
                   </div>
 
-                  {/* Mini Mock Vibe Toggle */}
-                  <div className="bg-[#090E17] p-3.5 rounded-lg border border-white/[0.06]">
-                    <div className="flex items-center justify-between text-[10px] font-bold text-[#6F7886] mb-2 uppercase tracking-wide">
-                      <span>Filter Query</span>
-                      <span className="text-[#22C55E]">4 Matched</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      <span className="inline-flex items-center gap-1 bg-[#3B9EFF]/20 text-[#3B9EFF] px-2 py-0.5 rounded text-[11px] font-semibold">
-                        <span>😂</span>
-                        <span>Hilarious</span>
+                  {/* Mini Mock Vibe & Filter Query */}
+                  <div className="bg-[#090E17] p-3.5 rounded-xl border border-white/[0.06] flex flex-col gap-2.5 mt-auto">
+                    <div className="flex items-center justify-between text-[10px] font-bold text-[#6F7886] uppercase tracking-wide">
+                      <span>Vault Filter</span>
+                      <span className="text-[#22C55E] flex items-center gap-1 font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                        3 Matched
                       </span>
-                      <span className="inline-flex items-center gap-1 bg-[#1B2029] text-[#A8B0BD] px-2 py-0.5 rounded text-[11px] font-semibold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#F43F5E]" />
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="inline-flex items-center gap-1 bg-[#3B9EFF]/15 border border-[#3B9EFF]/30 text-[#60A5FA] px-2 py-0.5 rounded-md text-[10px] font-bold">
+                        <span>🌌 Sci-Fi Epic</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 bg-[#1A2330] border border-white/[0.08] text-[#E2E8F0] px-2 py-0.5 rounded-md text-[10px] font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#E50914]" />
                         <span>Netflix</span>
                       </span>
+                      <span className="inline-flex items-center gap-1 bg-[#F5C84B]/10 border border-[#F5C84B]/20 text-[#F5C84B] px-2 py-0.5 rounded-md text-[10px] font-bold">
+                        <span>★ Masterpieces</span>
+                      </span>
                     </div>
-                    <div className="text-[10px] text-[#6F7886] flex items-center gap-1 font-medium">
-                      <Zap className="w-3 h-3 text-[#F5C84B]" />
-                      <span>Ready to dispatch instantly</span>
+
+                    {/* Matched Movie Result Card */}
+                    <div className="bg-[#121824] p-2.5 rounded-lg border border-white/[0.08] flex items-center gap-3">
+                      <div className="w-10 h-14 rounded bg-[#161E2C] shrink-0 overflow-hidden shadow-sm border border-white/[0.08]">
+                        <img
+                          src="https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg"
+                          alt="Interstellar"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0 flex flex-col gap-1">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-xs font-bold text-[#F5F7FA] truncate">
+                            Interstellar
+                          </span>
+                          <span className="text-[10px] font-mono text-[#6F7886] shrink-0">
+                            2014
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#F5C84B]/10 border border-[#F5C84B]/20 text-[#F5C84B] text-[9px] font-bold uppercase tracking-wider">
+                            <Star className="w-2.5 h-2.5 fill-[#F5C84B]" />
+                            <span>8.9 TMDb</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#22C55E] text-[9px] font-bold uppercase tracking-wider">
+                            <span>98% MATCH</span>
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-[#A8B0BD] truncate">
+                          Sci-Fi Epic • Christopher Nolan • On Netflix
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-white/[0.04] text-[10px]">
+                      <div className="flex items-center gap-1 text-[#6F7886] font-medium">
+                        <Zap className="w-3 h-3 text-[#F5C84B]" />
+                        <span>Filtered in 0.02s</span>
+                      </div>
+                      <span className="text-[#3B9EFF] font-semibold">Instant Pick</span>
                     </div>
                   </div>
                 </div>
               </ScrollReveal>
 
-              {/* Step 03 */}
+              {/* Step 03 - Upgraded Curator Share Card */}
               <ScrollReveal delay={300} distance={28} className="h-full">
-                <div className="bg-gradient-to-b from-[#1D2734] to-[#151D28] rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-sm border border-white/[0.06] hover:border-[#3B9EFF]/30 hover:shadow-[0_8px_30px_rgba(59,158,255,0.08)] transition-all duration-300 h-full">
+                <div className="bg-gradient-to-b from-[#1D2734] to-[#151D28] rounded-xl p-5 sm:p-6 flex flex-col shadow-sm border border-white/[0.06] hover:border-[#3B9EFF]/30 hover:shadow-[0_8px_30px_rgba(59,158,255,0.08)] transition-all duration-300 h-full">
                   <div>
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-2.5">
                       <h3 className="font-bold text-sm text-[#F5F7FA]">3. Share Instantly</h3>
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1B2029] text-[#A8B0BD]">
                         03
                       </span>
                     </div>
-                    <p className="text-xs text-[#A8B0BD] mb-5 leading-relaxed">
-                      Copy a formatted text bundle directly into WhatsApp/iMessage, or send your
-                      clean public profile link{" "}
+                    <p className="text-xs text-[#A8B0BD] mb-4 leading-relaxed">
+                      No messy text lists. Dispatch your curated film card or share your clean public profile{" "}
                       <code className="text-[#3B9EFF] font-mono text-[11px]">cinetrack.xyz/@you</code>.
                     </p>
                   </div>
 
-                  {/* Mini Mock Message Preview */}
-                  <div className="bg-[#090E17] p-3.5 rounded-lg border border-white/[0.06]">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#6F7886] mb-1.5 uppercase">
-                      <Send className="w-3 h-3 text-[#22C55E]" />
-                      <span>WhatsApp Preview</span>
+                  {/* Mini CineTrack Curator Share Card */}
+                  <div className="bg-[#090E17] p-3.5 rounded-xl border border-white/[0.06] flex flex-col gap-2.5 mt-auto">
+                    {/* Header with avatar & handle */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#3B9EFF] to-blue-600 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
+                          Y
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-[11px] font-bold text-[#F5F7FA]">@you</span>
+                          <CheckCircle2 className="w-3 h-3 text-[#3B9EFF]" />
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-bold text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                        3 Picks Ready
+                      </span>
                     </div>
-                    <div className="bg-[#1A2330] p-2.5 rounded text-[11px] text-[#A8B0BD] leading-snug">
-                      <p className="text-[#F5F7FA] font-bold mb-1">
-                        Hey! 3 funny movie picks from my CineTrack:
-                      </p>
-                      <p className="truncate">1. Superbad (★ 8.8) • Netflix</p>
-                      <p className="truncate">2. What We Do in the Shadows (★ 8.8)...</p>
+
+                    {/* 3 Mini Overlapping Fan Posters with guaranteed working URLs */}
+                    <div className="flex items-center justify-center gap-2 py-0.5">
+                      <div className="w-12 h-16 rounded bg-[#1A2330] overflow-hidden shadow-md border border-white/10 -rotate-3 hover:rotate-0 transition-transform">
+                        <img
+                          src="https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg"
+                          alt="Oppenheimer"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="w-13 h-18 rounded bg-[#1A2330] overflow-hidden shadow-lg border border-[#3B9EFF]/40 z-10 scale-105">
+                        <img
+                          src="https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg"
+                          alt="Dune 2"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="w-12 h-16 rounded bg-[#1A2330] overflow-hidden shadow-md border border-white/10 rotate-3 hover:rotate-0 transition-transform">
+                        <img
+                          src="https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg"
+                          alt="Parasite"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     </div>
+
+                    {/* Interactive Copy Button */}
+                    <button
+                      type="button"
+                      onClick={handleCopyStep3}
+                      className="w-full h-7 px-2.5 rounded-md bg-[#1A2330] hover:bg-[#222E3F] text-[10px] font-semibold text-[#CBD5E1] hover:text-white border border-white/[0.08] hover:border-[#3B9EFF]/40 flex items-center justify-between transition-all active:scale-98 cursor-pointer select-none"
+                    >
+                      <span className="font-mono text-[#8B95A5] truncate">
+                        cinetrack.xyz/@you
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-[#3B9EFF] font-bold shrink-0 ml-1.5">
+                        {copiedStep3 ? (
+                          <>
+                            <Check className="w-3 h-3 text-[#22C55E]" />
+                            <span className="text-[#22C55E]">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            <span>Copy Link</span>
+                          </>
+                        )}
+                      </span>
+                    </button>
                   </div>
                 </div>
               </ScrollReveal>
