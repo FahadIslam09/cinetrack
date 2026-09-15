@@ -275,14 +275,23 @@ export function HeaderSearch({ isMobileOpen, onCloseMobile }: HeaderSearchProps)
                     {profile.avatarUrl ? (
                       <img
                         src={profile.avatarUrl}
-                        alt={profile.username}
+                        alt=""
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.classList.remove("hidden");
+                        }}
                         className="w-8 h-8 rounded-full object-cover shrink-0 border border-white/10"
                       />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-[#3B9EFF]/20 text-[#3B9EFF] flex items-center justify-center font-bold text-xs shrink-0 border border-[#3B9EFF]/30">
-                        {(profile.fullName || profile.username).slice(0, 2).toUpperCase()}
-                      </div>
-                    )}
+                    ) : null}
+                    <div
+                      className={`w-8 h-8 rounded-full bg-[#3B9EFF]/20 text-[#3B9EFF] flex items-center justify-center font-bold text-xs shrink-0 border border-[#3B9EFF]/30 ${
+                        profile.avatarUrl ? "hidden" : "flex"
+                      }`}
+                    >
+                      {(profile.fullName || profile.username).slice(0, 2).toUpperCase()}
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-xs font-semibold text-[#F5F7FA] group-hover:text-[#3B9EFF] transition-colors truncate">
                         {profile.fullName || profile.username}

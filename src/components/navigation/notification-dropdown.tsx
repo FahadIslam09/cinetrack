@@ -36,6 +36,42 @@ function formatRelativeTime(isoString: string): string {
   }).format(date);
 }
 
+function NotificationAvatar({
+  avatarUrl,
+  name,
+  type,
+}: {
+  avatarUrl?: string | null;
+  name?: string;
+  type?: string;
+}) {
+  const [imgError, setImgError] = useState(false);
+  const initial = (name?.trim() || "U").charAt(0).toUpperCase();
+
+  return (
+    <div className="relative shrink-0 mt-0.5">
+      {avatarUrl && !imgError ? (
+        <img
+          src={avatarUrl}
+          alt=""
+          referrerPolicy="no-referrer"
+          onError={() => setImgError(true)}
+          className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10 bg-[#1A2330]"
+        />
+      ) : (
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#3B9EFF]/20 to-[#8B5CF6]/20 text-[#3B9EFF] flex items-center justify-center text-xs font-bold ring-1 ring-white/10 select-none">
+          {initial}
+        </div>
+      )}
+      {type === "review_reaction" && (
+        <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[#121824] flex items-center justify-center text-rose-400 ring-1 ring-white/10 shadow-sm">
+          <Heart className="w-2.5 h-2.5 fill-rose-500 text-rose-500" />
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function NotificationDropdown({
   currentUser,
 }: {
@@ -209,24 +245,11 @@ export function NotificationDropdown({
                 }`}
               >
                 {/* Actor Avatar / Icon */}
-                <div className="relative shrink-0 mt-0.5">
-                  {item.actor?.avatarUrl ? (
-                    <img
-                      src={item.actor.avatarUrl}
-                      alt={item.actor.name}
-                      className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10 bg-[#1A2330]"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-rose-500/15 text-rose-400 flex items-center justify-center ring-1 ring-rose-500/25">
-                      <Heart className="w-4 h-4 fill-rose-500/30 text-rose-400" />
-                    </div>
-                  )}
-                  {item.type === "review_reaction" && item.actor?.avatarUrl && (
-                    <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[#121824] flex items-center justify-center text-rose-400 ring-1 ring-white/10">
-                      <Heart className="w-2.5 h-2.5 fill-rose-500 text-rose-500" />
-                    </span>
-                  )}
-                </div>
+                <NotificationAvatar
+                  avatarUrl={item.actor?.avatarUrl}
+                  name={item.actor?.name}
+                  type={item.type}
+                />
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
