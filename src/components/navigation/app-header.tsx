@@ -157,23 +157,23 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
   return (
     <>
       <header className="fixed top-0 left-0 w-full z-50 bg-[#0F141D]/90 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_1px_8px_rgba(0,0,0,0.04)] h-16 sm:h-[70px] flex items-center">
-        <div className="w-full max-w-[834px] lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-3 sm:gap-6">
+        <div className="w-full max-w-[1440px] mx-auto px-3.5 sm:px-5 md:px-6 lg:px-8 xl:px-12 flex items-center justify-between gap-2 sm:gap-4 lg:gap-6">
           {/* Left: Brand & Navigation Links */}
-          <div className="flex items-center gap-6 lg:gap-8 min-w-0">
+          <div className="flex items-center gap-3 sm:gap-4 md:gap-4 lg:gap-6 xl:gap-8 min-w-0">
             {/* Brand Logo & Badge */}
             <Link
               href="/"
-              className="flex items-center gap-2.5 shrink-0 group focus:outline-none"
+              className="flex items-center gap-2 sm:gap-2.5 shrink-0 group focus:outline-none"
             >
-              <LogoIcon className="w-7 h-7" size={28} priority />
-              <span className="font-bold text-lg tracking-tight text-[#F5F7FA]">
+              <LogoIcon className="w-6 h-6 sm:w-7 sm:h-7" size={28} priority />
+              <span className="font-bold text-base sm:text-lg tracking-tight text-[#F5F7FA]">
                 Cine<span className="text-[#3B9EFF]">Track</span>
               </span>
             </Link>
 
             {/* Main Navigation Menu Links */}
             <nav
-              className="hidden md:flex items-center gap-3 lg:gap-6 shrink-0 text-[13px] lg:text-[14px]"
+              className="hidden md:flex items-center gap-2 md:gap-2.5 lg:gap-4 xl:gap-6 shrink-0 text-xs md:text-[13px] lg:text-[13px] xl:text-[14px]"
               aria-label="Main Navigation"
             >
               <Link
@@ -403,22 +403,22 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
           </div>
 
           {/* Right: Search Bar & Actions */}
-          <div className="flex items-center gap-2.5 sm:gap-3 lg:gap-4 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 xl:gap-4 shrink-0">
             {/* Search Input for Desktop / Tablet & Mobile Overlay */}
             <HeaderSearch
               isMobileOpen={isMobileSearchOpen}
               onCloseMobile={() => setIsMobileSearchOpen(false)}
             />
 
-            {/* Quick Add Button - Hidden on mobile and iPad Mini */}
+            {/* Quick Add Button */}
             <button
               type="button"
               suppressHydrationWarning
               onClick={handleQuickAdd}
-              className="hidden md:inline-flex h-9 px-3 sm:px-3.5 rounded-lg bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs sm:text-[13px] items-center gap-1.5 transition-colors shadow-sm shrink-0 cursor-pointer"
+              className="hidden md:inline-flex h-8 lg:h-9 px-2.5 lg:px-3.5 rounded-lg bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs lg:text-[13px] items-center gap-1 lg:gap-1.5 transition-colors shadow-sm shrink-0 cursor-pointer"
               title="Add to Library"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
               <span className="whitespace-nowrap">Add</span>
             </button>
 

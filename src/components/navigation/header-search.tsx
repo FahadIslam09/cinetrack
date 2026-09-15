@@ -192,7 +192,7 @@ export function HeaderSearch({ isMobileOpen, onCloseMobile }: HeaderSearchProps)
       {/* 2. Tablet Search Box (768px - 1023px) */}
       <form
         onSubmit={handleSubmit}
-        className="relative hidden md:flex lg:hidden items-center w-36 md:w-44"
+        className="relative hidden md:flex lg:hidden items-center w-28 sm:w-32 md:w-36 transition-all duration-200 focus-within:w-44 shrink-0"
       >
         <Search className="w-3.5 h-3.5 text-[#6F7886] absolute left-2.5 pointer-events-none" />
         <input
@@ -216,10 +216,10 @@ export function HeaderSearch({ isMobileOpen, onCloseMobile }: HeaderSearchProps)
         ) : null}
       </form>
 
-      {/* 3. Desktop Search Bar (≥ 1024px) */}
+      {/* 3. Desktop / iPad Pro Search Bar (≥ 1024px) */}
       <form
         onSubmit={handleSubmit}
-        className="relative hidden lg:block w-[280px] xl:w-[320px]"
+        className="relative hidden lg:block w-44 xl:w-72 2xl:w-80 transition-all duration-200 focus-within:w-56 xl:focus-within:w-72 shrink-0"
       >
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#6F7886] pointer-events-none" />
         <input
@@ -228,8 +228,8 @@ export function HeaderSearch({ isMobileOpen, onCloseMobile }: HeaderSearchProps)
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
-          placeholder="Search movies, TV shows, anime, users..."
-          className="w-full h-9 pl-9 pr-14 bg-[#1A2330]/70 border border-white/[0.06] hover:border-white/[0.12] focus:border-[#3B9EFF] rounded-lg text-[#F5F7FA] text-[13px] placeholder:text-[#6F7886] focus:outline-none transition-colors"
+          placeholder="Search movies, TV, users..."
+          className="w-full h-9 pl-9 pr-12 xl:pr-14 bg-[#1A2330]/70 border border-white/[0.06] hover:border-white/[0.12] focus:border-[#3B9EFF] rounded-lg text-[#F5F7FA] text-xs xl:text-[13px] placeholder:text-[#6F7886] focus:outline-none transition-colors"
         />
         {isLoading ? (
           <Loader2 className="w-4 h-4 text-[#3B9EFF] animate-spin absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -237,12 +237,12 @@ export function HeaderSearch({ isMobileOpen, onCloseMobile }: HeaderSearchProps)
           <button
             type="button"
             onClick={() => setSearchQuery("")}
-            className="absolute right-8 top-1/2 -translate-y-1/2 text-[#6F7886] hover:text-white p-0.5 cursor-pointer"
+            className="absolute right-7 xl:right-8 top-1/2 -translate-y-1/2 text-[#6F7886] hover:text-white p-0.5 cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
         ) : (
-          <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-semibold text-[#6F7886] bg-[#1B2029] rounded border border-white/[0.06] pointer-events-none select-none">
+          <kbd className="hidden xl:inline-block absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-semibold text-[#6F7886] bg-[#1B2029] rounded border border-white/[0.06] pointer-events-none select-none">
             ⌘K
           </kbd>
         )}
