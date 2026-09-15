@@ -27,8 +27,6 @@ import {
   ChevronRight,
   Compass,
   ArrowUpRight,
-  Menu,
-  X,
 } from "lucide-react";
 import { LogoIcon } from "@/components/ui/logo-icon";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
@@ -369,78 +367,113 @@ export function LandingView() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
-              className="md:hidden p-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-[#CBD5E1] hover:text-white transition-colors cursor-pointer"
-              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              className="md:hidden relative w-9 h-9 flex flex-col items-center justify-center rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-[#CBD5E1] hover:text-white transition-colors cursor-pointer group select-none"
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              <div className="w-4 h-3.5 flex flex-col justify-between items-center relative pointer-events-none">
+                <span
+                  className={`w-4 h-[2px] bg-current rounded-full transition-all duration-300 ease-in-out transform origin-center ${
+                    mobileMenuOpen
+                      ? "rotate-45 translate-y-[6px]"
+                      : "rotate-0 translate-y-0"
+                  }`}
+                />
+                <span
+                  className={`w-4 h-[2px] bg-current rounded-full transition-all duration-200 ease-in-out ${
+                    mobileMenuOpen
+                      ? "opacity-0 scale-x-0"
+                      : "opacity-100 scale-x-100"
+                  }`}
+                />
+                <span
+                  className={`w-4 h-[2px] bg-current rounded-full transition-all duration-300 ease-in-out transform origin-center ${
+                    mobileMenuOpen
+                      ? "-rotate-45 -translate-y-[6px]"
+                      : "rotate-0 translate-y-0"
+                  }`}
+                />
+              </div>
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation Dropdown Drawer */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-white/[0.06] bg-[#0F141D]/95 backdrop-blur-2xl px-5 py-4 flex flex-col gap-3 shadow-2xl">
+        {/* Mobile Navigation Dropdown Drawer with Smooth Bidirectional Open / Close */}
+        <div
+          className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out border-b bg-[#0F141D]/95 backdrop-blur-2xl shadow-2xl ${
+            mobileMenuOpen
+              ? "max-h-[460px] opacity-100 border-white/[0.08] pointer-events-auto"
+              : "max-h-0 opacity-0 border-transparent pointer-events-none"
+          }`}
+        >
+          <div
+            className={`px-5 py-4 flex flex-col gap-3 transition-all duration-300 ease-out ${
+              mobileMenuOpen
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-3 opacity-0"
+            }`}
+          >
             <nav className="flex flex-col gap-1 text-sm font-medium text-[#A8B0BD]">
               <Link
                 href="/discover"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 py-2 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors"
+                className="flex items-center gap-2.5 py-2.5 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors group"
               >
-                <Compass className="w-4 h-4 text-[#3B9EFF]" />
-                <span>Discover</span>
+                <Compass className="w-4 h-4 text-[#3B9EFF] transition-transform duration-200 group-hover:scale-110" />
+                <span className="font-semibold">Discover</span>
               </Link>
               <Link
                 href="/search"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 py-2 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors"
+                className="flex items-center gap-2.5 py-2.5 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors group"
               >
-                <Search className="w-4 h-4 text-[#3B9EFF]" />
-                <span>Search</span>
+                <Search className="w-4 h-4 text-[#3B9EFF] transition-transform duration-200 group-hover:scale-110" />
+                <span className="font-semibold">Search</span>
               </Link>
               <a
                 href="#demo-section"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 py-2 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors"
+                className="flex items-center gap-2.5 py-2.5 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors group"
               >
-                <Star className="w-4 h-4 text-[#F5C84B]" />
-                <span>Trending Highlights</span>
+                <Star className="w-4 h-4 text-[#F5C84B] transition-transform duration-200 group-hover:scale-110" />
+                <span className="font-semibold">Trending Highlights</span>
               </a>
               <a
                 href="#how-it-works"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 py-2 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors"
+                className="flex items-center gap-2.5 py-2.5 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors group"
               >
-                <Layers className="w-4 h-4 text-[#3B9EFF]" />
-                <span>How It Works</span>
+                <Layers className="w-4 h-4 text-[#3B9EFF] transition-transform duration-200 group-hover:scale-110" />
+                <span className="font-semibold">How It Works</span>
               </a>
               <a
                 href="#curator-profile"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 py-2 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors"
+                className="flex items-center gap-2.5 py-2.5 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors group"
               >
-                <Share2 className="w-4 h-4 text-[#3B9EFF]" />
-                <span>Curator Identity</span>
+                <Share2 className="w-4 h-4 text-[#3B9EFF] transition-transform duration-200 group-hover:scale-110" />
+                <span className="font-semibold">Curator Identity</span>
               </a>
             </nav>
 
-            <div className="pt-2 border-t border-white/[0.06] flex items-center gap-2.5">
+            <div className="pt-3 border-t border-white/[0.06] flex items-center gap-2.5">
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 py-2 text-center text-xs font-semibold text-[#A8B0BD] hover:text-white bg-white/[0.04] rounded-lg transition-colors"
+                className="flex-1 py-2.5 text-center text-xs font-semibold text-[#A8B0BD] hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/login?mode=signup"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 py-2 text-center text-xs font-semibold text-white bg-[#3B9EFF] hover:bg-[#5AAFFF] rounded-lg transition-colors shadow-sm"
+                className="flex-1 py-2.5 text-center text-xs font-semibold text-white bg-[#3B9EFF] hover:bg-[#5AAFFF] rounded-lg transition-all shadow-md shadow-[#3B9EFF]/20 active:scale-95"
               >
                 Get Started
               </Link>
             </div>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="w-full pt-16 flex-1 flex flex-col">
