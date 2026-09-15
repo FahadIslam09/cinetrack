@@ -57,13 +57,15 @@ export default async function Image({
             >
               ▶
             </div>
-            <span style={{ fontSize: "28px", fontWeight: "bold", letterSpacing: "-0.5px" }}>
-              Cine<span style={{ color: "#3B9EFF" }}>Track</span>
-            </span>
+            <div style={{ display: "flex", fontSize: "28px", fontWeight: "bold", letterSpacing: "-0.5px" }}>
+              <span>Cine</span>
+              <span style={{ color: "#3B9EFF" }}>Track</span>
+            </div>
           </div>
 
-          <span
+          <div
             style={{
+              display: "flex",
               background: "rgba(59, 158, 255, 0.12)",
               color: "#3B9EFF",
               padding: "8px 18px",
@@ -74,18 +76,18 @@ export default async function Image({
               textTransform: "uppercase",
             }}
           >
-            Curator Profile
-          </span>
+            <span>Curator Profile</span>
+          </div>
         </div>
 
         {/* User Bio & Title */}
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <span style={{ fontSize: "48px", fontWeight: "800", letterSpacing: "-1px" }}>
-            @{username}
-          </span>
-          <span style={{ fontSize: "22px", color: "#A8B0BD" }}>
-            Tracking movies, series, and anime with personal ratings and reviews.
-          </span>
+          <div style={{ display: "flex", fontSize: "48px", fontWeight: "800", letterSpacing: "-1px" }}>
+            <span>@{username}</span>
+          </div>
+          <div style={{ display: "flex", fontSize: "22px", color: "#A8B0BD" }}>
+            <span>Tracking movies, series, and anime with personal ratings and reviews.</span>
+          </div>
         </div>
 
         {/* Stats Row */}

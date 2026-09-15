@@ -57,7 +57,6 @@ export default async function Image() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            zIndex: 10,
           }}
         >
           {/* Brand Logo */}
@@ -113,9 +112,11 @@ export default async function Image() {
         </div>
 
         {/* Center: Main Headline */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "18px", zIndex: 10, maxWidth: "980px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "18px", maxWidth: "980px" }}>
           <div
             style={{
+              display: "flex",
+              flexDirection: "column",
               fontSize: "64px",
               fontWeight: "900",
               lineHeight: 1.1,
@@ -123,11 +124,12 @@ export default async function Image() {
               color: "#FFFFFF",
             }}
           >
-            Everything You Watch,
-            <span style={{ color: "#3B9EFF", display: "block" }}>In One Place.</span>
+            <span>Everything You Watch,</span>
+            <span style={{ color: "#3B9EFF" }}>In One Place.</span>
           </div>
           <div
             style={{
+              display: "flex",
               fontSize: "24px",
               color: "#94A3B8",
               lineHeight: 1.4,
@@ -135,7 +137,7 @@ export default async function Image() {
               maxWidth: "840px",
             }}
           >
-            The fastest, modern personal vault to discover, track, rate, review, and share movies, TV series, and anime.
+            <span>The fastest, modern personal vault to discover, track, rate, review, and share movies, TV series, and anime.</span>
           </div>
         </div>
 
@@ -145,13 +147,13 @@ export default async function Image() {
             display: "flex",
             alignItems: "center",
             gap: "14px",
-            zIndex: 10,
           }}
         >
           {["🎬 Feature Films", "📺 TV Series", "⚔️ Anime", "⭐ Consensus Ratings", "👥 Friend Activity"].map((badge) => (
             <div
               key={badge}
               style={{
+                display: "flex",
                 padding: "8px 18px",
                 borderRadius: "10px",
                 background: "rgba(255, 255, 255, 0.04)",
@@ -161,7 +163,7 @@ export default async function Image() {
                 fontWeight: "600",
               }}
             >
-              {badge}
+              <span>{badge}</span>
             </div>
           ))}
         </div>
