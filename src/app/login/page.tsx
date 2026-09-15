@@ -173,7 +173,10 @@ function LoginForm() {
         }
 
         if (data.session) {
-          // Instant sign in - user will be greeted with Profile Setup popup
+          // Instant sign in - user will be greeted with Profile Setup popup and PWA prompt
+          try {
+            sessionStorage.setItem("cinetrack_just_registered", "true");
+          } catch {}
           router.push(next);
           router.refresh();
         } else {

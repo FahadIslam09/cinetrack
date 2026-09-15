@@ -19,10 +19,12 @@ import {
   BookmarkCheck,
   LogOut,
   Loader2,
+  Download,
 } from "lucide-react";
 import { QuickAddModal } from "../quick-add/quick-add-modal";
 import { LogoIcon } from "@/components/ui/logo-icon";
 import { createClient } from "@/lib/supabase/client";
+import { usePwaInstall } from "@/components/pwa/pwa-install-provider";
 
 import { HeaderSearch } from "./header-search";
 import { NotificationDropdown } from "./notification-dropdown";
@@ -41,6 +43,7 @@ interface AppHeaderProps {
 export function AppHeader({ user: initialUser }: AppHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { openInstallModal, isInstalled } = usePwaInstall();
   const [currentUser, setCurrentUser] = useState(initialUser);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
@@ -245,13 +248,35 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
 
                 {/* Dropdown Menu Container with seamless hover bridge & smooth slow animation */}
                 <div
-                  className={`absolute top-full left-0 pt-2 w-64 z-50 transition-all duration-300 ease-out origin-top-left ${
+                  className={`absolute top-full left-0 pt-2 w-64 sm:w-72 z-50 transition-all duration-300 ease-out origin-top-left ${
                     isMoreDropdownOpen
                       ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
                       : "opacity-0 scale-[0.96] -translate-y-2 pointer-events-none"
                   }`}
                 >
                   <div className="p-2 rounded-2xl bg-[#151C27]/95 border border-white/[0.12] shadow-[0_20px_45px_rgba(0,0,0,0.65)] backdrop-blur-2xl ring-1 ring-black/40 flex flex-col gap-1">
+                    {/* Install CineTrack PWA Action */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMoreDropdownOpen(false);
+                        openInstallModal(false);
+                      }}
+                      className="flex items-center justify-between px-3 py-2 sm:py-2.5 rounded-xl text-xs font-semibold text-[#F5F7FA] hover:text-[#3B9EFF] hover:bg-white/[0.05] transition-all duration-200 group/install cursor-pointer w-full text-left"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-lg bg-[#3B9EFF]/10 border border-[#3B9EFF]/20 text-[#3B9EFF] group-hover/install:bg-[#3B9EFF] group-hover/install:text-white transition-colors flex items-center justify-center shrink-0">
+                          <Download className="w-3.5 h-3.5" />
+                        </div>
+                        <span>Install CineTrack</span>
+                      </div>
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[#3B9EFF]/15 text-[#3B9EFF] border border-[#3B9EFF]/30 group-hover/install:bg-[#3B9EFF] group-hover/install:text-white transition-colors">
+                        {isInstalled ? "Active" : "App"}
+                      </span>
+                    </button>
+
+                    <div className="my-0.5 border-t border-white/[0.08]" />
+
                     <Link
                       href="/about"
                       onClick={() => setIsMoreDropdownOpen(false)}

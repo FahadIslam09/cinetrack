@@ -6,6 +6,7 @@ import "./globals.css";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { BackToTop } from "@/components/ui/back-to-top";
 import { ProfileSetupProvider } from "@/components/profile/profile-setup-provider";
+import { PwaInstallProvider } from "@/components/pwa/pwa-install-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -85,6 +86,11 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: "/apple-icon.png",
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "CineTrack",
+  },
 };
 
 export const viewport: Viewport = {
@@ -127,9 +133,11 @@ export default function RootLayout({
         </Script>
 
         <SmoothScrollProvider>
-          {children}
-          <BackToTop />
-          <ProfileSetupProvider />
+          <PwaInstallProvider>
+            {children}
+            <BackToTop />
+            <ProfileSetupProvider />
+          </PwaInstallProvider>
         </SmoothScrollProvider>
       </body>
     </html>

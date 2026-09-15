@@ -21,14 +21,17 @@ import {
   LogOut,
   Loader2,
   LogIn,
+  Download,
 } from "lucide-react";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { usePwaInstall } from "@/components/pwa/pwa-install-provider";
 
 function BottomNavContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { openInstallModal, isInstalled } = usePwaInstall();
   const currentType = searchParams.get("type");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -203,6 +206,33 @@ function BottomNavContent() {
               More Links
             </span>
           </div>
+
+          {/* Prominent Install CineTrack App Action */}
+          <button
+            type="button"
+            onClick={() => {
+              setIsMoreOpen(false);
+              openInstallModal(false);
+            }}
+            className="w-full flex items-center justify-between p-3.5 mb-2.5 rounded-2xl bg-gradient-to-r from-[#3B9EFF]/20 via-[#3B9EFF]/10 to-[#2563EB]/15 hover:from-[#3B9EFF]/25 hover:to-[#2563EB]/20 border border-[#3B9EFF]/35 transition-all cursor-pointer group shadow-[0_0_16px_rgba(59,158,255,0.1)] text-left active:scale-[0.98]"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-[#3B9EFF] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#3B9EFF]/30 group-hover:scale-105 transition-transform">
+                <Download className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-sm font-bold text-[#F5F7FA] block leading-tight">
+                  Install CineTrack
+                </span>
+                <span className="text-[11px] text-[#A8B0BD] mt-0.5 block truncate">
+                  {isInstalled ? "App is active on this device" : "Add to home screen for full-screen"}
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-1 rounded-lg bg-[#3B9EFF] text-white shadow-sm shadow-[#3B9EFF]/25 shrink-0 flex items-center gap-1 ml-2">
+              <span>{isInstalled ? "Installed" : "Install"}</span>
+            </span>
+          </button>
 
           {/* Eye-catching Highlighted Feature Request Card */}
           <Link

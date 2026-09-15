@@ -4,8 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getProfileSetupStatus } from "@/actions/profile";
 import { ProfileSetupModal } from "./profile-setup-modal";
+import { usePwaInstall } from "@/components/pwa/pwa-install-provider";
 
 export function ProfileSetupProvider() {
+  const { openInstallModal } = usePwaInstall();
   const [isOpen, setIsOpen] = useState(false);
   const [initialDisplayName, setInitialDisplayName] = useState("");
   const [userEmail, setUserEmail] = useState("");
@@ -48,12 +50,20 @@ export function ProfileSetupProvider() {
     };
   }, [checkStatus]);
 
+  const handleSetupCompleted = () => {
+    setIsOpen(false);
+    // User finished creating and configuring account -> Show PWA install popup!
+    setTimeout(() => {
+      openInstallModal(true);
+    }, 700);
+  };
+
   return (
     <ProfileSetupModal
       isOpen={isOpen}
       initialDisplayName={initialDisplayName}
       userEmail={userEmail}
-      onCompleted={() => setIsOpen(false)}
+      onCompleted={handleSetupCompleted}
     />
   );
 }
