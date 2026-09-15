@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -27,6 +27,8 @@ import {
   ChevronRight,
   Compass,
   ArrowUpRight,
+  Menu,
+  X,
 } from "lucide-react";
 import { LogoIcon } from "@/components/ui/logo-icon";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
@@ -269,12 +271,28 @@ const HIGHLIGHT_MOVIES_BY_CATEGORY: Record<string, NormalizedMedia[]> = {
   ],
 };
 
+// 1-line curator notes connecting highlight titles to curator value proposition
+const CURATOR_NOTES: Record<string, string> = {
+  "tmdb:movie:693134": "Must-watch in IMAX 70mm",
+  "tmdb:movie:915935": "Tightest screenplay of 2023",
+  "tmdb:movie:467244": "Sound design masterclass",
+  "tmdb:movie:666277": "Most tender romance in years",
+  "tmdb:movie:786892": "Relentless visual spectacle",
+  "tmdb:movie:937287": "Electric score & dynamic pacing",
+  "tmdb:movie:929590": "Unflinching, intense ride",
+  "tmdb:movie:906126": "Visceral survival cinema",
+  "tmdb:movie:974635": "Charismatic & laugh-out-loud funny",
+  "tmdb:movie:661374": "Witty whodunnit ensemble",
+  "tmdb:movie:872585": "Peak cinematic tension",
+};
+
 export function LandingView() {
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState("all");
   const [claimUsername, setClaimUsername] = useState("");
   const [copiedProfile, setCopiedProfile] = useState(false);
   const [copiedStep3, setCopiedStep3] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const currentCategoryMovies =
     HIGHLIGHT_MOVIES_BY_CATEGORY[activeCategory] || HIGHLIGHT_MOVIES_BY_CATEGORY.all;
@@ -335,21 +353,94 @@ export function LandingView() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/login"
-              className="px-3 py-1.5 text-xs font-semibold text-[#A8B0BD] hover:text-white transition-colors"
+              className="hidden xs:inline-block px-3 py-1.5 text-xs font-semibold text-[#A8B0BD] hover:text-white transition-colors"
             >
               Sign In
             </Link>
             <Link
               href="/login?mode=signup"
-              className="px-4 py-2 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs rounded-lg shadow-sm transition-all active:scale-95 flex items-center justify-center cursor-pointer"
+              className="px-3.5 sm:px-4 py-2 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs rounded-lg shadow-sm shadow-[#3B9EFF]/25 transition-all active:scale-95 flex items-center justify-center cursor-pointer animate-[glow_2s_ease-in-out_1]"
             >
               Get Started
             </Link>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              className="md:hidden p-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-[#CBD5E1] hover:text-white transition-colors cursor-pointer"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Dropdown Drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-white/[0.06] bg-[#0F141D]/95 backdrop-blur-2xl px-5 py-4 flex flex-col gap-3 shadow-2xl">
+            <nav className="flex flex-col gap-1 text-sm font-medium text-[#A8B0BD]">
+              <Link
+                href="/discover"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 py-2 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors"
+              >
+                <Compass className="w-4 h-4 text-[#3B9EFF]" />
+                <span>Discover</span>
+              </Link>
+              <Link
+                href="/search"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 py-2 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors"
+              >
+                <Search className="w-4 h-4 text-[#3B9EFF]" />
+                <span>Search</span>
+              </Link>
+              <a
+                href="#demo-section"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 py-2 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors"
+              >
+                <Star className="w-4 h-4 text-[#F5C84B]" />
+                <span>Trending Highlights</span>
+              </a>
+              <a
+                href="#how-it-works"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 py-2 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors"
+              >
+                <Layers className="w-4 h-4 text-[#3B9EFF]" />
+                <span>How It Works</span>
+              </a>
+              <a
+                href="#curator-profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 py-2 px-3 rounded-lg hover:bg-white/[0.06] hover:text-white transition-colors"
+              >
+                <Share2 className="w-4 h-4 text-[#3B9EFF]" />
+                <span>Curator Identity</span>
+              </a>
+            </nav>
+
+            <div className="pt-2 border-t border-white/[0.06] flex items-center gap-2.5">
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex-1 py-2 text-center text-xs font-semibold text-[#A8B0BD] hover:text-white bg-white/[0.04] rounded-lg transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/login?mode=signup"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex-1 py-2 text-center text-xs font-semibold text-white bg-[#3B9EFF] hover:bg-[#5AAFFF] rounded-lg transition-colors shadow-sm"
+              >
+                Get Started
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="w-full pt-16 flex-1 flex flex-col">
@@ -689,10 +780,11 @@ export function LandingView() {
           </div>
         </section>
 
+
         {/* 3. INTERACTIVE "TRY THE RECOMMENDER" / THIS WEEK'S HIGHLIGHTS */}
         <section
           id="demo-section"
-          className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-16 lg:py-20"
+          className="w-full bg-[#0F1318] max-w-none px-4 sm:px-6 lg:px-12 py-16 lg:py-20"
         >
           <ScrollReveal distance={24}>
             <div className="text-center max-w-2xl mx-auto mb-10">
@@ -742,7 +834,7 @@ export function LandingView() {
           </ScrollReveal>
 
           {/* 4 Featured Movie Cards matching Discover page design */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-5 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-5 mb-8 max-w-[1440px] mx-auto">
             {currentCategoryMovies.map((movie, idx) => (
               <ScrollReveal
                 key={`${activeCategory}-${movie.id}`}
@@ -750,12 +842,20 @@ export function LandingView() {
                 distance={24}
                 className="h-full"
               >
-                <MediaCard
-                  media={movie}
-                  userRating={movie.rating >= 8.9 ? "masterpiece" : movie.rating >= 8.2 ? "great" : "good"}
-                  readOnly={true}
-                  className="w-full h-full"
-                />
+                <div className="flex flex-col h-full group/card">
+                  <MediaCard
+                    media={movie}
+                    userRating={movie.rating >= 8.9 ? "masterpiece" : movie.rating >= 8.2 ? "great" : "good"}
+                    readOnly={true}
+                    className="w-full h-full"
+                  />
+                  {CURATOR_NOTES[movie.id] && (
+                    <div className="mt-2 px-2.5 py-1.5 rounded-lg bg-[#141A24] border border-white/[0.06] flex items-center gap-1.5 text-[11px] text-[#A8B0BD] group-hover/card:border-[#3B9EFF]/30 group-hover/card:text-[#F5F7FA] transition-colors">
+                      <span className="text-[#3B9EFF] text-xs font-bold shrink-0">❝</span>
+                      <span className="truncate italic">{CURATOR_NOTES[movie.id]}</span>
+                    </div>
+                  )}
+                </div>
               </ScrollReveal>
             ))}
           </div>
@@ -787,7 +887,7 @@ export function LandingView() {
         {/* 4. THE SHAREABLE CURATOR PROFILE PREVIEW */}
         <section
           id="curator-profile"
-          className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-16 lg:py-24"
+          className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-16 lg:py-24 border-t border-white/[0.04]"
         >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left Column */}
@@ -966,11 +1066,20 @@ export function LandingView() {
           </div>
         </section>
 
+
         {/* 5. BOTTOM MINIMAL CALL-TO-ACTION */}
-        <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-16 lg:py-24 border-t border-white/[0.06]">
+        <section className="w-full bg-gradient-to-b from-[#0F141D] to-[#0D1117] max-w-none px-4 sm:px-6 lg:px-12 py-16 lg:py-24">
           <ScrollReveal distance={32}>
-            <div className="bg-[#1D2734] rounded-2xl p-8 sm:p-12 md:p-16 flex flex-col items-center text-center shadow-xl border border-white/[0.08] relative overflow-hidden">
-              <div className="w-12 h-12 rounded-full bg-[#1A2330] flex items-center justify-center text-[#3B9EFF] mb-4 shadow-sm border border-white/[0.06]">
+            <div className="bg-[#1D2734] rounded-2xl p-8 sm:p-12 md:p-16 flex flex-col items-center text-center shadow-xl border border-white/[0.08] relative overflow-hidden max-w-[1440px] mx-auto">
+              {/* Subtle poster mosaic background */}
+              <div className="absolute inset-0 opacity-[0.04] pointer-events-none">
+                <div className="absolute inset-0 grid grid-cols-6 md:grid-cols-10 gap-1 p-2">
+                  {Array.from({ length: 30 }).map((_, i) => (
+                    <div key={i} className="aspect-[2/3] bg-white/20 rounded-sm" />
+                  ))}
+                </div>
+              </div>
+              <div className="w-12 h-12 rounded-full bg-[#1A2330] flex items-center justify-center text-[#3B9EFF] mb-4 shadow-sm border border-white/[0.06] relative z-10">
                 <Film className="w-6 h-6" />
               </div>
 
@@ -978,7 +1087,7 @@ export function LandingView() {
                 Ready to stop forgetting what you watched?
               </h2>
               <p className="text-xs sm:text-sm text-[#A8B0BD] max-w-lg mb-8 leading-relaxed">
-                Build your vault in minutes. Free forever. No ads. Full data export anytime.
+                Build your vault in minutes. Free forever. No ads. Zero friction.
               </p>
 
               {/* Input Field Claim Form */}
@@ -1006,14 +1115,39 @@ export function LandingView() {
                 </button>
               </form>
 
+              {/* Social proof mini anime avatars */}
+              <div className="flex items-center justify-center gap-2 mb-4 relative z-10">
+                <div className="flex -space-x-2">
+                  {[
+                    { src: "/avatars/user-avatar-1.jpeg", alt: "Anime avatar 1" },
+                    { src: "/avatars/user-avatar-2.jpeg", alt: "Nobita avatar" },
+                    { src: "/avatars/user-avatar-3.jpeg", alt: "Tom avatar" },
+                    { src: "/avatars/user-avatar-4.jpeg", alt: "Shin-chan avatar" },
+                    { src: "/avatars/user-avatar-5.jpeg", alt: "Jack avatar" },
+                  ].map((avatar, i) => (
+                    <div
+                      key={i}
+                      className="w-7 h-7 rounded-full overflow-hidden border-2 border-[#1D2734] shadow-sm shrink-0 bg-[#161D28]"
+                    >
+                      <img
+                        src={avatar.src}
+                        alt={avatar.alt}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <span className="text-xs text-[#A8B0BD] ml-1">Join 850+ members</span>
+              </div>
+
               {/* Discreet Status & Privacy Notes */}
-              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] font-semibold text-[#6F7886] uppercase tracking-wider">
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] font-semibold text-[#6F7886] uppercase tracking-wider relative z-10">
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-                  Instant Setup
+                  Free Forever
                 </span>
                 <span>•</span>
-                <span>Custom CSV Import Ready</span>
+                <span>Instant Setup</span>
                 <span>•</span>
                 <span>No Credit Card Required</span>
               </div>
@@ -1024,7 +1158,7 @@ export function LandingView() {
 
       {/* 6. FOOTER */}
       <footer className="w-full bg-[#121824] border-t border-white/[0.06] mt-auto">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-12 lg:py-16">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-12 lg:py-16 pb-24 sm:pb-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             {/* Col 1: Brand & Tagline */}
             <div className="col-span-2 md:col-span-1 flex flex-col gap-3">
@@ -1056,7 +1190,7 @@ export function LandingView() {
               <nav className="flex flex-col gap-2 text-xs text-[#A8B0BD]">
                 <Link href="/about" className="hover:text-white transition-colors">About CineTrack</Link>
                 <Link href="/contact" className="hover:text-white transition-colors">Contact Support</Link>
-                <Link href="/feedback" className="hover:text-white transition-colors text-[#3B9EFF] hover:text-[#5AAFFF] font-semibold">Need a New Feature?</Link>
+                <Link href="/feedback" className="hover:text-white transition-colors text-[#3B9EFF] hover:text-[#5AAFFF] font-semibold inline-flex items-center gap-1">Need a New Feature? <ArrowRight className="w-3 h-3" /></Link>
               </nav>
             </div>
 
@@ -1071,7 +1205,7 @@ export function LandingView() {
           </div>
 
           {/* Bottom Row */}
-          <div className="pt-6 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#6F7886]">
+          <div className="pt-6 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#6F7886] pr-0 sm:pr-14">
             <span>
               &copy; {new Date().getFullYear()} CineTrack. All rights reserved.
             </span>
