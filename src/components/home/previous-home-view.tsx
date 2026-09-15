@@ -110,7 +110,7 @@ export async function PreviousHomeView({ searchParams }: PreviousHomeViewProps) 
       posterPath: "https://image.tmdb.org/t/p/w500/kCGlIMHnOm8JPXq3rXM6c5wMxcT.jpg",
       backdropPath: null,
       year: "2023",
-      rating: 8.0,
+      rating: 7.8,
       totalEpisodes: 1,
       genres: ["Comedy", "Sci-Fi"],
     },

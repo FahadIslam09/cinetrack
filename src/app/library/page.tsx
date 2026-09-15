@@ -100,7 +100,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
           posterPath: l.media.posterPath || null,
           backdropPath: l.media.backdropPath || null,
           year: l.media.releaseDate ? l.media.releaseDate.substring(0, 4) : undefined,
-          rating: 8.0,
+          rating: l.media.rating ? Number(l.media.rating) : 0,
           totalEpisodes: l.media.totalEpisodes || 1,
           genres: l.media.genres || [],
           synopsis: l.media.synopsis || undefined,

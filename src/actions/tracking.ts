@@ -150,6 +150,7 @@ export async function upsertMediaLog(params: LogMediaParams) {
           posterPath: media.posterPath,
           backdropPath: media.backdropPath,
           releaseDate: media.releaseDate,
+          rating: media.rating ? String(media.rating) : null,
           totalEpisodes: media.totalEpisodes,
           runtime,
           genres: media.genres,

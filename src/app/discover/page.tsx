@@ -117,7 +117,7 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
           backdropPath: l.media.backdropPath || null,
           releaseDate: l.media.releaseDate || undefined,
           year: l.media.releaseDate ? l.media.releaseDate.substring(0, 4) : undefined,
-          rating: 8.0,
+          rating: l.media.rating ? Number(l.media.rating) : 0,
           totalEpisodes: l.media.totalEpisodes || 1,
           runtime: l.media.runtime || undefined,
           genres: l.media.genres || [],

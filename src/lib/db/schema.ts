@@ -48,6 +48,7 @@ export const mediaItems = pgTable(
     posterPath: text("poster_path"),
     backdropPath: text("backdrop_path"),
     releaseDate: text("release_date"),
+    rating: numeric("rating", { precision: 3, scale: 1 }),
     totalEpisodes: integer("total_episodes").default(1),
     runtime: integer("runtime"), // in minutes
     genres: text("genres").array().default([]),

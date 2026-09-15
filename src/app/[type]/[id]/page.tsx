@@ -581,7 +581,7 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
             year: cMedia.releaseDate
               ? cMedia.releaseDate.substring(0, 4)
               : undefined,
-            rating: 8.0,
+            rating: cMedia.rating ? Number(cMedia.rating) : 0,
             totalEpisodes: cMedia.totalEpisodes || 1,
             runtime: cMedia.runtime || undefined,
             genres: cMedia.genres || [],
