@@ -2,11 +2,11 @@ import type { NextConfig } from "next";
 
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  img-src 'self' data: blob: https://image.tmdb.org https://images.unsplash.com https://i.ibb.co https://lh3.googleusercontent.com https://*.supabase.co https://*.imgbb.com;
+  img-src 'self' data: blob: https://image.tmdb.org https://images.unsplash.com https://i.ibb.co https://lh3.googleusercontent.com https://*.supabase.co https://*.imgbb.com https://*.google-analytics.com https://*.googletagmanager.com;
   font-src 'self' data: https://fonts.gstatic.com;
-  connect-src 'self' https://*.supabase.co https://api.themoviedb.org https://graphql.anilist.co https://api.graphql.imdb.com https://api.imgbb.com;
+  connect-src 'self' https://*.supabase.co https://api.themoviedb.org https://graphql.anilist.co https://api.graphql.imdb.com https://api.imgbb.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com;
   frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;
   object-src 'none';
   base-uri 'self';

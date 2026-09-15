@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Inter, Noto_Sans_Bengali } from "next/font/google";
 import "lenis/dist/lenis.css";
 import "./globals.css";
@@ -23,6 +24,9 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cinetrack.xyz";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   referrer: "origin-when-cross-origin",
+  verification: {
+    google: "nciOvQmJGdpILbuAu9vkt2UoUg0owEw5Gpi4oED-kEc",
+  },
   title: {
     default: "CineTrack · Everything You Watch, In One Place",
     template: "%s · CineTrack",
@@ -105,8 +109,23 @@ export default function RootLayout({
         <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
         <link rel="icon" href="/icon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/apple-icon.png" />
+        <meta name="google-site-verification" content="nciOvQmJGdpILbuAu9vkt2UoUg0owEw5Gpi4oED-kEc" />
       </head>
       <body className="bg-[#0F141D] text-[#F5F7FA] min-h-screen flex flex-col antialiased selection:bg-[#3B9EFF]/30" suppressHydrationWarning>
+        {/* Google Analytics (gtag.js) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-T87CW1GYJK"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-T87CW1GYJK');
+          `}
+        </Script>
+
         <SmoothScrollProvider>
           {children}
           <BackToTop />
