@@ -23,6 +23,7 @@ import { Footer } from "@/components/navigation/footer";
 import { MediaCard } from "@/components/media/media-card";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { ProfileSearchResult } from "@/app/api/search/route";
+import { getCurrentUserLibraryLogs } from "@/actions/tracking";
 
 type FilterTab = "all" | "movie" | "series" | "anime" | "profiles";
 
@@ -90,6 +91,33 @@ function SearchPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [userLogsMap, setUserLogsMap] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadUserLogs() {
+      try {
+        const logs = await getCurrentUserLibraryLogs();
+        if (!isMounted) return;
+        const map: Record<string, any> = {};
+        for (const log of logs) {
+          if (log.sourceId) {
+            map[`${log.mediaType}_${log.sourceId}`] = log;
+          }
+          if (log.mediaId) {
+            map[log.mediaId] = log;
+          }
+        }
+        setUserLogsMap(map);
+      } catch (err) {
+        console.error("Failed to load user logs in search:", err);
+      }
+    }
+    loadUserLogs();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Keep internal state in sync with URL
   useEffect(() => {
@@ -443,13 +471,25 @@ function SearchPageContent() {
                 )}
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4">
-                  {mediaList.map((item) => (
-                    <MediaCard
-                      key={item.id}
-                      media={item}
-                      className="w-full"
-                    />
-                  ))}
+                  {mediaList.map((item) => {
+                    const userLog =
+                      userLogsMap[`${item.mediaType}_${item.sourceId}`] ||
+                      userLogsMap[item.id];
+                    return (
+                      <MediaCard
+                        key={item.id}
+                        media={item}
+                        status={userLog?.status}
+                        userRating={userLog?.rating}
+                        userEpisodes={userLog?.episodesWatched}
+                        currentSeason={userLog?.currentSeason}
+                        currentEpisode={userLog?.currentEpisode}
+                        reviewText={userLog?.reviewText}
+                        containsSpoilers={userLog?.containsSpoilers}
+                        className="w-full"
+                      />
+                    );
+                  })}
                 </div>
 
                 {/* Minimal Compact Pagination */}

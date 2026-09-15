@@ -342,3 +342,41 @@ export async function deleteMediaLog(mediaId: string) {
     return { error: err.message || "Failed to remove item from library." };
   }
 }
+
+export async function getCurrentUserLibraryLogs() {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return [];
+
+    const logs = await db
+      .select({
+        id: userMediaLogs.id,
+        mediaId: userMediaLogs.mediaId,
+        source: mediaItems.source,
+        sourceId: mediaItems.sourceId,
+        mediaType: mediaItems.mediaType,
+        status: userMediaLogs.status,
+        rating: userMediaLogs.rating,
+        currentSeason: userMediaLogs.currentSeason,
+        currentEpisode: userMediaLogs.currentEpisode,
+        episodesWatched: userMediaLogs.episodesWatched,
+        reviewText: userMediaLogs.reviewText,
+        containsSpoilers: userMediaLogs.containsSpoilers,
+      })
+      .from(userMediaLogs)
+      .innerJoin(mediaItems, eq(userMediaLogs.mediaId, mediaItems.id))
+      .where(eq(userMediaLogs.userId, user.id));
+
+    return logs.map((l) => ({
+      ...l,
+      rating: parseRating(l.rating),
+    }));
+  } catch (err) {
+    console.error("getCurrentUserLibraryLogs error:", err);
+    return [];
+  }
+}

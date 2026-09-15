@@ -34,7 +34,7 @@ import { SeasonInfo } from "@/app/api/tv/[id]/seasons/route";
 export interface LibraryItem {
   id: string;
   media: NormalizedMedia;
-  status: "watching" | "completed" | "plan_to_watch" | "on_hold" | "dropped";
+  status?: "watching" | "completed" | "plan_to_watch" | "on_hold" | "dropped";
   userRating?: RatingCategory | string | number | null;
   userEpisodes?: number;
   currentSeason?: number;

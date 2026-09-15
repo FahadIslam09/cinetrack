@@ -144,7 +144,24 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
     allItems = demoLibraryItems;
   }
 
-  // 3. Collect all user ratings per media item to determine platform consensus rating
+  // 3. Query current authenticated user's library logs (if signed in)
+  const currentUserLogsMap = new Map<string, typeof userMediaLogs.$inferSelect>();
+  if (user) {
+    try {
+      const myLogs = await db
+        .select()
+        .from(userMediaLogs)
+        .where(eq(userMediaLogs.userId, user.id));
+
+      for (const ml of myLogs) {
+        currentUserLogsMap.set(ml.mediaId, ml);
+      }
+    } catch (e) {
+      console.error("Discover user logs query error:", e);
+    }
+  }
+
+  // 4. Collect all user ratings per media item to determine platform consensus rating
   const ratingsByMediaId = new Map<string, string[]>();
   for (const item of allItems) {
     if (item.userRating) {
@@ -165,11 +182,29 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
     }
   }
 
-  // Apply consensus rating across all users for each title on Discover
+  // Apply consensus rating across all users for category grouping,
+  // but bind personal status and watch progress ONLY if present in the viewer's library.
   for (const [mediaId, item] of mediaMap.entries()) {
     const ratings = ratingsByMediaId.get(mediaId);
     if (ratings && ratings.length > 0) {
       item.userRating = getConsensusRating(ratings);
+    }
+
+    const myLog = currentUserLogsMap.get(mediaId);
+    if (myLog) {
+      item.status = myLog.status as any;
+      item.userEpisodes = myLog.episodesWatched ?? undefined;
+      item.currentSeason = myLog.currentSeason ?? 1;
+      item.currentEpisode = myLog.currentEpisode ?? 1;
+      item.reviewText = myLog.reviewText || undefined;
+      item.containsSpoilers = Boolean(myLog.containsSpoilers);
+    } else {
+      item.status = undefined;
+      item.userEpisodes = undefined;
+      item.currentSeason = undefined;
+      item.currentEpisode = undefined;
+      item.reviewText = undefined;
+      item.containsSpoilers = false;
     }
   }
   const allUniqueItems = Array.from(mediaMap.values());
