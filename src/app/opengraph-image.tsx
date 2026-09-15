@@ -149,7 +149,7 @@ export default async function Image() {
             gap: "14px",
           }}
         >
-          {["🎬 Feature Films", "📺 TV Series", "⚔️ Anime", "⭐ Consensus Ratings", "👥 Friend Activity"].map((badge) => (
+          {["🎬 Movies", "📺 TV Series", "⚔️ Anime", "⭐ Consensus Ratings", "👥 Friend Activity"].map((badge) => (
             <div
               key={badge}
               style={{

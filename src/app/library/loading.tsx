@@ -56,7 +56,7 @@ export default function LibraryLoading() {
 
           {/* 2. Key Metrics Bar Skeleton (4 columns matching exact stats) */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {/* Card 1: Feature Films */}
+            {/* Card 1: Movies */}
             <div className="p-3.5 sm:p-4 rounded-xl bg-[#151C27] border border-white/[0.06] flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-[#3B9EFF]/15 shrink-0 skeleton-shimmer" />
               <div className="flex flex-col gap-1.5 min-w-0 flex-1">

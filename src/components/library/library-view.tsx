@@ -574,7 +574,7 @@ export function LibraryView({
               {stats.movies}
             </div>
             <div className="text-[11px] font-medium text-[#A8B0BD] mt-1">
-              Feature Films
+              Movies
             </div>
           </div>
         </div>
