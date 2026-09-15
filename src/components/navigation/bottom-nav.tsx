@@ -18,6 +18,9 @@ import {
   FileText,
   Shield,
   Settings as SettingsIcon,
+  LogOut,
+  Loader2,
+  LogIn,
 } from "lucide-react";
 import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
@@ -29,6 +32,37 @@ function BottomNavContent() {
   const currentType = searchParams.get("type");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [user, setUser] = useState<{ email?: string; username?: string } | null>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ? { email: session.user.email, username: session.user.user_metadata?.user_name } : null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ? { email: session.user.email, username: session.user.user_metadata?.user_name } : null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      setUser(null);
+      setIsMoreOpen(false);
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      console.error("Sign out error:", err);
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   const handleAddClick = async () => {
     const supabase = createClient();
@@ -222,6 +256,49 @@ function BottomNavContent() {
               );
             })}
           </div>
+
+          {/* Session Actions: Sign Out (if logged in) or Sign In (if guest) */}
+          {user ? (
+            <>
+              <div className="my-2.5 border-t border-white/[0.08]" />
+              <button
+                type="button"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="w-full flex items-center justify-between p-3 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 active:bg-rose-500/20 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+                    {isSigningOut ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <LogOut className="w-4 h-4" />
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold">
+                    {isSigningOut ? "Signing out..." : "Sign Out"}
+                  </span>
+                </div>
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="my-2.5 border-t border-white/[0.08]" />
+              <Link
+                href="/login"
+                onClick={() => setIsMoreOpen(false)}
+                className="w-full flex items-center justify-between p-3 rounded-xl text-[#3B9EFF] hover:bg-[#3B9EFF]/10 active:bg-[#3B9EFF]/20 transition-all cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-[#3B9EFF]/10 border border-[#3B9EFF]/20 text-[#3B9EFF] flex items-center justify-center shrink-0">
+                    <LogIn className="w-4 h-4" />
+                  </div>
+                  <span className="text-sm font-semibold">Sign In</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-[#3B9EFF]/60" />
+              </Link>
+            </>
+          )}
         </div>
 
       {/* Main Bottom Navigation Bar (z-50 solid background so sheet slides behind it) */}
