@@ -101,7 +101,7 @@ export async function submitFeatureRequest(params: {
       headersList.get("x-real-ip") ||
       "anonymous";
 
-    const rateLimit = checkRateLimit(`feedback:${clientIp}`, {
+    const rateLimit = await checkRateLimit(`feedback:${clientIp}`, {
       limit: 5,
       windowMs: 10 * 60 * 1000, // 5 submissions per 10 minutes
     });

@@ -1,66 +1,80 @@
-/**
- * Lightweight in-memory sliding-window rate limiter.
- * Protects public mutation endpoints from automated spam and abuse.
- */
-
-interface RateLimitRecord {
-  count: number;
-  resetAt: number;
-}
-
-const rateLimitStore = new Map<string, RateLimitRecord>();
-
-// Clean up expired keys every 60 seconds
-if (typeof setInterval !== "undefined") {
-  const cleanupTimer = setInterval(() => {
-    const now = Date.now();
-    for (const [key, record] of rateLimitStore.entries()) {
-      if (now > record.resetAt) {
-        rateLimitStore.delete(key);
-      }
-    }
-  }, 60000);
-  if (cleanupTimer.unref) {
-    cleanupTimer.unref();
-  }
-}
+import { db } from "@/lib/db";
+import { rateLimits } from "@/lib/db/schema";
+import { sql, lt } from "drizzle-orm";
 
 export interface RateLimitOptions {
   limit: number;    // Max requests allowed in window
   windowMs: number; // Duration of window in milliseconds
 }
 
-export function checkRateLimit(
+export interface RateLimitResult {
+  allowed: boolean;
+  remaining: number;
+  resetInMs: number;
+}
+
+/**
+ * PostgreSQL-backed distributed rate limiter.
+ * Protects public mutation endpoints across serverless instances and cold starts.
+ */
+export async function checkRateLimit(
   identifier: string,
   options: RateLimitOptions = { limit: 10, windowMs: 60000 }
-): { allowed: boolean; remaining: number; resetInMs: number } {
-  const now = Date.now();
-  const record = rateLimitStore.get(identifier);
+): Promise<RateLimitResult> {
+  const now = new Date();
+  const resetAt = new Date(now.getTime() + options.windowMs);
 
-  if (!record || now > record.resetAt) {
-    rateLimitStore.set(identifier, {
-      count: 1,
-      resetAt: now + options.windowMs,
-    });
+  try {
+    // Atomic upsert: if window expired, reset count to 1 and update resetAt.
+    // Otherwise increment count.
+    const [record] = await db
+      .insert(rateLimits)
+      .values({
+        key: identifier,
+        count: 1,
+        resetAt,
+      })
+      .onConflictDoUpdate({
+        target: rateLimits.key,
+        set: {
+          count: sql`case
+            when ${rateLimits.resetAt} <= ${now} then 1
+            else ${rateLimits.count} + 1
+          end`,
+          resetAt: sql`case
+            when ${rateLimits.resetAt} <= ${now} then ${resetAt}
+            else ${rateLimits.resetAt}
+          end`,
+        },
+      })
+      .returning({
+        count: rateLimits.count,
+        resetAt: rateLimits.resetAt,
+      });
+
+    // Probabilistic prune: 5% chance on request to clean expired keys (non-blocking)
+    if (Math.random() < 0.05) {
+      db.delete(rateLimits)
+        .where(lt(rateLimits.resetAt, now))
+        .catch(() => {});
+    }
+
+    const currentCount = record?.count ?? 1;
+    const currentResetAt = record?.resetAt
+      ? new Date(record.resetAt).getTime()
+      : resetAt.getTime();
+    const allowed = currentCount <= options.limit;
+    const remaining = Math.max(0, options.limit - currentCount);
+    const resetInMs = Math.max(0, currentResetAt - now.getTime());
+
+    return { allowed, remaining, resetInMs };
+  } catch (err) {
+    // Fail-open strategy on database error to avoid locking out legitimate users
+    console.error("Rate limit check failed, failing open:", err);
     return {
       allowed: true,
-      remaining: options.limit - 1,
+      remaining: 1,
       resetInMs: options.windowMs,
     };
   }
-
-  if (record.count >= options.limit) {
-    return {
-      allowed: false,
-      remaining: 0,
-      resetInMs: Math.max(0, record.resetAt - now),
-    };
-  }
-
-  record.count += 1;
-  return {
-    allowed: true,
-    remaining: options.limit - record.count,
-    resetInMs: Math.max(0, record.resetAt - now),
-  };
 }

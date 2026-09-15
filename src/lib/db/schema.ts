@@ -180,6 +180,17 @@ export const notifications = pgTable(
   ]
 );
 
+// 7. Rate Limits (Distributed serverless rate limiting)
+export const rateLimits = pgTable(
+  "rate_limits",
+  {
+    key: text("key").primaryKey(),
+    count: integer("count").default(1).notNull(),
+    resetAt: timestamp("reset_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [index("rate_limits_reset_at_idx").on(table.resetAt)]
+);
+
 export type Profile = typeof profiles.$inferSelect;
 export type NewProfile = typeof profiles.$inferInsert;
 export type MediaItem = typeof mediaItems.$inferSelect;
@@ -192,4 +203,7 @@ export type ReviewReaction = typeof reviewReactions.$inferSelect;
 export type NewReviewReaction = typeof reviewReactions.$inferInsert;
 export type Notification = typeof notifications.$inferSelect;
 export type NewNotification = typeof notifications.$inferInsert;
+export type RateLimit = typeof rateLimits.$inferSelect;
+export type NewRateLimit = typeof rateLimits.$inferInsert;
+
 
