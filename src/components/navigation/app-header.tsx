@@ -491,7 +491,7 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
                     {/* Navigation Items */}
                     <div className="p-1 space-y-0.5">
                       <Link
-                        href={currentUser.username ? `/u/${currentUser.username}` : "/library"}
+                        href={currentUser.username ? `/${currentUser.username}` : "/library"}
                         onClick={() => setIsUserMenuOpen(false)}
                         className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-white/[0.06] transition-colors cursor-pointer"
                       >

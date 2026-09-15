@@ -86,21 +86,31 @@ export default async function proxy(request: NextRequest) {
     }
   }
 
-  // 2. Rewrite /@username to /u/[username]
+  // 2. Redirect legacy /u/:username to vanity /:username (e.g. cinetrack.xyz/fahadislam)
+  if (pathname.startsWith("/u/") && !request.headers.has("x-internal-profile-rewrite")) {
+    const username = pathname.slice(3);
+    if (username && !username.includes("/")) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${username}`;
+      const redirectResponse = NextResponse.redirect(url, 308);
+      copyCookies(supabaseResponse, redirectResponse);
+      return redirectResponse;
+    }
+  }
+
+  // 3. Redirect /@username to vanity /username
   if (pathname.startsWith("/@")) {
     const username = pathname.slice(2);
     if (username) {
       const url = request.nextUrl.clone();
-      url.pathname = `/u/${username}`;
-      const rewriteResponse = NextResponse.rewrite(url, {
-        request: { headers: request.headers },
-      });
-      copyCookies(supabaseResponse, rewriteResponse);
-      return rewriteResponse;
+      url.pathname = `/${username}`;
+      const redirectResponse = NextResponse.redirect(url, 308);
+      copyCookies(supabaseResponse, redirectResponse);
+      return redirectResponse;
     }
   }
 
-  // 3. Check for root single-segment user handle: /username -> /u/username
+  // 4. Handle vanity profile URL: /username -> /u/username (internal rewrite)
   const match = pathname.match(/^\/([a-zA-Z0-9_.-]+)$/);
   if (match) {
     const slug = match[1];
@@ -108,8 +118,10 @@ export default async function proxy(request: NextRequest) {
     if (!RESERVED_ROUTES.has(slug.toLowerCase()) && !slug.includes(".")) {
       const url = request.nextUrl.clone();
       url.pathname = `/u/${slug}`;
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set("x-internal-profile-rewrite", "1");
       const rewriteResponse = NextResponse.rewrite(url, {
-        request: { headers: request.headers },
+        request: { headers: requestHeaders },
       });
       copyCookies(supabaseResponse, rewriteResponse);
       return rewriteResponse;

@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: ProfilePageProps) {
   const decoded = decodeURIComponent(username).replace(/^@/, "");
   const title = `@${decoded}'s Library`;
   const description = `Explore movies, series, and anime tracked by @${decoded} on CineTrack.`;
-  const url = `/u/${decoded}`;
+  const url = `/${decoded}`;
 
   return {
     title,

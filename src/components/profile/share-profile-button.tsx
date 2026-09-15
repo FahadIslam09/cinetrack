@@ -17,8 +17,8 @@ export function ShareProfileButton({
   const handleShare = async () => {
     const profileUrl =
       typeof window !== "undefined"
-        ? `${window.location.origin}/u/${username}`
-        : `https://cinetrack.xyz/u/${username}`;
+        ? `${window.location.origin}/${username}`
+        : `https://cinetrack.xyz/${username}`;
 
     try {
       if (

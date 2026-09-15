@@ -55,7 +55,7 @@ export function ReviewCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [, startTransition] = useTransition();
 
-  const profileUrl = author.profileHref || (author.username ? `/u/${author.username}` : undefined);
+  const profileUrl = author.profileHref || (author.username ? `/${author.username}` : undefined);
 
   const isLong = (reviewText?.length || 0) > 180 || (reviewText?.split("\n").length || 0) > 3;
 

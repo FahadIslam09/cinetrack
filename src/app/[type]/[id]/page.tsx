@@ -114,7 +114,7 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
   const fallbackUrl = fromUsername
     ? fromUsername === "library"
       ? "/library"
-      : `/u/${fromUsername}`
+      : `/${fromUsername}`
     : "/";
 
   let media: NormalizedMedia | null = null;
@@ -743,7 +743,7 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
                   <span className="text-xs sm:text-sm font-bold text-[#F5F7FA] tracking-wide">
                     Note from{" "}
                     <Link
-                      href={`/u/${contextualReview.author.username}`}
+                      href={`/${contextualReview.author.username}`}
                       className="text-[#3B9EFF] hover:underline font-bold"
                     >
                       @{contextualReview.author.username}
@@ -755,7 +755,7 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
                 </div>
 
                 <Link
-                  href={`/u/${contextualReview.author.username}`}
+                  href={`/${contextualReview.author.username}`}
                   className="inline-flex items-center gap-1 text-[11px] font-bold text-[#A8B0BD] hover:text-[#F5F7FA] transition-colors group cursor-pointer"
                 >
                   <span>View @{contextualReview.author.username}&apos;s Profile</span>

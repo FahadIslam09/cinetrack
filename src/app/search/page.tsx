@@ -415,7 +415,7 @@ function SearchPageContent() {
                   {profilesList.map((profile) => (
                     <Link
                       key={profile.id}
-                      href={`/u/${profile.username}`}
+                      href={`/${profile.username}`}
                       className="flex items-center gap-3.5 p-3.5 rounded-xl bg-[#151C27] border border-white/[0.06] hover:bg-[#1A2230] hover:border-white/[0.12] transition-all group"
                     >
                       <div className="w-12 h-12 rounded-full overflow-hidden bg-[#1A2230] border border-white/[0.08] flex items-center justify-center shrink-0">

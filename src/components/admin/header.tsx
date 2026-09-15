@@ -314,7 +314,7 @@ export function Header({
 
         {/* Profile */}
         <Link
-          href={admin.username ? `/u/${admin.username}` : "/admin"}
+          href={admin.username ? `/${admin.username}` : "/admin"}
           className="flex items-center gap-2 pl-2 ml-1 rounded-lg hover:bg-slate-100 py-1 pr-2 cursor-pointer"
         >
           {admin.avatarUrl ? (

@@ -132,7 +132,7 @@ export default async function AdminUserDetail({ params }: Props) {
               <SuspendButton userId={profile.id} suspended={profile.status === "suspended"} />
             )}
             <Link
-              href={`/u/${profile.username}`}
+              href={`/${profile.username}`}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
             >
               View Profile

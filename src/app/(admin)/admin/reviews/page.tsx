@@ -110,7 +110,7 @@ export default async function AdminReviews({ searchParams }: Props) {
       key: "author",
       header: "Author",
       render: (r) => (
-        <Link href={`/u/${r.username}`} className="text-xs font-medium text-slate-600 hover:text-blue-600">
+        <Link href={`/${r.username}`} className="text-xs font-medium text-slate-600 hover:text-blue-600">
           @{r.username || "user"}
         </Link>
       ),

@@ -268,7 +268,7 @@ export function HeaderSearch({ isMobileOpen, onCloseMobile }: HeaderSearchProps)
                 {liveResults.profiles.map((profile) => (
                   <Link
                     key={profile.id}
-                    href={`/u/${profile.username}`}
+                    href={`/${profile.username}`}
                     onClick={handleSelectResult}
                     className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.05] transition-colors group cursor-pointer"
                   >
