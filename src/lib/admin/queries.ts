@@ -4,8 +4,10 @@ import {
   mediaItems,
   userMediaLogs,
   featureRequests,
+  authUsers,
+  adminAuditLogs,
 } from "@/lib/db/schema";
-import { eq, gte, count, desc, isNotNull } from "drizzle-orm";
+import { eq, gte, count, desc, isNotNull, or, and, ilike, sql } from "drizzle-orm";
 import type { ChartPoint } from "@/components/admin/chart";
 
 export type RangeKey = "7" | "30" | "90" | "365";
@@ -301,4 +303,271 @@ export async function getRatingDistribution() {
     .where(isNotNull(userMediaLogs.rating))
     .groupBy(userMediaLogs.rating);
   return rows.map((r) => ({ rating: r.rating as string, count: r.n }));
+}
+
+// ---------------------------------------------------------------------------
+// Production User Management Queries
+// ---------------------------------------------------------------------------
+
+export interface AdminUserListItem {
+  id: string;
+  username: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  role: string;
+  status: "active" | "suspended" | "banned";
+  statusReason: string | null;
+  statusUpdatedAt: Date | null;
+  createdAt: Date;
+  email: string | null;
+  lastSignInAt: Date | null;
+  provider: string | null;
+  library: number;
+  reviews: number;
+  ratings: number;
+}
+
+export interface GetPaginatedUsersParams {
+  q?: string;
+  status?: string;
+  role?: string;
+  sort?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface PaginatedUsersResult {
+  users: AdminUserListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export async function getPaginatedUsers(
+  params: GetPaginatedUsersParams = {}
+): Promise<PaginatedUsersResult> {
+  const q = params.q?.trim() || "";
+  const status = params.status || "all";
+  const role = params.role || "all";
+  const sort = params.sort || "newest";
+  const page = Math.max(1, params.page || 1);
+  const pageSize = Math.max(1, Math.min(100, params.pageSize || 20));
+
+  // 1. Aggregate per-user library and review counts
+  const activityRows = await db
+    .select({
+      userId: userMediaLogs.userId,
+      library: count(userMediaLogs.id),
+      reviews: sql<number>`count(case when ${userMediaLogs.reviewText} is not null and trim(${userMediaLogs.reviewText}) != '' then 1 end)`,
+      ratings: count(userMediaLogs.rating),
+    })
+    .from(userMediaLogs)
+    .groupBy(userMediaLogs.userId);
+
+  const activityMap = new Map<string, { library: number; reviews: number; ratings: number }>();
+  for (const r of activityRows) {
+    activityMap.set(r.userId, {
+      library: Number(r.library),
+      reviews: Number(r.reviews),
+      ratings: Number(r.ratings),
+    });
+  }
+
+  // 2. Query profiles joined with auth.users
+  const conditions = [];
+
+  if (q) {
+    conditions.push(
+      or(
+        ilike(profiles.username, `%${q}%`),
+        ilike(profiles.fullName, `%${q}%`),
+        ilike(authUsers.email, `%${q}%`)
+      )
+    );
+  }
+
+  if (status && status !== "all") {
+    conditions.push(eq(profiles.status, status));
+  }
+
+  if (role && role !== "all") {
+    conditions.push(eq(profiles.role, role));
+  }
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const rows = await db
+    .select({
+      id: profiles.id,
+      username: profiles.username,
+      fullName: profiles.fullName,
+      avatarUrl: profiles.avatarUrl,
+      role: profiles.role,
+      status: profiles.status,
+      statusReason: profiles.statusReason,
+      statusUpdatedAt: profiles.statusUpdatedAt,
+      createdAt: profiles.createdAt,
+      email: authUsers.email,
+      lastSignInAt: authUsers.lastSignInAt,
+      rawAppMetaData: authUsers.rawAppMetaData,
+    })
+    .from(profiles)
+    .leftJoin(authUsers, eq(profiles.id, authUsers.id))
+    .where(whereClause);
+
+  const mapped: AdminUserListItem[] = rows.map((r) => {
+    const act = activityMap.get(r.id) || { library: 0, reviews: 0, ratings: 0 };
+    const rawMeta = r.rawAppMetaData as { provider?: string; providers?: string[] } | null;
+    const provider = rawMeta?.provider || (rawMeta?.providers && rawMeta.providers[0]) || "email";
+    return {
+      id: r.id,
+      username: r.username,
+      fullName: r.fullName,
+      avatarUrl: r.avatarUrl,
+      role: r.role,
+      status: (r.status as "active" | "suspended" | "banned") || "active",
+      statusReason: r.statusReason,
+      statusUpdatedAt: r.statusUpdatedAt,
+      createdAt: r.createdAt,
+      email: r.email,
+      lastSignInAt: r.lastSignInAt,
+      provider,
+      library: act.library,
+      reviews: act.reviews,
+      ratings: act.ratings,
+    };
+  });
+
+  // 3. Sorting
+  if (sort === "oldest") {
+    mapped.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  } else if (sort === "name") {
+    mapped.sort((a, b) =>
+      (a.fullName || a.username).localeCompare(b.fullName || b.username)
+    );
+  } else if (sort === "activity") {
+    mapped.sort((a, b) => b.library - a.library);
+  } else if (sort === "reviews") {
+    mapped.sort((a, b) => b.reviews - a.reviews);
+  } else {
+    // Default newest
+    mapped.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  const total = mapped.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const paginated = mapped.slice((page - 1) * pageSize, page * pageSize);
+
+  return {
+    users: paginated,
+    total,
+    page,
+    pageSize,
+    totalPages,
+  };
+}
+
+export interface AdminUserDetail {
+  id: string;
+  username: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  backdropUrl: string | null;
+  bio: string | null;
+  preferredCountry: string;
+  isPublic: boolean;
+  role: string;
+  status: "active" | "suspended" | "banned";
+  statusReason: string | null;
+  statusUpdatedAt: Date | null;
+  statusUpdatedBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  email: string | null;
+  lastSignInAt: Date | null;
+  provider: string | null;
+}
+
+export async function getUserDetail(userId: string): Promise<AdminUserDetail | null> {
+  const [row] = await db
+    .select({
+      id: profiles.id,
+      username: profiles.username,
+      fullName: profiles.fullName,
+      avatarUrl: profiles.avatarUrl,
+      backdropUrl: profiles.backdropUrl,
+      bio: profiles.bio,
+      preferredCountry: profiles.preferredCountry,
+      isPublic: profiles.isPublic,
+      role: profiles.role,
+      status: profiles.status,
+      statusReason: profiles.statusReason,
+      statusUpdatedAt: profiles.statusUpdatedAt,
+      statusUpdatedBy: profiles.statusUpdatedBy,
+      createdAt: profiles.createdAt,
+      updatedAt: profiles.updatedAt,
+      email: authUsers.email,
+      lastSignInAt: authUsers.lastSignInAt,
+      rawAppMetaData: authUsers.rawAppMetaData,
+    })
+    .from(profiles)
+    .leftJoin(authUsers, eq(profiles.id, authUsers.id))
+    .where(eq(profiles.id, userId))
+    .limit(1);
+
+  if (!row) return null;
+
+  const rawMeta = row.rawAppMetaData as { provider?: string; providers?: string[] } | null;
+  const provider = rawMeta?.provider || (rawMeta?.providers && rawMeta.providers[0]) || "email";
+
+  return {
+    ...row,
+    status: (row.status as "active" | "suspended" | "banned") || "active",
+    provider,
+  };
+}
+
+export interface AdminAuditLogRow {
+  id: string;
+  adminId: string;
+  adminName: string;
+  adminUsername: string;
+  targetUserId: string;
+  action: string;
+  reason: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: Date;
+}
+
+export async function getUserAuditLogs(userId: string): Promise<AdminAuditLogRow[]> {
+  const rows = await db
+    .select({
+      id: adminAuditLogs.id,
+      adminId: adminAuditLogs.adminId,
+      adminName: profiles.fullName,
+      adminUsername: profiles.username,
+      targetUserId: adminAuditLogs.targetUserId,
+      action: adminAuditLogs.action,
+      reason: adminAuditLogs.reason,
+      metadata: adminAuditLogs.metadata,
+      createdAt: adminAuditLogs.createdAt,
+    })
+    .from(adminAuditLogs)
+    .leftJoin(profiles, eq(adminAuditLogs.adminId, profiles.id))
+    .where(eq(adminAuditLogs.targetUserId, userId))
+    .orderBy(desc(adminAuditLogs.createdAt))
+    .limit(50);
+
+  return rows.map((r) => ({
+    id: r.id,
+    adminId: r.adminId,
+    adminName: r.adminName || r.adminUsername || "Admin",
+    adminUsername: r.adminUsername || "admin",
+    targetUserId: r.targetUserId,
+    action: r.action,
+    reason: r.reason,
+    metadata: (r.metadata as Record<string, unknown>) || null,
+    createdAt: r.createdAt,
+  }));
 }

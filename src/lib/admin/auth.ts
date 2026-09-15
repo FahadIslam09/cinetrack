@@ -23,7 +23,7 @@ export async function getAdminProfile() {
     .where(eq(profiles.id, user.id))
     .limit(1);
 
-  if (!profile || profile.role !== "admin" || profile.status === "suspended") return null;
+  if (!profile || profile.role !== "admin" || profile.status !== "active") return null;
 
   return {
     id: profile.id,

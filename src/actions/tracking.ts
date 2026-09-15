@@ -40,8 +40,8 @@ export async function upsertMediaLog(params: LogMediaParams) {
       .where(eq(profiles.id, user.id))
       .limit(1);
 
-    if (existingProfile?.status === "suspended") {
-      return { error: "Account is suspended. Tracking is disabled." };
+    if (existingProfile?.status === "suspended" || existingProfile?.status === "banned") {
+      return { error: `Account is ${existingProfile.status}. Tracking is disabled.` };
     }
 
     if (!existingProfile) {
@@ -220,8 +220,8 @@ export async function incrementEpisode(mediaId: string, totalEpisodes: number = 
       .where(eq(profiles.id, user.id))
       .limit(1);
 
-    if (profile?.status === "suspended") {
-      return { error: "Account is suspended." };
+    if (profile?.status === "suspended" || profile?.status === "banned") {
+      return { error: `Account is ${profile.status}.` };
     }
 
     const [existing] = await db
@@ -321,8 +321,8 @@ export async function deleteMediaLog(mediaId: string) {
       .where(eq(profiles.id, user.id))
       .limit(1);
 
-    if (profile?.status === "suspended") {
-      return { error: "Account is suspended." };
+    if (profile?.status === "suspended" || profile?.status === "banned") {
+      return { error: `Account is ${profile.status}.` };
     }
 
     await db

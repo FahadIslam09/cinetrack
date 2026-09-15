@@ -83,8 +83,8 @@ export async function changeEmail(newEmail: string) {
       .where(eq(profiles.id, user.id))
       .limit(1);
 
-    if (profile?.status === "suspended") {
-      return { error: "Account is suspended. Modifying credentials is not allowed." };
+    if (profile?.status === "suspended" || profile?.status === "banned") {
+      return { error: `Account is ${profile.status}. Modifying credentials is not allowed.` };
     }
 
     const trimmed = newEmail.trim().toLowerCase();
@@ -149,8 +149,8 @@ export async function changePassword(params: {
       .where(eq(profiles.id, user.id))
       .limit(1);
 
-    if (profile?.status === "suspended") {
-      return { error: "Account is suspended. Modifying credentials is not allowed." };
+    if (profile?.status === "suspended" || profile?.status === "banned") {
+      return { error: `Account is ${profile.status}. Modifying credentials is not allowed.` };
     }
 
     const newPass = params.newPassword;

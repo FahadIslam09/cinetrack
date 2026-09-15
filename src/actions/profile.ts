@@ -77,8 +77,8 @@ export async function updateProfile(params: UpdateProfileParams) {
       .where(eq(profiles.id, user.id))
       .limit(1);
 
-    if (existing?.status === "suspended") {
-      return { error: "Account is suspended. Profile updates are disabled." };
+    if (existing?.status === "suspended" || existing?.status === "banned") {
+      return { error: `Account is ${existing.status}. Profile updates are disabled.` };
     }
 
     let targetUsername = existing?.username;
@@ -466,8 +466,8 @@ export async function uploadProfileImage(
       .where(eq(profiles.id, user.id))
       .limit(1);
 
-    if (existing?.status === "suspended") {
-      return { success: false, error: "Account is suspended." };
+    if (existing?.status === "suspended" || existing?.status === "banned") {
+      return { success: false, error: `Account is ${existing.status}.` };
     }
 
     const file = formData.get("image") as File | null;

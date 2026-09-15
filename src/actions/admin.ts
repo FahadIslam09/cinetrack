@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { profiles, featureRequests } from "@/lib/db/schema";
+import { profiles, featureRequests, adminAuditLogs } from "@/lib/db/schema";
 import { getAdminProfile } from "@/lib/admin/auth";
 import { createClient } from "@/lib/supabase/server";
 import { notifyNewRequest } from "@/lib/telegram";
-import { eq, desc, count } from "drizzle-orm";
+import { eq, desc, count, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -30,10 +30,10 @@ export async function updateFeatureRequest(params: {
   if (!admin) return { error: "Unauthorized" };
 
   const set: Record<string, unknown> = { updatedAt: new Date() };
-  if (params.status && REQUEST_STATUSES.includes(params.status as any)) {
+  if (params.status && (REQUEST_STATUSES as readonly string[]).includes(params.status)) {
     set.status = params.status;
   }
-  if (params.priority && PRIORITIES.includes(params.priority as any)) {
+  if (params.priority && (PRIORITIES as readonly string[]).includes(params.priority)) {
     set.priority = params.priority;
   }
   if (params.adminNotes !== undefined) {
@@ -49,44 +49,134 @@ export async function updateFeatureRequest(params: {
     revalidatePath("/admin/requests");
     revalidatePath("/admin/notifications");
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("updateFeatureRequest error:", err);
-    return { error: err.message || "Failed to update request." };
+    return { error: (err as Error).message || "Failed to update request." };
   }
 }
 
-export async function setUserSuspended(userId: string, suspended: boolean) {
+export async function updateUserStatus(params: {
+  userId: string;
+  status: "active" | "suspended" | "banned";
+  reason?: string;
+}) {
   const admin = await getAdminProfile();
   if (!admin) return { error: "Unauthorized" };
 
+  const { userId, status, reason } = params;
+
   if (userId === admin.id) {
-    return { error: "Cannot suspend your own account." };
+    return { error: "Cannot modify status of your own account." };
+  }
+
+  if (!["active", "suspended", "banned"].includes(status)) {
+    return { error: "Invalid account status value." };
   }
 
   try {
     const [target] = await db
-      .select({ role: profiles.role })
+      .select({
+        role: profiles.role,
+        status: profiles.status,
+        username: profiles.username,
+      })
       .from(profiles)
       .where(eq(profiles.id, userId))
       .limit(1);
 
     if (!target) return { error: "User not found." };
     if (target.role === "admin") {
-      return { error: "Cannot suspend an admin account." };
+      return { error: "Protected account. Cannot modify status of an admin." };
     }
 
-    await db
-      .update(profiles)
-      .set({ status: suspended ? "suspended" : "active", updatedAt: new Date() })
-      .where(eq(profiles.id, userId));
+    const cleanReason = reason ? reason.trim().slice(0, 500) : null;
+    const action =
+      status === "suspended"
+        ? "suspend_user"
+        : status === "banned"
+        ? "ban_user"
+        : target.status === "banned"
+        ? "unban_user"
+        : "restore_user";
+
+    // 1. Atomic update in transaction: update profile + write audit log
+    await db.transaction(async (tx) => {
+      await tx
+        .update(profiles)
+        .set({
+          status,
+          statusReason: cleanReason,
+          statusUpdatedAt: new Date(),
+          statusUpdatedBy: admin.id,
+          updatedAt: new Date(),
+        })
+        .where(eq(profiles.id, userId));
+
+      await tx.insert(adminAuditLogs).values({
+        adminId: admin.id,
+        targetUserId: userId,
+        action: action as "suspend_user" | "restore_user" | "ban_user" | "unban_user" | "role_change",
+        reason: cleanReason,
+        metadata: {
+          previousStatus: target.status,
+          newStatus: status,
+        },
+      });
+    });
+
+    // 2. Auth layer session invalidation and ban enforcement
+    try {
+      if (status === "suspended") {
+        await db.execute(
+          sql`UPDATE auth.users SET banned_until = NOW() + INTERVAL '100 years' WHERE id = ${userId}::uuid`
+        );
+        await db.execute(
+          sql`DELETE FROM auth.sessions WHERE user_id = ${userId}::uuid`
+        );
+        await db.execute(
+          sql`DELETE FROM auth.refresh_tokens WHERE session_id NOT IN (SELECT id FROM auth.sessions)`
+        );
+      } else if (status === "banned") {
+        await db.execute(
+          sql`UPDATE auth.users SET banned_until = '2099-12-31 23:59:59+00'::timestamptz WHERE id = ${userId}::uuid`
+        );
+        await db.execute(
+          sql`DELETE FROM auth.sessions WHERE user_id = ${userId}::uuid`
+        );
+        await db.execute(
+          sql`DELETE FROM auth.refresh_tokens WHERE session_id NOT IN (SELECT id FROM auth.sessions)`
+        );
+      } else if (status === "active") {
+        await db.execute(
+          sql`UPDATE auth.users SET banned_until = NULL WHERE id = ${userId}::uuid`
+        );
+      }
+    } catch (authErr) {
+      console.warn("Auth table session invalidation warning:", authErr);
+    }
+
+    revalidatePath("/admin");
     revalidatePath("/admin/users");
     revalidatePath(`/admin/users/${userId}`);
+    if (target.username) {
+      revalidatePath(`/${target.username}`);
+      revalidatePath(`/u/${target.username}`);
+    }
+
     return { success: true };
-  } catch (err: any) {
-    console.error("setUserSuspended error:", err);
-    return { error: err.message || "Failed to update user status." };
+  } catch (err: unknown) {
+    console.error("updateUserStatus error:", err);
+    return { error: (err as Error).message || "Failed to update user status." };
   }
 }
+
+export async function setUserSuspended(userId: string, suspended: boolean) {
+  return updateUserStatus({
+    userId,
+    status: suspended ? "suspended" : "active",
+  });
+}
+
 
 export async function submitFeatureRequest(params: {
   category: string;
@@ -164,7 +254,7 @@ export async function submitFeatureRequest(params: {
     await db.insert(featureRequests).values({
       userId,
       email: submitterEmail,
-      category: category as any,
+      category: category as "feature" | "bug" | "general",
       title,
       description,
     });
@@ -184,7 +274,7 @@ export async function submitFeatureRequest(params: {
     revalidatePath("/admin/requests");
     revalidatePath("/admin/notifications");
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("submitFeatureRequest error:", err);
     return { error: "Failed to submit request. Please try again later." };
   }
@@ -261,8 +351,8 @@ export async function markAllRequestsReviewed() {
     revalidatePath("/admin/requests");
     revalidatePath("/admin/notifications");
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("markAllRequestsReviewed error:", err);
-    return { error: err.message || "Failed to update requests." };
+    return { error: (err as Error).message || "Failed to update requests." };
   }
 }

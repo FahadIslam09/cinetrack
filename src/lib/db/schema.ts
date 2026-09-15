@@ -1,5 +1,6 @@
 import {
   pgTable,
+  pgSchema,
   text,
   uuid,
   integer,
@@ -11,8 +12,19 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 
+// Supabase auth.users table mapping for admin inspection (read-only)
+const authSchema = pgSchema("auth");
+export const authUsers = authSchema.table("users", {
+  id: uuid("id").primaryKey(),
+  email: text("email"),
+  createdAt: timestamp("created_at", { withTimezone: true }),
+  lastSignInAt: timestamp("last_sign_in_at", { withTimezone: true }),
+  rawAppMetaData: jsonb("raw_app_meta_data"),
+});
+
 // 1. Profiles Table
 export const profiles = pgTable(
+
   "profiles",
   {
     id: uuid("id").primaryKey(),
@@ -24,7 +36,10 @@ export const profiles = pgTable(
     preferredCountry: text("preferred_country").default("US").notNull(),
     isPublic: boolean("is_public").default(true).notNull(),
     role: text("role").default("user").notNull(),
-    status: text("status").default("active").notNull(),
+    status: text("status").default("active").notNull(), // 'active' | 'suspended' | 'banned'
+    statusReason: text("status_reason"),
+    statusUpdatedAt: timestamp("status_updated_at", { withTimezone: true }),
+    statusUpdatedBy: uuid("status_updated_by"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -191,6 +206,30 @@ export const rateLimits = pgTable(
   (table) => [index("rate_limits_reset_at_idx").on(table.resetAt)]
 );
 
+// 8. Admin Audit Logs (Action tracking for user moderation & changes)
+export const adminAuditLogs = pgTable(
+  "admin_audit_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    adminId: uuid("admin_id")
+      .references(() => profiles.id, { onDelete: "cascade" })
+      .notNull(),
+    targetUserId: uuid("target_user_id")
+      .references(() => profiles.id, { onDelete: "cascade" })
+      .notNull(),
+    action: text("action").notNull(), // 'suspend_user' | 'restore_user' | 'ban_user' | 'unban_user' | 'role_change'
+    reason: text("reason"),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("admin_audit_logs_target_idx").on(table.targetUserId),
+    index("admin_audit_logs_created_idx").on(table.createdAt),
+  ]
+);
+
 export type Profile = typeof profiles.$inferSelect;
 export type NewProfile = typeof profiles.$inferInsert;
 export type MediaItem = typeof mediaItems.$inferSelect;
@@ -205,5 +244,8 @@ export type Notification = typeof notifications.$inferSelect;
 export type NewNotification = typeof notifications.$inferInsert;
 export type RateLimit = typeof rateLimits.$inferSelect;
 export type NewRateLimit = typeof rateLimits.$inferInsert;
+export type AdminAuditLog = typeof adminAuditLogs.$inferSelect;
+export type NewAdminAuditLog = typeof adminAuditLogs.$inferInsert;
+
 
 
