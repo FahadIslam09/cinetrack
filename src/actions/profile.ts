@@ -168,9 +168,9 @@ export async function updateProfile(params: UpdateProfileParams) {
         backdropUrl: trimmedBackdrop || existing?.backdropUrl,
       },
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Profile update error:", err);
-    return { error: err.message || "Failed to update profile." };
+    return { error: (err as Error).message || "Failed to update profile." };
   }
 }
 
@@ -288,7 +288,7 @@ export async function checkUsernameAvailability(rawUsername: string) {
     }
 
     return { available: true, username };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Availability check error:", err);
     return { available: false, error: "Unable to verify username right now." };
   }
@@ -436,9 +436,9 @@ export async function completeProfileSetup(params: {
       username: finalUsername,
       displayName: trimmedName,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Complete profile setup error:", err);
-    return { error: err.message || "Failed to complete profile setup." };
+    return { error: (err as Error).message || "Failed to complete profile setup." };
   }
 }
 
@@ -488,7 +488,12 @@ export async function uploadProfileImage(
       return { success: false, error: "Image size must not exceed 5MB." };
     }
 
-    const imgbbKey = process.env.IMGBB_API_KEY || "991f94ae55c7ee215507ec80b51bfa5b";
+    const imgbbKey = process.env.IMGBB_API_KEY;
+    if (!imgbbKey) {
+      console.error("IMGBB_API_KEY environment variable is not configured.");
+      return { success: false, error: "Image upload service is temporarily unavailable." };
+    }
+
     const uploadData = new FormData();
     uploadData.append("image", file);
 
@@ -509,7 +514,7 @@ export async function uploadProfileImage(
     }
 
     return { success: true, url: uploadedUrl };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("uploadProfileImage error:", err);
     return { success: false, error: "Failed to upload image. Please try again." };
   }
