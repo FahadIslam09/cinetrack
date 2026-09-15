@@ -1158,8 +1158,8 @@ export function LandingView() {
 
       {/* 6. FOOTER */}
       <footer className="w-full bg-[#121824] border-t border-white/[0.06] mt-auto">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-12 lg:py-16 pb-24 sm:pb-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 pt-10 sm:pt-12 lg:pt-14 pb-6 sm:pb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 sm:mb-10">
             {/* Col 1: Brand & Tagline */}
             <div className="col-span-2 md:col-span-1 flex flex-col gap-3">
               <Link href="/" className="flex items-center gap-2.5 group">
