@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { userMediaLogs, mediaItems, profiles } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { parseRating } from "@/lib/rating";
+import { redirect } from "next/navigation";
 
 interface LibraryPageProps {
   searchParams: Promise<{
@@ -22,6 +23,10 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login?next=/library");
+  }
 
   let userProfile: any = null;
   let items: LibraryItem[] = [];
