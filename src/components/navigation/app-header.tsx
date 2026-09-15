@@ -15,6 +15,10 @@ import {
   Lightbulb,
   FileText,
   Shield,
+  User,
+  BookmarkCheck,
+  LogOut,
+  Loader2,
 } from "lucide-react";
 import { QuickAddModal } from "../quick-add/quick-add-modal";
 import { LogoIcon } from "@/components/ui/logo-icon";
@@ -25,9 +29,12 @@ import { NotificationDropdown } from "./notification-dropdown";
 
 interface AppHeaderProps {
   user?: {
+    id?: string;
     email?: string;
     avatarUrl?: string;
     username?: string;
+    displayName?: string;
+    fullName?: string;
   } | null;
 }
 
@@ -38,7 +45,10 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const moreDropdownRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const dropdownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const isMoreActive = ["/about", "/contact", "/feedback", "/terms", "/privacy"].includes(pathname);
@@ -82,12 +92,21 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
       ) {
         setIsMoreDropdownOpen(false);
       }
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(e.target as Node)
+      ) {
+        setIsUserMenuOpen(false);
+      }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsMoreDropdownOpen(false);
+      if (e.key === "Escape") {
+        setIsMoreDropdownOpen(false);
+        setIsUserMenuOpen(false);
+      }
     };
 
-    if (isMoreDropdownOpen) {
+    if (isMoreDropdownOpen || isUserMenuOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("keydown", handleKeyDown);
     }
@@ -95,7 +114,7 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isMoreDropdownOpen]);
+  }, [isMoreDropdownOpen, isUserMenuOpen]);
 
   useEffect(() => {
     if (initialUser !== undefined) {
@@ -139,6 +158,23 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
       return;
     }
     setIsQuickAddOpen(true);
+  };
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      setCurrentUser(null);
+      setIsUserMenuOpen(false);
+      setIsMoreDropdownOpen(false);
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      console.error("Sign out error:", err);
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   return (
@@ -336,6 +372,30 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
                       </div>
                       <span>Privacy Policy</span>
                     </Link>
+
+                    {currentUser && (
+                      <>
+                        <div className="my-0.5 border-t border-white/[0.08]" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsMoreDropdownOpen(false);
+                            handleSignOut();
+                          }}
+                          disabled={isSigningOut}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          <div className="w-6 h-6 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+                            {isSigningOut ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <LogOut className="w-3.5 h-3.5" />
+                            )}
+                          </div>
+                          <span>{isSigningOut ? "Signing out..." : "Sign Out"}</span>
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -394,24 +454,89 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
 
             {/* User Profile Avatar / Sign In */}
             {currentUser ? (
-              <Link
-                href={currentUser.username ? `/${currentUser.username}` : "/library"}
-                className="flex items-center shrink-0 pl-1"
-                title="User Profile"
-              >
-                {currentUser.avatarUrl ? (
-                  <img
-                    src={currentUser.avatarUrl}
-                    alt="Profile"
-                    referrerPolicy="no-referrer"
-                    className="w-8 h-8 rounded-full object-cover border border-white/[0.06] hover:border-white/[0.16] ring-1 ring-white/[0.08] hover:ring-[#3B9EFF]/50 transition-all"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-[#3B9EFF]/20 border border-[#3B9EFF]/40 flex items-center justify-center text-xs font-semibold text-[#3B9EFF]">
-                    {currentUser.email?.slice(0, 2).toUpperCase() || "U"}
+              <div className="relative shrink-0 pl-1" ref={userMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                  className="flex items-center rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-[#3B9EFF]/40 cursor-pointer select-none"
+                  aria-label="User account menu"
+                  aria-expanded={isUserMenuOpen}
+                >
+                  {currentUser.avatarUrl ? (
+                    <img
+                      src={currentUser.avatarUrl}
+                      alt={currentUser.username || "Profile"}
+                      referrerPolicy="no-referrer"
+                      className="w-8 h-8 rounded-full object-cover border border-white/[0.06] hover:border-white/[0.16] ring-1 ring-white/[0.08] hover:ring-[#3B9EFF]/50 transition-all"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-[#3B9EFF]/20 border border-[#3B9EFF]/40 flex items-center justify-center text-xs font-semibold text-[#3B9EFF]">
+                      {currentUser.email?.slice(0, 2).toUpperCase() || "U"}
+                    </div>
+                  )}
+                </button>
+
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2.5 w-60 rounded-2xl bg-[#141B26]/95 backdrop-blur-xl border border-white/[0.1] shadow-2xl shadow-black/80 py-1.5 z-50 animate-in fade-in-50 zoom-in-95 duration-150">
+                    {/* User Info Header */}
+                    <div className="px-3.5 py-2.5 border-b border-white/[0.06]">
+                      <p className="text-xs font-bold text-[#F5F7FA] truncate">
+                        {currentUser.displayName || currentUser.fullName || currentUser.username || "User"}
+                      </p>
+                      <p className="text-[11px] text-[#A8B0BD] truncate mt-0.5">
+                        {currentUser.email || `@${currentUser.username}`}
+                      </p>
+                    </div>
+
+                    {/* Navigation Items */}
+                    <div className="p-1 space-y-0.5">
+                      <Link
+                        href={currentUser.username ? `/u/${currentUser.username}` : "/library"}
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-white/[0.06] transition-colors cursor-pointer"
+                      >
+                        <User className="w-4 h-4 text-[#3B9EFF]" />
+                        <span>Public Profile</span>
+                      </Link>
+
+                      <Link
+                        href="/library"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-white/[0.06] transition-colors cursor-pointer"
+                      >
+                        <BookmarkCheck className="w-4 h-4 text-[#10B981]" />
+                        <span>My Library</span>
+                      </Link>
+
+                      <Link
+                        href="/settings"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-white/[0.06] transition-colors cursor-pointer"
+                      >
+                        <Settings className="w-4 h-4 text-[#F5C84B]" />
+                        <span>Settings</span>
+                      </Link>
+                    </div>
+
+                    {/* Divider & Sign Out */}
+                    <div className="p-1 border-t border-white/[0.06] mt-1">
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        disabled={isSigningOut}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        {isSigningOut ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-rose-400" />
+                        ) : (
+                          <LogOut className="w-4 h-4 text-rose-400" />
+                        )}
+                        <span>{isSigningOut ? "Signing out..." : "Sign Out"}</span>
+                      </button>
+                    </div>
                   </div>
                 )}
-              </Link>
+              </div>
             ) : (
               <Link
                 href="/login"

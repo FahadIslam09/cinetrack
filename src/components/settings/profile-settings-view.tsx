@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { User, AtSign, AlignLeft, Pencil, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { User, AtSign, AlignLeft, Pencil, ExternalLink, Image as ImageIcon, LogOut, Loader2 } from "lucide-react";
 import { EditProfileModal } from "@/components/profile/edit-profile-modal";
+import { createClient } from "@/lib/supabase/client";
 
 interface ProfileSettingsViewProps {
   initialProfile: {
@@ -17,8 +19,24 @@ interface ProfileSettingsViewProps {
 }
 
 export function ProfileSettingsView({ initialProfile }: ProfileSettingsViewProps) {
+  const router = useRouter();
   const [profile, setProfile] = useState(initialProfile);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      console.error("Sign out error:", err);
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   const initials = (profile.fullName || profile.username || "U").slice(0, 2).toUpperCase();
 
@@ -125,6 +143,32 @@ export function ProfileSettingsView({ initialProfile }: ProfileSettingsViewProps
             <ExternalLink className="w-3.5 h-3.5" />
           </Link>
         </div>
+      </div>
+
+      {/* Account Session Card */}
+      <div className="rounded-2xl sm:rounded-3xl bg-[#151C27] border border-white/[0.08] p-5 sm:p-7 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h3 className="text-sm sm:text-base font-bold text-[#F5F7FA]">
+            Account Session
+          </h3>
+          <p className="text-xs text-[#A8B0BD] mt-0.5">
+            Signed in as <span className="text-[#F5F7FA] font-medium font-mono">@{profile.username}</span>. Sign out of CineTrack anytime on this device.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSignOut}
+          disabled={isSigningOut}
+          className="h-10 px-4 rounded-xl border border-rose-500/30 hover:border-rose-500/60 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 text-xs font-semibold inline-flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-98 shrink-0 disabled:opacity-50"
+        >
+          {isSigningOut ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <LogOut className="w-3.5 h-3.5" />
+          )}
+          <span>{isSigningOut ? "Signing out..." : "Sign Out"}</span>
+        </button>
       </div>
 
       {/* Edit Profile Modal Integration */}
