@@ -25,6 +25,7 @@ const RESERVED_ROUTES = new Set([
   "terms",
   "privacy",
   "settings",
+  "home",
 ]);
 
 function copyCookies(from: NextResponse, to: NextResponse) {
@@ -37,16 +38,8 @@ export default async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request);
   const { pathname, search } = request.nextUrl;
 
-  // 1. Guarded routes: /library, /profile, /settings, and /admin require authentication
+  // 1. Guarded routes: /profile, /settings, and /admin require authentication
   if (!user) {
-    if (pathname === "/library" || pathname.startsWith("/library/")) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = "/login";
-      loginUrl.search = `?next=${encodeURIComponent(pathname + search)}`;
-      const redirectResponse = NextResponse.redirect(loginUrl);
-      copyCookies(supabaseResponse, redirectResponse);
-      return redirectResponse;
-    }
 
     if (pathname === "/profile" || pathname.startsWith("/profile/")) {
       const loginUrl = request.nextUrl.clone();

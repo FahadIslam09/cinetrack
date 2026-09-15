@@ -48,7 +48,7 @@ function LoginForm() {
       }
       if (decoded.startsWith("/search")) return { url: decoded, label: "Search" };
       if (decoded.startsWith("/u/") || decoded.startsWith("/@")) return { url: decoded, label: "Profile" };
-      if (decoded === "/") return { url: "/", label: "Home" };
+      if (decoded === "/" || decoded === "/home") return { url: "/home", label: "Home" };
       return { url: decoded, label: "Previous Page" };
     }
     return { url: "/discover", label: null };

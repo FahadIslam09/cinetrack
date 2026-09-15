@@ -37,7 +37,7 @@ function AnchorScrollHandler() {
       let targetSelector = "";
       if (href.startsWith("#") && href.length > 1) {
         targetSelector = href;
-      } else if (href.startsWith("/#") && pathname === "/") {
+      } else if (href.startsWith("/#") && (pathname === "/" || pathname === "/home")) {
         targetSelector = href.slice(1);
       }
 

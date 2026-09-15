@@ -164,15 +164,15 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
               aria-label="Main Navigation"
             >
               <Link
-                href="/"
+                href="/home"
                 className={`relative py-2 font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
-                  pathname === "/"
+                  pathname === "/home"
                     ? "text-[#F5F7FA]"
                     : "text-[#A8B0BD] hover:text-[#F5F7FA]"
                 }`}
               >
                 <span>Home</span>
-                {pathname === "/" && (
+                {pathname === "/home" && (
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
                 )}
               </Link>

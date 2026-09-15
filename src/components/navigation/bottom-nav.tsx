@@ -96,9 +96,9 @@ function BottomNavContent() {
   const navItems = [
     {
       label: "Home",
-      href: "/",
+      href: "/home",
       icon: Film,
-      isActive: pathname === "/",
+      isActive: pathname === "/home",
     },
     {
       label: "Discover",
