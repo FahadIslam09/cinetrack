@@ -187,13 +187,16 @@ function BottomNavContent() {
         aria-hidden="true"
       />
 
-      {/* Slide-up Sheet for More links (z-40, sits behind bottom nav bar z-50) */}
+      {/* Slide-up Sheet for More links (z-40, sits seamlessly behind bottom nav bar z-50) */}
       <div
-        className={`md:hidden fixed bottom-16 left-0 right-0 z-40 p-4 pb-6 bg-[#151C27] border-t border-white/10 rounded-t-2xl shadow-[0_-12px_32px_rgba(0,0,0,0.6)] transition-transform duration-300 ease-out will-change-transform ${
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-40 max-h-[85dvh] overflow-y-auto overscroll-contain p-4 bg-[#151C27] border-t border-white/10 rounded-t-2xl shadow-[0_-12px_32px_rgba(0,0,0,0.6)] transition-transform duration-300 ease-out will-change-transform ${
           isMoreOpen
             ? "translate-y-0 pointer-events-auto"
             : "translate-y-full pointer-events-none"
         }`}
+        style={{
+          paddingBottom: "calc(5rem + env(safe-area-inset-bottom, 0px))",
+        }}
         role="dialog"
         aria-label="More navigation links"
         aria-hidden={!isMoreOpen}
