@@ -893,20 +893,20 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
           )}
 
           {/* Reviews */}
-          <section className="flex flex-col gap-3 mt-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-base text-[#F5F7FA]">Reviews</h3>
-                <span className="text-xs font-semibold text-[#A8B0BD] bg-white/[0.06] border border-white/[0.08] px-2 py-0.5 rounded-full">
-                  {totalReviews}
-                </span>
+          {communityReviews.length > 0 && (
+            <section className="flex flex-col gap-3 mt-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-base text-[#F5F7FA]">Reviews</h3>
+                  <span className="text-xs font-semibold text-[#A8B0BD] bg-white/[0.06] border border-white/[0.08] px-2 py-0.5 rounded-full">
+                    {totalReviews}
+                  </span>
+                </div>
+                <WriteReviewButton media={media} initialLog={userLog} />
               </div>
-              <WriteReviewButton media={media} initialLog={userLog} />
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {communityReviews.length > 0 ? (
-                communityReviews.map((rev) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {communityReviews.map((rev) => (
                   <ReviewCard
                     key={rev.id}
                     reviewId={rev.id}
@@ -921,40 +921,10 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
                     commentsCount={0}
                     timeAgo={rev.timeAgo}
                   />
-                ))
-              ) : (
-                <>
-                  <ReviewCard
-                    author={{
-                      name: "শৌভিক ভট্টাচার্য (Souvik)",
-                      isVerified: true,
-                    }}
-                    mediaTitle={media.title}
-                    rating="masterpiece"
-                    reviewText="হিলদুর গুদনাদোত্তিরের শব্দের অনুরণন এবং সিনেমাটোগ্রাফি চলচ্চিত্রটিকে এক অন্য মাত্রায় নিয়ে গেছে। নিস্তব্ধতার যে ওজন থাকতে পারে, তা পরিচালক অত্যন্ত সংবেদনশীলতার সাথে ফুটিয়ে তুলেছেন।"
-                    isBengali={true}
-                    likesCount={142}
-                    commentsCount={29}
-                    timeAgo="Recent log"
-                  />
-
-                  <ReviewCard
-                    author={{
-                      name: "Julian Vane",
-                      isVerified: false,
-                    }}
-                    mediaTitle={media.title}
-                    rating="good"
-                    containsSpoilers={true}
-                    reviewText="The second act pacing accelerates relentlessly toward a sequence that fundamentally questions the characters' allegiances. One of the strongest cinematic conclusions this year."
-                    likesCount={88}
-                    commentsCount={14}
-                    timeAgo="2 days ago"
-                  />
-                </>
-              )}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Related Titles */}
           {similarItems.length > 0 && (
