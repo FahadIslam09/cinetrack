@@ -714,15 +714,19 @@ export function QuickAddModal({
         <div
           data-modal-scroll="true"
           data-lenis-prevent="true"
-          className="flex-1 overflow-y-auto overscroll-contain modal-scrollbar p-4 sm:p-5 flex flex-col min-h-0"
+          className={`flex-1 p-4 sm:p-5 flex flex-col min-h-0 ${
+            step === 1
+              ? "overflow-hidden"
+              : "overflow-y-auto overscroll-contain modal-scrollbar"
+          }`}
         >
           {/* =========================================================================
               STEP 1: SEARCH & SELECT
              ========================================================================= */}
           {step === 1 && (
-            <div className="flex flex-col gap-4 flex-1">
+            <div className="flex flex-col gap-4 flex-1 min-h-0">
               {/* Search Bar */}
-              <div className="relative">
+              <div className="relative shrink-0">
                 <Search className="w-4 h-4 text-[#6F7886] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   ref={searchInputRef}
@@ -747,7 +751,7 @@ export function QuickAddModal({
               </div>
 
               {/* Format Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none shrink-0">
                 {[
                   { id: "all", label: "All Formats" },
                   { id: "movie", label: "Movies", icon: Film },
@@ -775,7 +779,7 @@ export function QuickAddModal({
               </div>
 
               {/* Search Results / States */}
-              <div className="flex-1 min-h-[320px] flex flex-col relative">
+              <div className="flex-1 min-h-0 flex flex-col relative">
                 {searchResults.length > 0 ? (
                   <div className="relative flex-1 flex flex-col min-h-0">
                     {/* In-place Loading Overlay when updating existing results */}
@@ -789,7 +793,9 @@ export function QuickAddModal({
                     )}
 
                     <div
-                      className={`space-y-2 overflow-y-auto flex-1 modal-scrollbar pr-1 transition-opacity duration-150 ${
+                      data-modal-scroll="true"
+                      data-lenis-prevent="true"
+                      className={`space-y-2 overflow-y-auto overscroll-contain flex-1 min-h-0 modal-scrollbar pr-1 transition-opacity duration-150 ${
                         isSearching ? "opacity-35 pointer-events-none" : "opacity-100"
                       }`}
                     >
@@ -857,12 +863,12 @@ export function QuickAddModal({
                     </div>
                   </div>
                 ) : isSearching ? (
-                  <div className="flex-1 min-h-[320px] flex flex-col items-center justify-center gap-2.5 py-12 text-[#A8B0BD]">
+                  <div className="flex-1 min-h-[220px] sm:min-h-[300px] flex flex-col items-center justify-center gap-2.5 py-8 sm:py-12 text-[#A8B0BD]">
                     <Loader2 className="w-7 h-7 text-[#3B9EFF] animate-spin" />
                     <p className="text-xs font-medium">Searching titles...</p>
                   </div>
                 ) : searchError ? (
-                  <div className="flex-1 min-h-[320px] flex flex-col items-center justify-center gap-2 py-10 text-center">
+                  <div className="flex-1 min-h-[220px] sm:min-h-[300px] flex flex-col items-center justify-center gap-2 py-8 sm:py-10 text-center">
                     <p className="text-sm text-[#F43F5E]">{searchError}</p>
                     <button
                       type="button"
@@ -873,7 +879,7 @@ export function QuickAddModal({
                     </button>
                   </div>
                 ) : searchQuery.trim().length > 0 ? (
-                  <div className="flex-1 min-h-[320px] flex flex-col items-center justify-center gap-2 py-12 text-center text-[#A8B0BD]">
+                  <div className="flex-1 min-h-[220px] sm:min-h-[300px] flex flex-col items-center justify-center gap-2 py-8 sm:py-12 text-center text-[#A8B0BD]">
                     <Search className="w-8 h-8 text-[#6F7886]/60" />
                     <p className="text-sm font-medium text-[#F5F7FA]">
                       No titles found
@@ -883,7 +889,7 @@ export function QuickAddModal({
                     </p>
                   </div>
                 ) : (
-                  <div className="flex-1 min-h-[320px] flex flex-col items-center justify-center gap-3 py-12 text-center text-[#A8B0BD]">
+                  <div className="flex-1 min-h-[220px] sm:min-h-[300px] flex flex-col items-center justify-center gap-3 py-8 sm:py-12 text-center text-[#A8B0BD]">
                     <div className="w-12 h-12 rounded-2xl bg-[#1D2734] border border-white/[0.06] flex items-center justify-center text-[#3B9EFF]">
                       <Search className="w-6 h-6" />
                     </div>
