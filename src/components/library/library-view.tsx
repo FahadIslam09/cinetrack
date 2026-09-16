@@ -252,6 +252,12 @@ export function LibraryView({
         return true;
       })
       .sort((a, b) => {
+        const isWatchingA = a.status === "watching" ? 1 : 0;
+        const isWatchingB = b.status === "watching" ? 1 : 0;
+        if (isWatchingA !== isWatchingB) {
+          return isWatchingB - isWatchingA;
+        }
+
         if (sortBy === "masterpiece_first") {
           const rA = getRatingRank(a.userRating);
           const rB = getRatingRank(b.userRating);

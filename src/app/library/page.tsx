@@ -113,7 +113,15 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
         reviewText: l.log.reviewText,
         containsSpoilers: Boolean(l.log.containsSpoilers),
         updatedAt: l.log.updatedAt ? l.log.updatedAt.toISOString() : undefined,
-      }));
+      })).sort((a, b) => {
+        const isWatchingA = a.status === "watching" ? 1 : 0;
+        const isWatchingB = b.status === "watching" ? 1 : 0;
+        if (isWatchingA !== isWatchingB) return isWatchingB - isWatchingA;
+        return (
+          new Date(b.updatedAt || 0).getTime() -
+          new Date(a.updatedAt || 0).getTime()
+        );
+      });
     } catch (err) {
       console.error("Library query error:", err);
     }
