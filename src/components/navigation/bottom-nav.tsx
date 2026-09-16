@@ -67,10 +67,8 @@ function BottomNavContent() {
     }
   };
 
-  const handleAddClick = async () => {
-    const supabase = createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
+  const handleAddClick = () => {
+    if (!user) {
       const currentUrl = window.location.pathname + window.location.search;
       router.push(`/login?next=${encodeURIComponent(currentUrl)}`);
       return;

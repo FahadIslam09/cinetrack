@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useTransition, useMemo } from "react";
+import { useState, useEffect, useRef, useTransition, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -158,8 +158,42 @@ export function QuickAddModal({
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  // Lock background screen scroll cleanly across all devices when modal is open
-  useScrollLock(isOpen);
+  // Animation state for smooth open and close transitions
+  const [isRendered, setIsRendered] = useState(isOpen);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // If opening, ensure rendered state is active immediately during current render pass
+  if (isOpen && !isRendered) {
+    setIsRendered(true);
+  }
+
+  // Controlled smooth exit handler
+  const handleClose = useCallback(() => {
+    if (isSubmitting || isDeleting || !isVisible) return;
+    setIsVisible(false);
+    setTimeout(() => {
+      setIsRendered(false);
+      onClose();
+    }, 300);
+  }, [isSubmitting, isDeleting, isVisible, onClose]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const raf = requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
+      return () => cancelAnimationFrame(raf);
+    } else {
+      setIsVisible(false);
+      const timer = setTimeout(() => {
+        setIsRendered(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  // Lock background screen scroll cleanly across all devices while modal is open or animating out
+  useScrollLock(isRendered);
 
   // Handle ESC key to close modal or dismiss confirmation popup
   useEffect(() => {
@@ -169,13 +203,13 @@ export function QuickAddModal({
         if (isDeleteConfirmOpen) {
           if (!isDeleting) setIsDeleteConfirmOpen(false);
         } else if (!isSubmitting) {
-          onClose();
+          handleClose();
         }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isSubmitting, isDeleting, isDeleteConfirmOpen, onClose]);
+  }, [isOpen, isSubmitting, isDeleting, isDeleteConfirmOpen, handleClose]);
 
   // Initialize modal state on open or media change
   useEffect(() => {
@@ -532,7 +566,7 @@ export function QuickAddModal({
 
         // Close after brief success confirmation
         setTimeout(() => {
-          onClose();
+          handleClose();
         }, 900);
       }
     } catch (err: any) {
@@ -562,7 +596,7 @@ export function QuickAddModal({
       } else {
         setIsDeleting(false);
         setIsDeleteConfirmOpen(false);
-        onClose();
+        handleClose();
         onSuccess?.();
         startTransition(() => {
           router.refresh();
@@ -600,7 +634,7 @@ export function QuickAddModal({
     );
   };
 
-  if (!isOpen || !mounted) return null;
+  if (!isRendered || !mounted) return null;
 
   return createPortal(
     <div
@@ -608,10 +642,26 @@ export function QuickAddModal({
       aria-modal="true"
       data-lenis-prevent="true"
       aria-labelledby="add-to-library-title"
-      className="fixed inset-0 z-[80] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overscroll-contain"
+      className="fixed inset-0 z-[80] flex items-end md:items-center justify-center p-0 md:p-4 overscroll-contain pointer-events-none"
     >
+      {/* Backdrop */}
       <div
-        className="w-full max-w-lg bg-[#151C27] border border-white/[0.08] rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90dvh] md:h-[640px] max-h-[92dvh] md:max-h-[85vh] animate-in zoom-in-95 duration-200"
+        className={`fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300 ease-out ${
+          isVisible
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={handleClose}
+        aria-hidden="true"
+      />
+
+      {/* Modal / Bottom Sheet */}
+      <div
+        className={`relative z-10 pointer-events-auto w-full max-w-lg bg-[#151C27] border border-white/[0.08] rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90dvh] md:h-[640px] max-h-[92dvh] md:max-h-[85vh] transition-transform md:transition-all duration-300 ease-out will-change-transform ${
+          isVisible
+            ? "translate-y-0 md:scale-100 md:opacity-100"
+            : "translate-y-full md:translate-y-4 md:scale-95 md:opacity-0"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header & Step Indicator */}
@@ -634,7 +684,7 @@ export function QuickAddModal({
             </div>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="w-8 h-8 rounded-lg flex items-center justify-center text-[#A8B0BD] hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
               aria-label="Close modal"
             >
@@ -1374,7 +1424,7 @@ export function QuickAddModal({
               </span>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleClose}
                 className="h-9 px-4 rounded-xl text-xs font-semibold text-[#A8B0BD] hover:text-white hover:bg-white/[0.04] transition-colors cursor-pointer"
               >
                 Cancel
@@ -1385,7 +1435,7 @@ export function QuickAddModal({
               <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={() => (media ? onClose() : setStep(1))}
+                  onClick={() => (media ? handleClose() : setStep(1))}
                   className="h-10 px-3 sm:px-4 rounded-xl text-xs font-semibold text-[#A8B0BD] hover:text-white hover:bg-white/[0.04] transition-colors inline-flex items-center gap-1.5 cursor-pointer shrink-0"
                 >
                   <ChevronLeft className="w-4 h-4" />
