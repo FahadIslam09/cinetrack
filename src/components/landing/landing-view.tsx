@@ -351,16 +351,16 @@ export function LandingView() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
             <Link
               href="/login"
-              className="hidden xs:inline-block px-3 py-1.5 text-xs font-semibold text-[#A8B0BD] hover:text-white transition-colors"
+              className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold text-[#CBD5E1] hover:text-white hover:bg-white/[0.06] border border-white/[0.1] hover:border-white/[0.2] rounded-lg transition-all flex items-center justify-center cursor-pointer whitespace-nowrap"
             >
-              Sign In
+              Log In
             </Link>
             <Link
               href="/login?mode=signup"
-              className="px-3.5 sm:px-4 py-2 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs rounded-lg shadow-sm shadow-[#3B9EFF]/25 transition-all active:scale-95 flex items-center justify-center cursor-pointer animate-[glow_2s_ease-in-out_1]"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#3B9EFF] hover:bg-[#5AAFFF] text-white font-semibold text-xs rounded-lg shadow-sm shadow-[#3B9EFF]/25 transition-all active:scale-95 flex items-center justify-center cursor-pointer whitespace-nowrap"
             >
               Get Started
             </Link>
@@ -460,9 +460,9 @@ export function LandingView() {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 py-2.5 text-center text-xs font-semibold text-[#A8B0BD] hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors"
+                className="flex-1 py-2.5 text-center text-xs font-semibold text-[#CBD5E1] hover:text-white bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] rounded-lg transition-colors"
               >
-                Sign In
+                Log In
               </Link>
               <Link
                 href="/login?mode=signup"
@@ -538,6 +538,17 @@ export function LandingView() {
                 >
                   <Compass className="w-4 h-4 sm:w-5 sm:h-5 text-[#3B9EFF]" />
                   <span>Explore Discover</span>
+                </Link>
+              </div>
+
+              {/* Existing Member Log In Link */}
+              <div className="mt-3.5 sm:mt-4 text-xs sm:text-sm text-[#8B95A5] select-none text-center">
+                Already have an account?{" "}
+                <Link
+                  href="/login"
+                  className="text-[#3B9EFF] hover:text-[#5AAFFF] font-semibold underline underline-offset-4 transition-colors"
+                >
+                  Log In
                 </Link>
               </div>
             </ScrollReveal>
@@ -1148,6 +1159,16 @@ export function LandingView() {
                 </button>
               </form>
 
+              <div className="text-xs text-[#8B95A5] mb-5 relative z-10">
+                Already have an account?{" "}
+                <Link
+                  href="/login"
+                  className="text-[#3B9EFF] hover:text-[#5AAFFF] font-semibold underline underline-offset-4 transition-colors"
+                >
+                  Log In
+                </Link>
+              </div>
+
               {/* Social proof mini anime avatars */}
               <div className="flex items-center justify-center gap-2 mb-4 relative z-10">
                 <div className="flex -space-x-2">
@@ -1219,8 +1240,9 @@ export function LandingView() {
 
             {/* Col 3: Product & Community */}
             <div className="flex flex-col gap-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#F5F7FA]">Community & Info</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#F5F7FA]">Account & Community</h3>
               <nav className="flex flex-col gap-2 text-xs text-[#A8B0BD]">
+                <Link href="/login" className="hover:text-white text-[#F5F7FA] font-medium transition-colors">Log In</Link>
                 <Link href="/about" className="hover:text-white transition-colors">About CineTrack</Link>
                 <Link href="/contact" className="hover:text-white transition-colors">Contact Support</Link>
                 <Link href="/feedback" className="hover:text-white transition-colors text-[#3B9EFF] hover:text-[#5AAFFF] font-semibold inline-flex items-center gap-1">Need a New Feature? <ArrowRight className="w-3 h-3" /></Link>
