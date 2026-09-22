@@ -88,7 +88,11 @@ export async function upsertMediaLog(params: LogMediaParams) {
       return { error: "Invalid rating. Allowed categories: poor, average, good, great, masterpiece." };
     }
     const finalRating =
-      status === "plan_to_watch" ? null : rating ? parseRating(rating) : null;
+      status === "plan_to_watch" || status === "watching"
+        ? null
+        : rating
+        ? parseRating(rating)
+        : null;
 
     // Determine when the log reached "completed" (for accurate admin metrics)
     const [existingLog] = await db

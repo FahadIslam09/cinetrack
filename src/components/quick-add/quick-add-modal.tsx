@@ -229,7 +229,11 @@ export function QuickAddModal({
           (initialLog?.status as WatchStatus) ||
           (media.mediaType === "movie" ? "completed" : "watching");
         setStatus(resolvedStatus);
-        setRating(resolvedStatus === "plan_to_watch" ? null : parseRating(initialLog?.rating));
+        setRating(
+          resolvedStatus === "plan_to_watch" || resolvedStatus === "watching"
+            ? null
+            : parseRating(initialLog?.rating)
+        );
         setEpisodes(initialLog?.episodesWatched || 0);
         setSelectedSeason(initialLog?.currentSeason || 1);
         setSelectedEpisode(initialLog?.currentEpisode || 1);
@@ -350,7 +354,7 @@ export function QuickAddModal({
   const handleStatusChange = (newStatus: WatchStatus) => {
     setStatus(newStatus);
     setRatingError(null);
-    if (newStatus === "plan_to_watch") {
+    if (newStatus === "plan_to_watch" || newStatus === "watching") {
       setRating(null);
     }
     if (newStatus === "completed" && selectedMedia?.mediaType !== "movie" && seasonsData.length > 0) {
@@ -520,7 +524,7 @@ export function QuickAddModal({
   const handleSave = async () => {
     if (!selectedMedia) return;
 
-    if (status !== "plan_to_watch" && !rating) {
+    if (status !== "plan_to_watch" && status !== "watching" && !rating) {
       setErrorMessage("Please select a rating before saving.");
       setRatingError("Please select a rating to continue.");
       setStep(2);
@@ -1111,7 +1115,7 @@ export function QuickAddModal({
                     <label className="text-xs font-semibold uppercase tracking-wider text-[#A8B0BD]">
                       Personal Rating
                     </label>
-                    {status !== "plan_to_watch" && (
+                    {status !== "plan_to_watch" && status !== "watching" && (
                       <span className="text-rose-400 text-xs font-bold" title="Required">*</span>
                     )}
                   </div>
@@ -1119,6 +1123,10 @@ export function QuickAddModal({
                     {status === "plan_to_watch" ? (
                       <span className="text-[11px] font-medium text-[#6F7886] italic">
                         Not available for Want to Watch
+                      </span>
+                    ) : status === "watching" ? (
+                      <span className="text-[11px] font-medium text-[#6F7886] italic">
+                        Not available for Watching
                       </span>
                     ) : (
                       <>
@@ -1142,6 +1150,11 @@ export function QuickAddModal({
                   <div className="p-3.5 rounded-xl bg-[#1D2734]/50 border border-white/[0.04] text-center text-xs text-[#6F7886] select-none flex items-center justify-center gap-2">
                     <Bookmark className="w-4 h-4 text-[#A855F7]/60 shrink-0" />
                     <span>Rating disabled for &ldquo;Want to Watch&rdquo; titles.</span>
+                  </div>
+                ) : status === "watching" ? (
+                  <div className="p-3.5 rounded-xl bg-[#1D2734]/50 border border-white/[0.04] text-center text-xs text-[#6F7886] select-none flex items-center justify-center gap-2">
+                    <Play className="w-4 h-4 text-[#3B9EFF]/60 shrink-0" />
+                    <span>Rating disabled while &ldquo;Watching&rdquo; (rate once completed).</span>
                   </div>
                 ) : (
                   <>
@@ -1347,6 +1360,10 @@ export function QuickAddModal({
                           <span className="text-xs font-medium text-[#6F7886] italic">
                             Unrated (Want to Watch)
                           </span>
+                        ) : status === "watching" ? (
+                          <span className="text-xs font-medium text-[#6F7886] italic">
+                            Unrated (Watching)
+                          </span>
                         ) : rating ? (
                           <span className={`text-xs font-semibold inline-flex items-center gap-1.5 ${RATING_CONFIG[rating].textColor}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${RATING_CONFIG[rating].dotColor}`} />
@@ -1458,7 +1475,7 @@ export function QuickAddModal({
               <button
                 type="button"
                 onClick={() => {
-                  if (status !== "plan_to_watch" && !rating) {
+                  if (status !== "plan_to_watch" && status !== "watching" && !rating) {
                     setRatingError("Please select a rating to continue.");
                     return;
                   }
