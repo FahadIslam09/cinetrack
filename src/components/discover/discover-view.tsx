@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Compass,
   Crown,
-  Sparkles,
+  Medal,
   CheckCircle2,
   Award,
   Flame,
@@ -230,7 +230,7 @@ export function DiscoverView({
       title: "Great",
       label: "Great",
       description: "Standout direction and exceptional storytelling",
-      icon: <Sparkles className="w-4 h-4 text-[#10B981]" />,
+      icon: <Medal className="w-4 h-4 text-[#10B981]" />,
       pillClass: "bg-[#10B981]/15 text-[#10B981] border-[#10B981]/30",
       dotClass: "bg-[#10B981]",
       items: filteredItems.filter((i) => i.userRating === "great"),
