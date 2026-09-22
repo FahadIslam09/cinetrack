@@ -133,8 +133,28 @@ export async function GET(req: NextRequest) {
     // 2. Fetch Media (if type !== 'profiles')
     if (type !== "profiles") {
       if (type === "anime") {
-        const animeResults = await anilist.searchAnime(q, 16);
-        mediaResults = rankMediaResults(animeResults.map(normalizeAniListAnime), q);
+        const [animeResults, tvRes, movieRes] = await Promise.all([
+          anilist.searchAnime(q, 16).catch(() => []),
+          tmdb.searchTV(q, page).catch(() => ({ results: [] })),
+          tmdb.searchMovies(q, page).catch(() => ({ results: [] })),
+        ]);
+        const anilistAnime = (animeResults || []).map(normalizeAniListAnime);
+        const tmdbAnime = [
+          ...(tvRes.results || []).map(normalizeTmdbTV),
+          ...(movieRes.results || []).map(normalizeTmdbMovie),
+        ].filter((m) => m.mediaType === "anime");
+
+        const seenTitles = new Set<string>();
+        const merged: NormalizedMedia[] = [];
+        for (const item of [...anilistAnime, ...tmdbAnime]) {
+          const key = item.title.toLowerCase().replace(/[^a-z0-9]/g, "");
+          if (!seenTitles.has(key)) {
+            seenTitles.add(key);
+            merged.push(item);
+          }
+        }
+
+        mediaResults = rankMediaResults(merged, q);
         totalMedia = mediaResults.length;
         totalPages = Math.max(1, Math.ceil(totalMedia / 12));
       } else if (type === "movie") {
@@ -144,7 +164,10 @@ export async function GET(req: NextRequest) {
           total_pages: 1,
           total_results: 0,
         }));
-        mediaResults = rankMediaResults((tmdbRes.results || []).map(normalizeTmdbMovie), q);
+        mediaResults = rankMediaResults(
+          (tmdbRes.results || []).map(normalizeTmdbMovie).filter((m) => m.mediaType === "movie"),
+          q
+        );
         totalPages = tmdbRes.total_pages || 1;
         totalMedia = tmdbRes.total_results || mediaResults.length;
       } else if (type === "series") {
@@ -154,7 +177,10 @@ export async function GET(req: NextRequest) {
           total_pages: 1,
           total_results: 0,
         }));
-        mediaResults = rankMediaResults((tmdbRes.results || []).map(normalizeTmdbTV), q);
+        mediaResults = rankMediaResults(
+          (tmdbRes.results || []).map(normalizeTmdbTV).filter((m) => m.mediaType === "series"),
+          q
+        );
         totalPages = tmdbRes.total_pages || 1;
         totalMedia = tmdbRes.total_results || mediaResults.length;
       } else {

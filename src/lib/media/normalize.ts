@@ -61,16 +61,62 @@ export const TMDB_GENRE_MAP: Record<number, string> = {
   10768: "War & Politics",
 };
 
+export function isTmdbAnime(item: any): boolean {
+  if (!item) return false;
+
+  const hasAnimationGenre =
+    item.genre_ids?.includes(16) ||
+    item.genres?.some(
+      (g: any) =>
+        (typeof g === "string" && g.toLowerCase() === "animation") ||
+        g?.id === 16 ||
+        g?.name?.toLowerCase() === "animation"
+    );
+
+  const hasAnimeGenre = item.genres?.some(
+    (g: any) =>
+      (typeof g === "string" && g.toLowerCase() === "anime") ||
+      g?.name?.toLowerCase() === "anime"
+  );
+
+  if (hasAnimeGenre) return true;
+  if (!hasAnimationGenre) return false;
+
+  // Japanese origin indicator
+  const isJp =
+    item.original_language === "ja" ||
+    item.origin_country?.some(
+      (c: any) => (typeof c === "string" ? c.toUpperCase() === "JP" : c?.iso_3166_1 === "JP")
+    ) ||
+    item.production_countries?.some(
+      (c: any) => (typeof c === "string" ? c.toUpperCase() === "JP" : c?.iso_3166_1 === "JP")
+    );
+
+  return Boolean(isJp);
+}
+
 export function normalizeTmdbMovie(item: any): NormalizedMedia {
   const releaseDate = item.release_date || "";
   const year = releaseDate ? releaseDate.slice(0, 4) : undefined;
   const rating = item.vote_average ? Number(item.vote_average.toFixed(1)) : 0;
+  const isAnime = isTmdbAnime(item);
+  const mediaType = isAnime ? "anime" : "movie";
+
+  const rawGenres = Array.from(
+    new Set([
+      ...(item.genres?.map((g: any) => g.name || g) || []),
+      ...(item.genre_ids?.map((id: number) => TMDB_GENRE_MAP[id]).filter(Boolean) || []),
+    ])
+  );
+  if (isAnime && !rawGenres.some((g) => g.toLowerCase() === "anime")) {
+    rawGenres.unshift("Anime");
+  }
 
   return {
     id: `tmdb:movie:${item.id}`,
     source: "tmdb",
     sourceId: String(item.id),
-    mediaType: "movie",
+    mediaType,
     title: item.title || item.original_title || "Untitled",
     originalTitle: item.original_title,
     posterPath: getTmdbImageUrl(item.poster_path, "w500"),
@@ -80,12 +126,7 @@ export function normalizeTmdbMovie(item: any): NormalizedMedia {
     rating,
     totalEpisodes: 1,
     runtime: item.runtime || undefined,
-    genres: Array.from(
-      new Set([
-        ...(item.genres?.map((g: any) => g.name) || []),
-        ...(item.genre_ids?.map((id: number) => TMDB_GENRE_MAP[id]).filter(Boolean) || []),
-      ])
-    ),
+    genres: rawGenres,
     synopsis: item.overview,
     streamingProviders: item["watch/providers"]?.results || {},
     popularity: typeof item.popularity === "number" ? item.popularity : 0,
@@ -97,12 +138,24 @@ export function normalizeTmdbTV(item: any): NormalizedMedia {
   const year = releaseDate ? releaseDate.slice(0, 4) : undefined;
   const endYear = item.last_air_date ? item.last_air_date.slice(0, 4) : undefined;
   const rating = item.vote_average ? Number(item.vote_average.toFixed(1)) : 0;
+  const isAnime = isTmdbAnime(item);
+  const mediaType = isAnime ? "anime" : "series";
+
+  const rawGenres = Array.from(
+    new Set([
+      ...(item.genres?.map((g: any) => g.name || g) || []),
+      ...(item.genre_ids?.map((id: number) => TMDB_GENRE_MAP[id]).filter(Boolean) || []),
+    ])
+  );
+  if (isAnime && !rawGenres.some((g) => g.toLowerCase() === "anime")) {
+    rawGenres.unshift("Anime");
+  }
 
   return {
     id: `tmdb:tv:${item.id}`,
     source: "tmdb",
     sourceId: String(item.id),
-    mediaType: "series",
+    mediaType,
     title: item.name || item.original_name || "Untitled",
     originalTitle: item.original_name,
     posterPath: getTmdbImageUrl(item.poster_path, "w500"),
@@ -114,12 +167,7 @@ export function normalizeTmdbTV(item: any): NormalizedMedia {
     rating,
     totalEpisodes: item.number_of_episodes || 1,
     runtime: item.episode_run_time?.[0] || item.last_episode_to_air?.runtime || 45,
-    genres: Array.from(
-      new Set([
-        ...(item.genres?.map((g: any) => g.name) || []),
-        ...(item.genre_ids?.map((id: number) => TMDB_GENRE_MAP[id]).filter(Boolean) || []),
-      ])
-    ),
+    genres: rawGenres,
     synopsis: item.overview,
     streamingProviders: item["watch/providers"]?.results || {},
     popularity: typeof item.popularity === "number" ? item.popularity : 0,

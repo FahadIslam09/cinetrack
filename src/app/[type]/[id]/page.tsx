@@ -22,7 +22,7 @@ import { DetailsBackButton } from "./back-button";
 import { TrailerPlayer, TrailerVideo } from "@/components/media/trailer-player";
 import { db } from "@/lib/db";
 import { mediaItems, profiles, userMediaLogs, reviewReactions } from "@/lib/db/schema";
-import { eq, and, ne, isNotNull, desc, count, inArray } from "drizzle-orm";
+import { eq, and, ne, isNotNull, desc, count, inArray, or } from "drizzle-orm";
 import { getConsensusRating, RatingCategory } from "@/lib/rating";
 import { getImdbGenres } from "@/lib/imdb/client";
 
@@ -49,8 +49,43 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       const raw = await tmdb.getTVDetails(id);
       media = normalizeTmdbTV(raw);
     } else if (type === "anime") {
-      const raw = await anilist.getAnimeDetails(id);
-      media = normalizeAniListAnime(raw);
+      const [dbItem] = await db
+        .select()
+        .from(mediaItems)
+        .where(
+          or(
+            eq(mediaItems.id, id),
+            eq(mediaItems.id, `tmdb:tv:${id}`),
+            eq(mediaItems.id, `tmdb:movie:${id}`),
+            eq(mediaItems.id, `anilist:${id}`),
+            eq(mediaItems.sourceId, id)
+          )
+        )
+        .limit(1);
+
+      if (dbItem?.id.startsWith("tmdb:tv:")) {
+        const raw = await tmdb.getTVDetails(dbItem.sourceId);
+        media = normalizeTmdbTV(raw);
+      } else if (dbItem?.id.startsWith("tmdb:movie:")) {
+        const raw = await tmdb.getMovieDetails(dbItem.sourceId);
+        media = normalizeTmdbMovie(raw);
+      } else if (dbItem?.source === "anilist" || dbItem?.id.startsWith("anilist:")) {
+        const raw = await anilist.getAnimeDetails(dbItem.sourceId);
+        media = normalizeAniListAnime(raw);
+      } else {
+        try {
+          const raw = await anilist.getAnimeDetails(id);
+          media = normalizeAniListAnime(raw);
+        } catch {
+          try {
+            const raw = await tmdb.getTVDetails(id);
+            media = normalizeTmdbTV(raw);
+          } catch {
+            const raw = await tmdb.getMovieDetails(id);
+            media = normalizeTmdbMovie(raw);
+          }
+        }
+      }
     }
   } catch {
     return {
@@ -128,8 +163,43 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
       rawDetails = await tmdb.getTVDetails(id);
       media = normalizeTmdbTV(rawDetails);
     } else if (type === "anime") {
-      rawDetails = await anilist.getAnimeDetails(id);
-      media = normalizeAniListAnime(rawDetails);
+      const [dbItem] = await db
+        .select()
+        .from(mediaItems)
+        .where(
+          or(
+            eq(mediaItems.id, id),
+            eq(mediaItems.id, `tmdb:tv:${id}`),
+            eq(mediaItems.id, `tmdb:movie:${id}`),
+            eq(mediaItems.id, `anilist:${id}`),
+            eq(mediaItems.sourceId, id)
+          )
+        )
+        .limit(1);
+
+      if (dbItem?.id.startsWith("tmdb:tv:")) {
+        rawDetails = await tmdb.getTVDetails(dbItem.sourceId);
+        media = normalizeTmdbTV(rawDetails);
+      } else if (dbItem?.id.startsWith("tmdb:movie:")) {
+        rawDetails = await tmdb.getMovieDetails(dbItem.sourceId);
+        media = normalizeTmdbMovie(rawDetails);
+      } else if (dbItem?.source === "anilist" || dbItem?.id.startsWith("anilist:")) {
+        rawDetails = await anilist.getAnimeDetails(dbItem.sourceId);
+        media = normalizeAniListAnime(rawDetails);
+      } else {
+        try {
+          rawDetails = await anilist.getAnimeDetails(id);
+          media = normalizeAniListAnime(rawDetails);
+        } catch {
+          try {
+            rawDetails = await tmdb.getTVDetails(id);
+            media = normalizeTmdbTV(rawDetails);
+          } catch {
+            rawDetails = await tmdb.getMovieDetails(id);
+            media = normalizeTmdbMovie(rawDetails);
+          }
+        }
+      }
     }
   } catch (err) {
     console.error("Error fetching media details:", err);
@@ -162,7 +232,7 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
 
   // Extract YouTube trailers & clips
   let trailerVideos: TrailerVideo[] = [];
-  if (type === "movie" || type === "series" || type === "tv") {
+  if (type === "movie" || type === "series" || type === "tv" || rawDetails?.videos?.results?.length) {
     const rawVideos: any[] = rawDetails?.videos?.results || [];
     const ytVideos = rawVideos.filter(
       (v) => v.site === "YouTube" && Boolean(v.key)
