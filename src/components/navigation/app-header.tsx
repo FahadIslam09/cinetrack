@@ -40,11 +40,22 @@ interface AppHeaderProps {
   } | null;
 }
 
+function getCachedUsername(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|;\s*)cinetrack_username=([^;]+)/);
+  if (match) return decodeURIComponent(match[1]);
+  return null;
+}
+
 export function AppHeader({ user: initialUser }: AppHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { openInstallModal, isInstalled } = usePwaInstall();
-  const [currentUser, setCurrentUser] = useState(initialUser);
+  const [currentUser, setCurrentUser] = useState<AppHeaderProps["user"]>(() => {
+    if (initialUser !== undefined) return initialUser;
+    const cached = getCachedUsername();
+    return cached ? { username: cached } : null;
+  });
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
@@ -102,16 +113,24 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
   useEffect(() => {
     if (initialUser !== undefined) {
       setCurrentUser(initialUser);
+      if (initialUser?.username && typeof document !== "undefined") {
+        document.cookie = `cinetrack_username=${encodeURIComponent(initialUser.username)}; path=/; max-age=31536000; SameSite=Lax`;
+      }
       return;
     }
 
     const supabase = createClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
+        const cached = getCachedUsername();
+        const username = session.user.user_metadata?.user_name || cached || session.user.email?.split("@")[0];
+        if (username && typeof document !== "undefined") {
+          document.cookie = `cinetrack_username=${encodeURIComponent(username)}; path=/; max-age=31536000; SameSite=Lax`;
+        }
         setCurrentUser({
           email: session.user.email,
           avatarUrl: session.user.user_metadata?.avatar_url,
-          username: session.user.user_metadata?.user_name || session.user.email?.split("@")[0],
+          username,
         });
       } else {
         setCurrentUser(null);
@@ -120,13 +139,21 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
+        const cached = getCachedUsername();
+        const username = session.user.user_metadata?.user_name || cached || session.user.email?.split("@")[0];
+        if (username && typeof document !== "undefined") {
+          document.cookie = `cinetrack_username=${encodeURIComponent(username)}; path=/; max-age=31536000; SameSite=Lax`;
+        }
         setCurrentUser({
           email: session.user.email,
           avatarUrl: session.user.user_metadata?.avatar_url,
-          username: session.user.user_metadata?.user_name || session.user.email?.split("@")[0],
+          username,
         });
       } else {
         setCurrentUser(null);
+        if (typeof document !== "undefined") {
+          document.cookie = "cinetrack_username=; path=/; max-age=0";
+        }
       }
     });
 
@@ -146,6 +173,9 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
   const handleSignOut = async () => {
     setIsSigningOut(true);
     try {
+      if (typeof document !== "undefined") {
+        document.cookie = "cinetrack_username=; path=/; max-age=0";
+      }
       const supabase = createClient();
       await supabase.auth.signOut();
       setCurrentUser(null);

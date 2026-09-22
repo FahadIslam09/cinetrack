@@ -111,6 +111,7 @@ export const userMediaLogs = pgTable(
   (table) => [
     uniqueIndex("user_media_unique_idx").on(table.userId, table.mediaId),
     index("user_media_completed_at_idx").on(table.completedAt),
+    index("user_media_user_updated_idx").on(table.userId, table.updatedAt),
   ]
 );
 

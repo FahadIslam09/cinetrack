@@ -27,6 +27,13 @@ import { QuickAddModal } from "@/components/quick-add/quick-add-modal";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { usePwaInstall } from "@/components/pwa/pwa-install-provider";
 
+function getCachedUsername(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|;\s*)cinetrack_username=([^;]+)/);
+  if (match) return decodeURIComponent(match[1]);
+  return null;
+}
+
 function BottomNavContent() {
   const router = useRouter();
   const pathname = usePathname();
@@ -35,17 +42,32 @@ function BottomNavContent() {
   const currentType = searchParams.get("type");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
-  const [user, setUser] = useState<{ email?: string; username?: string } | null>(null);
+  const [user, setUser] = useState<{ email?: string; username?: string } | null>(() => {
+    const cached = getCachedUsername();
+    return cached ? { username: cached } : null;
+  });
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ? { email: session.user.email, username: session.user.user_metadata?.user_name } : null);
+      if (session?.user) {
+        const cached = getCachedUsername();
+        const username = session.user.user_metadata?.user_name || cached || session.user.email?.split("@")[0];
+        setUser({ email: session.user.email, username });
+      } else {
+        setUser(null);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ? { email: session.user.email, username: session.user.user_metadata?.user_name } : null);
+      if (session?.user) {
+        const cached = getCachedUsername();
+        const username = session.user.user_metadata?.user_name || cached || session.user.email?.split("@")[0];
+        setUser({ email: session.user.email, username });
+      } else {
+        setUser(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -54,6 +76,9 @@ function BottomNavContent() {
   const handleSignOut = async () => {
     setIsSigningOut(true);
     try {
+      if (typeof document !== "undefined") {
+        document.cookie = "cinetrack_username=; path=/; max-age=0";
+      }
       const supabase = createClient();
       await supabase.auth.signOut();
       setUser(null);

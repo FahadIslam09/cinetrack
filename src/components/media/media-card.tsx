@@ -100,9 +100,16 @@ export function MediaCard({
     media.status
   );
 
+  // Whether this card represents an active watching series/anime
+  const isWatchingSeries =
+    localStatus === "watching" && media.mediaType !== "movie";
+
   // Dynamically fetch season breakdown and series metadata (years/status)
   useEffect(() => {
-    if (media.mediaType === "series" || media.mediaType === "anime") {
+    if (
+      (isWatchingSeries || isQuickAddOpen) &&
+      (media.mediaType === "series" || media.mediaType === "anime")
+    ) {
       let cancelled = false;
       getSeriesMetadata(media.sourceId, media.source, media.totalEpisodes).then(
         (details) => {
@@ -124,6 +131,8 @@ export function MediaCard({
       };
     }
   }, [
+    isWatchingSeries,
+    isQuickAddOpen,
     media.sourceId,
     media.source,
     media.totalEpisodes,
@@ -133,10 +142,6 @@ export function MediaCard({
 
   const detailUrl = `/${media.mediaType}/${media.source === "anilist" ? media.sourceId : media.sourceId
     }${fromUsername ? `?from=${fromUsername}` : ""}`;
-
-  // Whether this card represents an active watching series/anime
-  const isWatchingSeries =
-    localStatus === "watching" && media.mediaType !== "movie";
 
   // Overall series completion progress across all seasons
   const progressInfo = calculateSeriesProgress(

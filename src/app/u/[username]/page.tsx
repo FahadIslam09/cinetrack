@@ -54,11 +54,24 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
   const normalizedUsername = decodeURIComponent(username).toLowerCase().replace(/^@/, "");
 
   const supabase = await createClient();
-  const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser();
+  const [authResponse, foundProfiles] = await Promise.all([
+    supabase.auth.getUser().catch((err) => {
+      console.error("Auth verification error:", err);
+      return { data: { user: null } };
+    }),
+    db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.username, normalizedUsername))
+      .limit(1)
+      .catch((err) => {
+        console.error("Profile lookup error:", err);
+        return [];
+      }),
+  ]);
 
-  let targetProfile: any = null;
+  const currentUser = authResponse.data?.user ?? null;
+  let targetProfile: any = foundProfiles.length > 0 ? foundProfiles[0] : null;
   let items: LibraryItem[] = [];
   let stats = {
     total: 0,
@@ -69,20 +82,6 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
     completed: 0,
     totalMinutes: 0,
   };
-
-  try {
-    const foundProfiles = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.username, normalizedUsername))
-      .limit(1);
-
-    if (foundProfiles.length > 0) {
-      targetProfile = foundProfiles[0];
-    }
-  } catch (err) {
-    console.error("Profile lookup error:", err);
-  }
 
   // Fallback demo user for showcase/demo username
   const isDemo = !targetProfile && (normalizedUsername === "elenavance" || normalizedUsername === "demo");
@@ -104,8 +103,29 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
     try {
       const allUserLogs = await db
         .select({
-          log: userMediaLogs,
-          media: mediaItems,
+          logId: userMediaLogs.id,
+          logStatus: userMediaLogs.status,
+          logRating: userMediaLogs.rating,
+          episodesWatched: userMediaLogs.episodesWatched,
+          currentSeason: userMediaLogs.currentSeason,
+          currentEpisode: userMediaLogs.currentEpisode,
+          reviewText: userMediaLogs.reviewText,
+          containsSpoilers: userMediaLogs.containsSpoilers,
+          updatedAt: userMediaLogs.updatedAt,
+          mediaId: mediaItems.id,
+          source: mediaItems.source,
+          sourceId: mediaItems.sourceId,
+          mediaType: mediaItems.mediaType,
+          title: mediaItems.title,
+          originalTitle: mediaItems.originalTitle,
+          posterPath: mediaItems.posterPath,
+          backdropPath: mediaItems.backdropPath,
+          releaseDate: mediaItems.releaseDate,
+          rating: mediaItems.rating,
+          totalEpisodes: mediaItems.totalEpisodes,
+          runtime: mediaItems.runtime,
+          genres: mediaItems.genres,
+          synopsis: mediaItems.synopsis,
         })
         .from(userMediaLogs)
         .innerJoin(mediaItems, eq(userMediaLogs.mediaId, mediaItems.id))
@@ -113,54 +133,54 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
         .orderBy(desc(userMediaLogs.updatedAt));
 
       stats.total = allUserLogs.length;
-      stats.movies = allUserLogs.filter((l) => l.media.mediaType === "movie").length;
-      stats.series = allUserLogs.filter((l) => l.media.mediaType === "series").length;
-      stats.anime = allUserLogs.filter((l) => l.media.mediaType === "anime").length;
-      stats.watching = allUserLogs.filter((l) => l.log.status === "watching").length;
-      stats.completed = allUserLogs.filter((l) => l.log.status === "completed").length;
+      stats.movies = allUserLogs.filter((l) => l.mediaType === "movie").length;
+      stats.series = allUserLogs.filter((l) => l.mediaType === "series").length;
+      stats.anime = allUserLogs.filter((l) => l.mediaType === "anime").length;
+      stats.watching = allUserLogs.filter((l) => l.logStatus === "watching").length;
+      stats.completed = allUserLogs.filter((l) => l.logStatus === "completed").length;
 
       stats.totalMinutes = allUserLogs.reduce((acc, curr) => {
         const fallback =
-          curr.media.mediaType === "movie"
+          curr.mediaType === "movie"
             ? 105
-            : curr.media.mediaType === "anime"
+            : curr.mediaType === "anime"
             ? 24
             : 45;
-        const runtime = curr.media.runtime || fallback;
+        const runtime = curr.runtime || fallback;
         const eps =
-          curr.media.mediaType === "movie"
-            ? curr.log.status === "completed" || curr.log.status === "watching"
+          curr.mediaType === "movie"
+            ? curr.logStatus === "completed" || curr.logStatus === "watching"
               ? 1
               : 0
-            : curr.log.episodesWatched || (curr.log.status === "completed" ? curr.media.totalEpisodes || 1 : 0);
+            : curr.episodesWatched || (curr.logStatus === "completed" ? curr.totalEpisodes || 1 : 0);
         return acc + runtime * eps;
       }, 0);
 
       items = allUserLogs.map((l) => ({
-        id: l.log.id,
+        id: l.logId,
         media: {
-          id: l.media.id,
-          source: l.media.source as "tmdb" | "anilist",
-          sourceId: l.media.sourceId,
-          mediaType: l.media.mediaType as "movie" | "series" | "anime",
-          title: l.media.title,
-          originalTitle: l.media.originalTitle || undefined,
-          posterPath: l.media.posterPath || null,
-          backdropPath: l.media.backdropPath || null,
-          year: l.media.releaseDate ? l.media.releaseDate.substring(0, 4) : undefined,
-          rating: l.media.rating ? Number(l.media.rating) : 0,
-          totalEpisodes: l.media.totalEpisodes || 1,
-          genres: l.media.genres || [],
-          synopsis: l.media.synopsis || undefined,
+          id: l.mediaId,
+          source: l.source as "tmdb" | "anilist",
+          sourceId: l.sourceId,
+          mediaType: l.mediaType as "movie" | "series" | "anime",
+          title: l.title,
+          originalTitle: l.originalTitle || undefined,
+          posterPath: l.posterPath || null,
+          backdropPath: l.backdropPath || null,
+          year: l.releaseDate ? l.releaseDate.substring(0, 4) : undefined,
+          rating: l.rating ? Number(l.rating) : 0,
+          totalEpisodes: l.totalEpisodes || 1,
+          genres: l.genres || [],
+          synopsis: l.synopsis || undefined,
         },
-        status: l.log.status as any,
-        userRating: parseRating(l.log.rating),
-        userEpisodes: l.log.episodesWatched,
-        currentSeason: l.log.currentSeason ?? 1,
-        currentEpisode: l.log.currentEpisode ?? 1,
-        reviewText: l.log.reviewText,
-        containsSpoilers: Boolean(l.log.containsSpoilers),
-        updatedAt: l.log.updatedAt ? l.log.updatedAt.toISOString() : undefined,
+        status: l.logStatus as any,
+        userRating: parseRating(l.logRating),
+        userEpisodes: l.episodesWatched,
+        currentSeason: l.currentSeason ?? 1,
+        currentEpisode: l.currentEpisode ?? 1,
+        reviewText: l.reviewText,
+        containsSpoilers: Boolean(l.containsSpoilers),
+        updatedAt: l.updatedAt ? l.updatedAt.toISOString() : undefined,
       })).sort((a, b) => {
         const isWatchingA = a.status === "watching" ? 1 : 0;
         const isWatchingB = b.status === "watching" ? 1 : 0;

@@ -76,6 +76,18 @@ export default async function proxy(request: NextRequest) {
       return redirectResponse;
     }
   } else {
+    // Fast path: authenticated user visiting /library redirects directly to their vanity handle
+    if (pathname === "/library") {
+      const cachedUsername = request.cookies.get("cinetrack_username")?.value;
+      if (cachedUsername) {
+        const targetUrl = request.nextUrl.clone();
+        targetUrl.pathname = `/${cachedUsername}`;
+        const redirectResponse = NextResponse.redirect(targetUrl, 307);
+        copyCookies(supabaseResponse, redirectResponse);
+        return redirectResponse;
+      }
+    }
+
     // Authenticated users visiting /login get redirected to their library or next target
     if (pathname === "/login") {
       const nextTarget = sanitizeRedirect(request.nextUrl.searchParams.get("next"), "/library");

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
@@ -47,12 +48,28 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
     console.error("Library redirect error:", err);
   }
 
+  const cookieStore = await cookies();
+
   if (targetUsername) {
+    try {
+      cookieStore.set("cinetrack_username", targetUsername, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: "lax",
+      });
+    } catch {}
     redirect(`/${targetUsername}${suffix}`);
   }
 
   const fallbackUsername = user.user_metadata?.user_name;
   if (fallbackUsername) {
+    try {
+      cookieStore.set("cinetrack_username", fallbackUsername, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: "lax",
+      });
+    } catch {}
     redirect(`/${fallbackUsername}${suffix}`);
   }
 

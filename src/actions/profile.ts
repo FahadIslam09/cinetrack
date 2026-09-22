@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
 import { createClient } from "@/lib/supabase/server";
@@ -146,6 +147,26 @@ export async function updateProfile(params: UpdateProfileParams) {
         preferredCountry: "US",
       });
       targetUsername = generatedUsername.slice(0, 15).toLowerCase();
+    }
+
+    if (targetUsername) {
+      try {
+        const cookieStore = await cookies();
+        cookieStore.set("cinetrack_username", targetUsername, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 365,
+          sameSite: "lax",
+        });
+      } catch {}
+
+      try {
+        await supabase.auth.updateUser({
+          data: {
+            full_name: trimmedName,
+            user_name: targetUsername,
+          },
+        });
+      } catch {}
     }
 
     revalidatePath("/library");
@@ -424,6 +445,15 @@ export async function completeProfileSetup(params: {
         user_name: finalUsername,
       },
     });
+
+    try {
+      const cookieStore = await cookies();
+      cookieStore.set("cinetrack_username", finalUsername, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: "lax",
+      });
+    } catch {}
 
     revalidatePath("/library");
     revalidatePath("/profile");
