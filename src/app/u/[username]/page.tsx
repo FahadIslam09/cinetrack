@@ -184,7 +184,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
         username: targetProfile.username,
         displayName: targetProfile.fullName || targetProfile.username,
         fullName: targetProfile.fullName,
-        email: null,
+        email: isOwner ? currentUser?.email : null,
         avatarUrl: targetProfile.avatarUrl,
         backdropUrl: targetProfile.backdropUrl,
         bio: targetProfile.bio,
@@ -205,9 +205,9 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
 
   return (
     <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D]">
-      <AppHeader />
+      <AppHeader user={isOwner ? { ...userProp, email: currentUser?.email } : undefined} />
 
-      <main className="flex-1 w-full max-w-[834px] lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 pt-24 sm:pt-28 pb-24 md:pb-12">
+      <main className="flex-1 w-full max-w-[1440px] mx-auto px-3.5 sm:px-6 lg:px-12 pt-18 sm:pt-24 pb-24 md:pb-12">
         {isPrivate ? (
           <div className="flex flex-col items-center justify-center py-20 px-6 text-center rounded-2xl bg-[#151C27] border border-white/[0.08] shadow-xl my-8 max-w-lg mx-auto">
             <div className="w-14 h-14 rounded-2xl bg-[#1D2734] border border-white/10 flex items-center justify-center text-[#A8B0BD] mb-4 shadow-inner">

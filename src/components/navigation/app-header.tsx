@@ -54,6 +54,12 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const isMoreActive = ["/about", "/contact", "/feedback", "/terms", "/privacy"].includes(pathname);
+  const isLibraryActive =
+    pathname === "/library" ||
+    (currentUser?.username
+      ? pathname === `/${currentUser.username}` ||
+        pathname === `/u/${currentUser.username}`
+      : false);
 
   // Close dropdown on route change
   useEffect(() => {
@@ -203,15 +209,15 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
                 )}
               </Link>
               <Link
-                href="/library"
+                href={currentUser?.username ? `/${currentUser.username}` : "/library"}
                 className={`relative py-2 font-semibold whitespace-nowrap transition-colors flex items-center gap-1 group ${
-                  pathname === "/library"
+                  isLibraryActive
                     ? "text-[#F5F7FA]"
                     : "text-[#A8B0BD] hover:text-[#F5F7FA]"
                 }`}
               >
                 <span>My Library</span>
-                {pathname === "/library" && (
+                {isLibraryActive && (
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#3B9EFF]" />
                 )}
               </Link>
@@ -503,7 +509,7 @@ export function AppHeader({ user: initialUser }: AppHeaderProps) {
                       </Link>
 
                       <Link
-                        href="/library"
+                        href={currentUser.username ? `/${currentUser.username}` : "/library"}
                         onClick={() => setIsUserMenuOpen(false)}
                         className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#A8B0BD] hover:text-[#F5F7FA] hover:bg-white/[0.06] transition-colors cursor-pointer"
                       >
