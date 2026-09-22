@@ -43,25 +43,70 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
     rating = "all",
   } = await searchParams;
 
-  // 1. Current Auth User (for AppHeader avatar/profile)
+  // 1. Parallel fetch auth user, mediaItems and community logs concurrently
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [authResponse, allMedia, allDbLogs] = await Promise.all([
+    supabase.auth.getUser().catch(() => ({ data: { user: null } })),
+    db
+      .select({
+        id: mediaItems.id,
+        source: mediaItems.source,
+        sourceId: mediaItems.sourceId,
+        mediaType: mediaItems.mediaType,
+        title: mediaItems.title,
+        originalTitle: mediaItems.originalTitle,
+        posterPath: mediaItems.posterPath,
+        backdropPath: mediaItems.backdropPath,
+        releaseDate: mediaItems.releaseDate,
+        rating: mediaItems.rating,
+        totalEpisodes: mediaItems.totalEpisodes,
+        runtime: mediaItems.runtime,
+        genres: mediaItems.genres,
+        streamingProviders: mediaItems.streamingProviders,
+      })
+      .from(mediaItems)
+      .orderBy(desc(mediaItems.createdAt))
+      .catch((err) => {
+        console.error("Discover mediaItems query error:", err);
+        return [];
+      }),
+    db
+      .select({
+        log: userMediaLogs,
+        profile: {
+          username: profiles.username,
+          fullName: profiles.fullName,
+        },
+      })
+      .from(userMediaLogs)
+      .leftJoin(profiles, eq(userMediaLogs.userId, profiles.id))
+      .orderBy(desc(userMediaLogs.updatedAt))
+      .catch((err) => {
+        console.error("Discover userMediaLogs query error:", err);
+        return [];
+      }),
+  ]);
+
+  const user = authResponse.data?.user ?? null;
 
   let userProfile: any = null;
   if (user) {
-    try {
-      const profileRows = await db
-        .select()
-        .from(profiles)
-        .where(eq(profiles.id, user.id))
-        .limit(1);
-      if (profileRows.length > 0) {
-        userProfile = profileRows[0];
+    const existingLog = allDbLogs.find((l) => l.log.userId === user.id);
+    if (existingLog?.profile?.username) {
+      userProfile = existingLog.profile;
+    } else {
+      try {
+        const profileRows = await db
+          .select()
+          .from(profiles)
+          .where(eq(profiles.id, user.id))
+          .limit(1);
+        if (profileRows.length > 0) {
+          userProfile = profileRows[0];
+        }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
     }
   }
 
@@ -84,96 +129,65 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
       }
     : null;
 
-  // 2. Query all mediaItems across the platform and all community user logs
+  // 2. Group community logs by mediaId & index current user logs directly in-memory
+  const logsByMediaId = new Map<string, typeof allDbLogs>();
+  const currentUserLogsMap = new Map<string, typeof userMediaLogs.$inferSelect>();
+
+  for (const l of allDbLogs) {
+    const list = logsByMediaId.get(l.log.mediaId) || [];
+    list.push(l);
+    logsByMediaId.set(l.log.mediaId, list);
+
+    if (user && l.log.userId === user.id) {
+      currentUserLogsMap.set(l.log.mediaId, l.log);
+    }
+  }
+
+  // 3. Construct unified discover library items
   let allUniqueItems: LibraryItem[] = [];
 
-  try {
-    const [allMedia, allDbLogs] = await Promise.all([
-      db.select().from(mediaItems).orderBy(desc(mediaItems.createdAt)),
-      db
-        .select({
-          log: userMediaLogs,
-          profile: {
-            username: profiles.username,
-            fullName: profiles.fullName,
-          },
-        })
-        .from(userMediaLogs)
-        .leftJoin(profiles, eq(userMediaLogs.userId, profiles.id))
-        .orderBy(desc(userMediaLogs.updatedAt)),
-    ]);
+  if (allMedia && allMedia.length > 0) {
+    allUniqueItems = allMedia.map((m) => {
+      const mediaLogs = logsByMediaId.get(m.id) || [];
+      const ratings = mediaLogs
+        .map((l) => parseRating(l.log.rating))
+        .filter(Boolean) as string[];
+      const consensusRating = ratings.length > 0 ? getConsensusRating(ratings) : null;
+      const bestLogWithReview = mediaLogs.find((l) => l.log.reviewText) || mediaLogs[0];
+      const myLog = currentUserLogsMap.get(m.id);
 
-    // Group community logs by mediaId
-    const logsByMediaId = new Map<string, typeof allDbLogs>();
-    for (const l of allDbLogs) {
-      const list = logsByMediaId.get(l.log.mediaId) || [];
-      list.push(l);
-      logsByMediaId.set(l.log.mediaId, list);
-    }
-
-    // 3. Query current authenticated user's library logs (if signed in)
-    const currentUserLogsMap = new Map<string, typeof userMediaLogs.$inferSelect>();
-    if (user) {
-      try {
-        const myLogs = await db
-          .select()
-          .from(userMediaLogs)
-          .where(eq(userMediaLogs.userId, user.id));
-
-        for (const ml of myLogs) {
-          currentUserLogsMap.set(ml.mediaId, ml);
-        }
-      } catch (e) {
-        console.error("Discover user logs query error:", e);
-      }
-    }
-
-    if (allMedia && allMedia.length > 0) {
-      allUniqueItems = allMedia.map((m) => {
-        const mediaLogs = logsByMediaId.get(m.id) || [];
-        const ratings = mediaLogs
-          .map((l) => parseRating(l.log.rating))
-          .filter(Boolean) as string[];
-        const consensusRating = ratings.length > 0 ? getConsensusRating(ratings) : null;
-        const bestLogWithReview = mediaLogs.find((l) => l.log.reviewText) || mediaLogs[0];
-        const myLog = currentUserLogsMap.get(m.id);
-
-        return {
-          id: bestLogWithReview?.log.id || `media_${m.id}`,
-          media: {
-            id: m.id,
-            source: m.source as "tmdb" | "anilist",
-            sourceId: m.sourceId,
-            mediaType: m.mediaType as "movie" | "series" | "anime",
-            title: m.title,
-            originalTitle: m.originalTitle || undefined,
-            posterPath: m.posterPath || null,
-            backdropPath: m.backdropPath || null,
-            releaseDate: m.releaseDate || undefined,
-            year: m.releaseDate ? m.releaseDate.substring(0, 4) : undefined,
-            rating: m.rating ? Number(m.rating) : 0,
-            totalEpisodes: m.totalEpisodes || 1,
-            runtime: m.runtime || undefined,
-            genres: m.genres || [],
-            synopsis: m.synopsis || undefined,
-            streamingProviders: (m.streamingProviders as any) || {},
-          },
-          status: myLog ? (myLog.status as any) : undefined,
-          userRating: consensusRating,
-          userEpisodes: myLog ? myLog.episodesWatched ?? undefined : undefined,
-          currentSeason: myLog ? myLog.currentSeason ?? 1 : undefined,
-          currentEpisode: myLog ? myLog.currentEpisode ?? 1 : undefined,
-          reviewText: myLog?.reviewText || undefined,
-          containsSpoilers: Boolean(myLog?.containsSpoilers),
-          fromUsername: bestLogWithReview?.profile?.username || undefined,
-          updatedAt: bestLogWithReview?.log.updatedAt
-            ? bestLogWithReview.log.updatedAt.toISOString()
-            : undefined,
-        };
-      });
-    }
-  } catch (err) {
-    console.error("Discover DB query error:", err);
+      return {
+        id: bestLogWithReview?.log.id || `media_${m.id}`,
+        media: {
+          id: m.id,
+          source: m.source as "tmdb" | "anilist",
+          sourceId: m.sourceId,
+          mediaType: m.mediaType as "movie" | "series" | "anime",
+          title: m.title,
+          originalTitle: m.originalTitle || undefined,
+          posterPath: m.posterPath || null,
+          backdropPath: m.backdropPath || null,
+          releaseDate: m.releaseDate || undefined,
+          year: m.releaseDate ? m.releaseDate.substring(0, 4) : undefined,
+          rating: m.rating ? Number(m.rating) : 0,
+          totalEpisodes: m.totalEpisodes || 1,
+          runtime: m.runtime || undefined,
+          genres: m.genres || [],
+          streamingProviders: (m.streamingProviders as any) || {},
+        },
+        status: myLog ? (myLog.status as any) : undefined,
+        userRating: consensusRating,
+        userEpisodes: myLog ? myLog.episodesWatched ?? undefined : undefined,
+        currentSeason: myLog ? myLog.currentSeason ?? 1 : undefined,
+        currentEpisode: myLog ? myLog.currentEpisode ?? 1 : undefined,
+        reviewText: myLog?.reviewText || undefined,
+        containsSpoilers: Boolean(myLog?.containsSpoilers),
+        fromUsername: bestLogWithReview?.profile?.username || undefined,
+        updatedAt: bestLogWithReview?.log.updatedAt
+          ? bestLogWithReview.log.updatedAt.toISOString()
+          : undefined,
+      };
+    });
   }
 
   // Fallback to community curated items if DB has no media yet
