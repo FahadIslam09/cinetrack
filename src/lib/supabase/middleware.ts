@@ -6,6 +6,15 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
+  // Fast path: If visitor has no Supabase auth token cookies, skip remote Auth API network call
+  const hasAuthCookie = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
+
+  if (!hasAuthCookie) {
+    return { supabaseResponse, user: null };
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

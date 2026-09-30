@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { Footer } from "@/components/navigation/footer";
 import { DiscoverView } from "@/components/discover/discover-view";
 import { LibraryItem } from "@/components/library/library-view";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { userMediaLogs, mediaItems, profiles } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -35,6 +36,58 @@ interface DiscoverPageProps {
   }>;
 }
 
+/**
+ * Cache platform discover catalog at the edge for 5 minutes.
+ * Prevents thousands of visitors and crawlers from repeatedly hammering PostgreSQL.
+ */
+const getDiscoverCatalog = unstable_cache(
+  async () => {
+    const [allMedia, allDbLogs] = await Promise.all([
+      db
+        .select({
+          id: mediaItems.id,
+          source: mediaItems.source,
+          sourceId: mediaItems.sourceId,
+          mediaType: mediaItems.mediaType,
+          title: mediaItems.title,
+          originalTitle: mediaItems.originalTitle,
+          posterPath: mediaItems.posterPath,
+          backdropPath: mediaItems.backdropPath,
+          releaseDate: mediaItems.releaseDate,
+          rating: mediaItems.rating,
+          totalEpisodes: mediaItems.totalEpisodes,
+          runtime: mediaItems.runtime,
+          genres: mediaItems.genres,
+          streamingProviders: mediaItems.streamingProviders,
+        })
+        .from(mediaItems)
+        .orderBy(desc(mediaItems.createdAt))
+        .catch((err) => {
+          console.error("Discover mediaItems query error:", err);
+          return [];
+        }),
+      db
+        .select({
+          log: userMediaLogs,
+          profile: {
+            username: profiles.username,
+            fullName: profiles.fullName,
+          },
+        })
+        .from(userMediaLogs)
+        .leftJoin(profiles, eq(userMediaLogs.userId, profiles.id))
+        .orderBy(desc(userMediaLogs.updatedAt))
+        .catch((err) => {
+          console.error("Discover userMediaLogs query error:", err);
+          return [];
+        }),
+    ]);
+    return { allMedia, allDbLogs };
+  },
+  ["discover-catalog-v1"],
+  { revalidate: 300, tags: ["discover"] }
+);
+
 export default async function DiscoverPage({ searchParams }: DiscoverPageProps) {
   const {
     type = "all",
@@ -43,51 +96,11 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
     rating = "all",
   } = await searchParams;
 
-  // 1. Parallel fetch auth user, mediaItems and community logs concurrently
-  const supabase = await createClient();
-  const [authResponse, allMedia, allDbLogs] = await Promise.all([
-    supabase.auth.getUser().catch(() => ({ data: { user: null } })),
-    db
-      .select({
-        id: mediaItems.id,
-        source: mediaItems.source,
-        sourceId: mediaItems.sourceId,
-        mediaType: mediaItems.mediaType,
-        title: mediaItems.title,
-        originalTitle: mediaItems.originalTitle,
-        posterPath: mediaItems.posterPath,
-        backdropPath: mediaItems.backdropPath,
-        releaseDate: mediaItems.releaseDate,
-        rating: mediaItems.rating,
-        totalEpisodes: mediaItems.totalEpisodes,
-        runtime: mediaItems.runtime,
-        genres: mediaItems.genres,
-        streamingProviders: mediaItems.streamingProviders,
-      })
-      .from(mediaItems)
-      .orderBy(desc(mediaItems.createdAt))
-      .catch((err) => {
-        console.error("Discover mediaItems query error:", err);
-        return [];
-      }),
-    db
-      .select({
-        log: userMediaLogs,
-        profile: {
-          username: profiles.username,
-          fullName: profiles.fullName,
-        },
-      })
-      .from(userMediaLogs)
-      .leftJoin(profiles, eq(userMediaLogs.userId, profiles.id))
-      .orderBy(desc(userMediaLogs.updatedAt))
-      .catch((err) => {
-        console.error("Discover userMediaLogs query error:", err);
-        return [];
-      }),
+  // 1. Parallel fetch auth user and cached catalog
+  const [user, { allMedia, allDbLogs }] = await Promise.all([
+    getCurrentUser(),
+    getDiscoverCatalog(),
   ]);
-
-  const user = authResponse.data?.user ?? null;
 
   let userProfile: any = null;
   if (user) {

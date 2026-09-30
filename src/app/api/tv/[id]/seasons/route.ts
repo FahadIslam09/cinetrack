@@ -18,17 +18,24 @@ export async function GET(
     const totalEps = Number(searchParams.get("totalEpisodes")) || 0;
 
     if (source === "anilist") {
-      return NextResponse.json({
-        totalSeasons: 1,
-        totalEpisodes: totalEps || 12,
-        seasons: [
-          {
-            seasonNumber: 1,
-            name: "Season 1",
-            episodeCount: totalEps || 12,
+      return NextResponse.json(
+        {
+          totalSeasons: 1,
+          totalEpisodes: totalEps || 12,
+          seasons: [
+            {
+              seasonNumber: 1,
+              name: "Season 1",
+              episodeCount: totalEps || 12,
+            },
+          ],
+        },
+        {
+          headers: {
+            "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=43200",
           },
-        ],
-      });
+        }
+      );
     }
 
     // TMDb TV Details
@@ -56,14 +63,21 @@ export async function GET(
     const endYear = data.last_air_date ? data.last_air_date.slice(0, 4) : undefined;
     const status = data.status;
 
-    return NextResponse.json({
-      totalSeasons: data.number_of_seasons || seasons.length,
-      totalEpisodes,
-      startYear,
-      endYear,
-      status,
-      seasons,
-    });
+    return NextResponse.json(
+      {
+        totalSeasons: data.number_of_seasons || seasons.length,
+        totalEpisodes,
+        startYear,
+        endYear,
+        status,
+        seasons,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=43200",
+        },
+      }
+    );
   } catch (err: any) {
     console.error("TV Seasons API error:", err);
     // Graceful fallback: 1 season with default episodes

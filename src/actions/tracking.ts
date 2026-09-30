@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { db } from "@/lib/db";
 import { mediaItems, userMediaLogs, profiles } from "@/lib/db/schema";
 import { createClient } from "@/lib/supabase/server";
@@ -201,6 +201,15 @@ export async function upsertMediaLog(params: LogMediaParams) {
     revalidatePath("/library");
     revalidatePath("/");
     revalidatePath(`/${media.mediaType}/${media.sourceId}`);
+    try {
+      updateTag("discover");
+      const currentUsername = existingProfile?.username || user.user_metadata?.user_name;
+      if (currentUsername) {
+        updateTag(`profile-${currentUsername}`);
+        revalidatePath(`/${currentUsername}`);
+        revalidatePath(`/u/${currentUsername}`);
+      }
+    } catch {}
 
     return { success: true };
   } catch (err: any) {
@@ -219,7 +228,7 @@ export async function incrementEpisode(mediaId: string, totalEpisodes: number = 
     if (!user) return { error: "Unauthorized" };
 
     const [profile] = await db
-      .select({ status: profiles.status })
+      .select({ status: profiles.status, username: profiles.username })
       .from(profiles)
       .where(eq(profiles.id, user.id))
       .limit(1);
@@ -274,6 +283,14 @@ export async function incrementEpisode(mediaId: string, totalEpisodes: number = 
 
     revalidatePath("/library");
     revalidatePath("/");
+    try {
+      updateTag("discover");
+      if (profile?.username) {
+        updateTag(`profile-${profile.username}`);
+        revalidatePath(`/${profile.username}`);
+        revalidatePath(`/u/${profile.username}`);
+      }
+    } catch {}
 
     return { success: true, count: newEpisodeCount };
   } catch (err: any) {
@@ -320,7 +337,7 @@ export async function deleteMediaLog(mediaId: string) {
     }
 
     const [profile] = await db
-      .select({ status: profiles.status })
+      .select({ status: profiles.status, username: profiles.username })
       .from(profiles)
       .where(eq(profiles.id, user.id))
       .limit(1);
@@ -340,6 +357,14 @@ export async function deleteMediaLog(mediaId: string) {
 
     revalidatePath("/library");
     revalidatePath("/");
+    try {
+      updateTag("discover");
+      if (profile?.username) {
+        updateTag(`profile-${profile.username}`);
+        revalidatePath(`/${profile.username}`);
+        revalidatePath(`/u/${profile.username}`);
+      }
+    } catch {}
 
     return { success: true };
   } catch (err: any) {

@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { Lock } from "lucide-react";
 import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { Footer } from "@/components/navigation/footer";
 import { LibraryView, LibraryItem } from "@/components/library/library-view";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { userMediaLogs, mediaItems, profiles } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -48,30 +49,80 @@ export async function generateMetadata({ params }: ProfilePageProps) {
   };
 }
 
+/**
+ * Cache public profile and library logs for 60 seconds.
+ * Defends database egress against social media traffic spikes and crawlers.
+ */
+const getProfileLibraryData = (normalizedUsername: string) =>
+  unstable_cache(
+    async () => {
+      const foundProfiles = await db
+        .select()
+        .from(profiles)
+        .where(eq(profiles.username, normalizedUsername))
+        .limit(1)
+        .catch((err) => {
+          console.error("Profile lookup error:", err);
+          return [];
+        });
+
+      const targetProfile = foundProfiles.length > 0 ? foundProfiles[0] : null;
+      if (!targetProfile) {
+        return { targetProfile: null, allUserLogs: [] };
+      }
+
+      let allUserLogs: any[] = [];
+      try {
+        allUserLogs = await db
+          .select({
+            logId: userMediaLogs.id,
+            logStatus: userMediaLogs.status,
+            logRating: userMediaLogs.rating,
+            episodesWatched: userMediaLogs.episodesWatched,
+            currentSeason: userMediaLogs.currentSeason,
+            currentEpisode: userMediaLogs.currentEpisode,
+            reviewText: userMediaLogs.reviewText,
+            containsSpoilers: userMediaLogs.containsSpoilers,
+            updatedAt: userMediaLogs.updatedAt,
+            mediaId: mediaItems.id,
+            source: mediaItems.source,
+            sourceId: mediaItems.sourceId,
+            mediaType: mediaItems.mediaType,
+            title: mediaItems.title,
+            originalTitle: mediaItems.originalTitle,
+            posterPath: mediaItems.posterPath,
+            backdropPath: mediaItems.backdropPath,
+            releaseDate: mediaItems.releaseDate,
+            rating: mediaItems.rating,
+            totalEpisodes: mediaItems.totalEpisodes,
+            runtime: mediaItems.runtime,
+            genres: mediaItems.genres,
+            synopsis: mediaItems.synopsis,
+          })
+          .from(userMediaLogs)
+          .innerJoin(mediaItems, eq(userMediaLogs.mediaId, mediaItems.id))
+          .where(eq(userMediaLogs.userId, targetProfile.id))
+          .orderBy(desc(userMediaLogs.updatedAt));
+      } catch (err) {
+        console.error("Error fetching media logs for profile:", err);
+      }
+
+      return { targetProfile, allUserLogs };
+    },
+    [`profile-library-cache-${normalizedUsername}`],
+    { revalidate: 60, tags: [`profile-${normalizedUsername}`] }
+  )();
+
 export default async function ProfilePage({ params, searchParams }: ProfilePageProps) {
   const { username } = await params;
   const { status = "all", type = "all" } = await searchParams;
   const normalizedUsername = decodeURIComponent(username).toLowerCase().replace(/^@/, "");
 
-  const supabase = await createClient();
-  const [authResponse, foundProfiles] = await Promise.all([
-    supabase.auth.getUser().catch((err) => {
-      console.error("Auth verification error:", err);
-      return { data: { user: null } };
-    }),
-    db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.username, normalizedUsername))
-      .limit(1)
-      .catch((err) => {
-        console.error("Profile lookup error:", err);
-        return [];
-      }),
+  const [currentUser, { targetProfile, allUserLogs }] = await Promise.all([
+    getCurrentUser(),
+    getProfileLibraryData(normalizedUsername),
   ]);
 
-  const currentUser = authResponse.data?.user ?? null;
-  let targetProfile: any = foundProfiles.length > 0 ? foundProfiles[0] : null;
   let items: LibraryItem[] = [];
   let stats = {
     total: 0,
@@ -99,39 +150,8 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
 
   const isPrivate = Boolean(targetProfile && !targetProfile.isPublic && !isOwner);
 
-  if (targetProfile && !isPrivate) {
+  if (targetProfile && !isPrivate && allUserLogs.length > 0) {
     try {
-      const allUserLogs = await db
-        .select({
-          logId: userMediaLogs.id,
-          logStatus: userMediaLogs.status,
-          logRating: userMediaLogs.rating,
-          episodesWatched: userMediaLogs.episodesWatched,
-          currentSeason: userMediaLogs.currentSeason,
-          currentEpisode: userMediaLogs.currentEpisode,
-          reviewText: userMediaLogs.reviewText,
-          containsSpoilers: userMediaLogs.containsSpoilers,
-          updatedAt: userMediaLogs.updatedAt,
-          mediaId: mediaItems.id,
-          source: mediaItems.source,
-          sourceId: mediaItems.sourceId,
-          mediaType: mediaItems.mediaType,
-          title: mediaItems.title,
-          originalTitle: mediaItems.originalTitle,
-          posterPath: mediaItems.posterPath,
-          backdropPath: mediaItems.backdropPath,
-          releaseDate: mediaItems.releaseDate,
-          rating: mediaItems.rating,
-          totalEpisodes: mediaItems.totalEpisodes,
-          runtime: mediaItems.runtime,
-          genres: mediaItems.genres,
-          synopsis: mediaItems.synopsis,
-        })
-        .from(userMediaLogs)
-        .innerJoin(mediaItems, eq(userMediaLogs.mediaId, mediaItems.id))
-        .where(eq(userMediaLogs.userId, targetProfile.id))
-        .orderBy(desc(userMediaLogs.updatedAt));
-
       stats.total = allUserLogs.length;
       stats.movies = allUserLogs.filter((l) => l.mediaType === "movie").length;
       stats.series = allUserLogs.filter((l) => l.mediaType === "series").length;
@@ -225,7 +245,20 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
 
   return (
     <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D]">
-      <AppHeader user={isOwner ? { ...userProp, email: currentUser?.email } : undefined} />
+      <AppHeader
+        user={
+          isOwner
+            ? {
+                id: userProp.id,
+                username: userProp.username,
+                displayName: userProp.displayName,
+                fullName: userProp.fullName || undefined,
+                email: currentUser?.email || undefined,
+                avatarUrl: userProp.avatarUrl || undefined,
+              }
+            : undefined
+        }
+      />
 
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-3.5 sm:px-6 lg:px-12 pt-18 sm:pt-24 pb-24 md:pb-12">
         {isPrivate ? (

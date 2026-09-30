@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
@@ -170,14 +170,19 @@ export async function updateProfile(params: UpdateProfileParams) {
     }
 
     revalidatePath("/library");
-    if (existing?.username) {
-      revalidatePath(`/${existing.username}`);
-      revalidatePath(`/u/${existing.username}`);
-    }
-    if (targetUsername && targetUsername !== existing?.username) {
-      revalidatePath(`/${targetUsername}`);
-      revalidatePath(`/u/${targetUsername}`);
-    }
+    try {
+      updateTag("discover");
+      if (existing?.username) {
+        revalidatePath(`/${existing.username}`);
+        revalidatePath(`/u/${existing.username}`);
+        updateTag(`profile-${existing.username}`);
+      }
+      if (targetUsername && targetUsername !== existing?.username) {
+        revalidatePath(`/${targetUsername}`);
+        revalidatePath(`/u/${targetUsername}`);
+        updateTag(`profile-${targetUsername}`);
+      }
+    } catch {}
 
     return {
       success: true,
@@ -460,6 +465,10 @@ export async function completeProfileSetup(params: {
     revalidatePath("/");
     revalidatePath(`/${finalUsername}`);
     revalidatePath(`/u/${finalUsername}`);
+    try {
+      updateTag(`profile-${finalUsername}`);
+      updateTag("discover");
+    } catch {}
 
     return {
       success: true,
