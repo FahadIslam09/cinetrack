@@ -3,7 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { db } from "@/lib/db";
 import { mediaItems, userMediaLogs, profiles } from "@/lib/db/schema";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import { NormalizedMedia } from "@/lib/media/normalize";
 import { eq, and } from "drizzle-orm";
 import { RatingCategory, isValidRating, parseRating } from "@/lib/rating";
@@ -300,11 +300,7 @@ export async function incrementEpisode(mediaId: string, totalEpisodes: number = 
 
 export async function getUserMediaLog(mediaId: string) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
+    const user = await getCurrentUser();
     if (!user) return null;
 
     const [log] = await db
@@ -375,11 +371,7 @@ export async function deleteMediaLog(mediaId: string) {
 
 export async function getCurrentUserLibraryLogs() {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
+    const user = await getCurrentUser();
     if (!user) return [];
 
     const logs = await db

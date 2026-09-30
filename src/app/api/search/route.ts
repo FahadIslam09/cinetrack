@@ -11,7 +11,7 @@ import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
 import { or, ilike, and, eq } from "drizzle-orm";
 import { escapeSqlLike } from "@/lib/security";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 
 export interface ProfileSearchResult {
   id: string;
@@ -86,13 +86,12 @@ export async function GET(req: NextRequest) {
     let totalPages = 1;
     let totalMedia = 0;
 
+    let user: any = null;
+
     // 1. Fetch User Profiles (if type is 'all' or 'profiles')
     if (type === "all" || type === "profiles") {
       try {
-        const supabase = await createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        user = await getCurrentUser();
 
         // Product rule: Logged-out users can only access public profiles through direct /u/[username] links
         if (!user) {
@@ -223,17 +222,24 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({
-      media: mediaResults,
-      profiles: profileResults,
-      pagination: {
-        page,
-        totalPages: Math.min(totalPages, 50),
-        totalMedia,
-        totalProfiles: profileResults.length,
+    return NextResponse.json(
+      {
+        media: mediaResults,
+        profiles: profileResults,
+        pagination: {
+          page,
+          totalPages: Math.min(totalPages, 50),
+          totalMedia,
+          totalProfiles: profileResults.length,
+        },
+        results: mediaResults,
       },
-      results: mediaResults,
-    });
+      {
+        headers: !user
+          ? { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=30" }
+          : { "Cache-Control": "private, no-cache" },
+      }
+    );
   } catch (err: any) {
     console.error("API search error:", err);
     return NextResponse.json(

@@ -15,7 +15,7 @@ import {
   normalizeAniListAnime,
   NormalizedMedia,
 } from "@/lib/media/normalize";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import { getUserMediaLog } from "@/actions/tracking";
 import { MediaDetailsActions, WriteReviewButton } from "./actions-client";
 import { DetailsBackButton } from "./back-button";
@@ -286,11 +286,8 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
   const trailerKey = trailerVideos[0]?.key || null;
 
   // Fetch user tracking log for this title if authenticated
-  const supabase = await createClient();
-  const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser();
-  const userLog = await getUserMediaLog(media.id);
+  const currentUser = await getCurrentUser();
+  const userLog = currentUser ? await getUserMediaLog(media.id) : null;
 
   // Fetch contextual curator review if user arrived from a specific profile (?from=username)
   let contextualReview: {
@@ -313,16 +310,11 @@ export default async function MediaDetailsPage({ params, searchParams }: PagePro
       let refLog: any = null;
 
       if (cleanUsername === "library" || cleanUsername === "me") {
-        const supabase = await createClient();
-        const {
-          data: { user: authUser },
-        } = await supabase.auth.getUser();
-
-        if (authUser) {
+        if (currentUser) {
           const [myProfile] = await db
             .select()
             .from(profiles)
-            .where(eq(profiles.id, authUser.id))
+            .where(eq(profiles.id, currentUser.id))
             .limit(1);
 
           refProfile = myProfile;

@@ -4,7 +4,7 @@ import { AppHeader } from "@/components/navigation/app-header";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { Footer } from "@/components/navigation/footer";
 import { FeedbackForm } from "@/components/feedback/feedback-form";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import { Mail } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
 
@@ -15,10 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function FeedbackPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   return (
     <div className="flex-1 flex flex-col w-full min-h-screen bg-[#0F141D] text-[#F5F7FA]">
